@@ -227,7 +227,7 @@ const CONFIG = {
 const $=s=>document.querySelector(s);
 const show=id=>['setup','auth','app','blocked'].forEach(x=>$('#'+x).classList.toggle('hide',x!==id));
 const COLORS=['#B07F5E','#4f8ef7','#e0709a','#4caf7d','#e3a53a','#8a63d2'];
-const ERR={'Invalid login credentials':'Неверная почта или пароль.','Email not confirmed':'Подтвердите почту: мы отправили вам письмо.','User already registered':'Этот e-mail уже зарегистрирован. Попробуйте войти.','Password should be at least 6 characters':'Пароль слишком короткий.'};
+const ERR={'Invalid login credentials':'Неверная почта или пароль.','Email not confirmed':'Подтвердите почту: мы отправили вам письмо.','User already registered':'Этот e-mail уже зарегистрирован. Попробуйте войти.','Password should be at least 6 characters':'Пароль слишком короткий.','email rate limit exceeded':'Слишком много писем за короткое время. Подождите около часа и попробуйте снова.'};
 const tr=m=>ERR[m]||('Что-то пошло не так: '+m);
 const say=(el,t,k)=>{el.textContent=t;el.className='msg '+(k||'')};
 
