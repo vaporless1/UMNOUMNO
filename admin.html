@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Админ-панель — УМНО</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{--brown:#B07F5E;--brown-d:#8f6246;--ink:#111;--grey:#6b6b6b;--soft:#f0efee;--cream:#fbf7f3;--r:24px}
+*{box-sizing:border-box;margin:0}
+body{font-family:Manrope,system-ui,sans-serif;color:var(--ink);background:var(--cream);line-height:1.5;min-height:100vh}
+h1,h2,h3,.btn{font-family:Unbounded,Manrope,sans-serif}
+.hide{display:none!important}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.btn{border:0;cursor:pointer;background:var(--brown);color:#fff;font-weight:500;font-size:13px;padding:13px 22px;border-radius:999px;transition:.25s;white-space:nowrap}
+.btn:hover{background:var(--brown-d);transform:translateY(-2px)}
+.btn:disabled{opacity:.5;pointer-events:none}
+.btn.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.btn.line:hover{background:var(--ink);color:#fff}
+.btn.red{background:#c0392b}.btn.red:hover{background:#992d22}
+.btn.sm{padding:9px 14px;font-size:12px}
+.in,select{width:100%;border:2px solid transparent;background:var(--soft);border-radius:999px;padding:13px 20px;font:500 14px Manrope;outline:0;transition:.25s;color:var(--ink)}
+.in:focus,select:focus{border-color:var(--brown);background:#fff}
+header{background:#fff;position:sticky;top:0;z-index:5}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px}
+.logo{font-family:Unbounded;font-weight:800;font-size:20px}.logo b{color:var(--brown)}
+.logo small{font:700 11px Manrope;background:var(--ink);color:#fff;padding:3px 9px;border-radius:99px;margin-left:8px;vertical-align:middle}
+.hr{display:flex;gap:10px;align-items:center;font-size:13px;font-weight:700}
+.center{max-width:420px;margin:90px auto;background:#fff;border-radius:var(--r);padding:34px;animation:up .5s}
+.center h2{font-size:22px;margin-bottom:16px}.center form{display:grid;gap:12px}
+.grid{display:grid;grid-template-columns:380px 1fr;gap:22px;padding:28px 0 70px;align-items:start}
+.card{background:#fff;border-radius:var(--r);padding:24px;animation:up .4s}
+.sf{display:flex;gap:8px;margin-bottom:16px}
+.u{display:block;width:100%;text-align:left;border:2px solid transparent;background:var(--soft);border-radius:18px;padding:12px 16px;margin-bottom:8px;cursor:pointer;font:inherit;transition:.2s}
+.u:hover{transform:translateX(4px)}.u.on{border-color:var(--brown);background:var(--cream)}
+.u b{display:block}.u small{color:var(--grey);display:block}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;background:#fff;margin-right:4px}
+.tag.red{background:#c0392b;color:#fff}.tag.ok{background:#2e7d4f;color:#fff}.tag.dk{background:var(--ink);color:#fff}
+.sec{border-top:1px solid #eee;padding:20px 0}
+.sec h3{font-size:14px;margin-bottom:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.row>.in,.row>select{flex:1;min-width:140px}
+.cr{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 0}
+.cr b{min-width:140px}.cr .st{font-size:12px;color:var(--grey);min-width:120px}.cr .in{width:160px;padding:9px 14px}
+.head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.head h2{font-size:22px}.muted{color:var(--grey);font-size:13px}
+.id{font-family:Unbounded;font-size:13px;background:var(--soft);padding:4px 12px;border-radius:99px;cursor:pointer}
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(30px);background:var(--ink);color:#fff;padding:13px 22px;border-radius:99px;font-size:14px;font-weight:700;opacity:0;transition:.35s;pointer-events:none;z-index:20;max-width:90vw}
+#toast.on{opacity:1;transform:translateX(-50%)}#toast.err{background:#c0392b}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="loginBox" class="center hide">
+ <h2>Вход в админ-панель</h2>
+ <form id="fLogin"><input class="in" name="email" type="email" placeholder="E-mail" required autocomplete="email"><input class="in" name="password" type="password" placeholder="Пароль" required autocomplete="current-password"><button class="btn" type="submit">Войти</button><div id="lmsg" class="muted" style="color:#c0392b;font-weight:700"></div></form>
+</div>
+<div id="deny" class="center hide"><h2>Нет доступа</h2><p class="muted" style="margin:10px 0 18px">У этого аккаунта нет прав администратора.</p><a class="btn" href="cabinet.html" style="display:inline-block;text-decoration:none">В кабинет</a> <button class="btn line" id="dout">Выйти</button></div>
+<div id="setup" class="center hide"><h2>Подключите базу</h2><p class="muted">Впишите SUPABASE_URL и SUPABASE_KEY в блок CONFIG в конце файла admin.html.</p></div>
+
+<div id="panel" class="hide">
+ <header><div class="wrap">
+  <span class="logo">УМ<b>НО</b><small>админ</small></span>
+  <div class="hr"><span id="me" class="muted"></span><a class="btn line sm" href="cabinet.html" style="text-decoration:none">Кабинет</a><button class="btn line sm" id="out">Выйти</button></div>
+ </div></header>
+ <main class="wrap grid">
+  <section class="card">
+   <form class="sf" id="fSearch"><input class="in" id="q" placeholder="ID, e-mail или имя" autocomplete="off"><button class="btn" type="submit">Найти</button></form>
+   <div id="list"></div>
+  </section>
+  <section class="card" id="detail"><p class="muted">Выберите аккаунт слева или найдите его по ID.</p></section>
+ </main>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+const CONFIG={
+  SUPABASE_URL:"https://oqwnpqjwznlcuudzvntp.supabase.co",
+  SUPABASE_KEY:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xd25wcWp3em5sY3V1ZHp2bnRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzMDEwNjAsImV4cCI6MjEwODg3NzA2MH0.fBgSrNFTz07DE9uYzjyFTupOpZEw9E_xjnx9zq3-6LM"
+};
+const $=s=>document.querySelector(s);
+const show=id=>['loginBox','deny','setup','panel'].forEach(x=>$('#'+x).classList.toggle('hide',x!==id));
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const PLAN={none:'Нет подписки',trial:'Пробный',family:'Семейный',year:'Годовой'};
+const fd=d=>d?new Date(d).toLocaleDateString('ru'):'—';
+const toIn=d=>d?new Date(d).toISOString().slice(0,10):'';
+const eod=v=>v?new Date(v+'T23:59:59').toISOString():null;
+let tt;function toast(m,err){const t=$('#toast');t.textContent=m;t.className=(err?'err ':'')+'on';clearTimeout(tt);tt=setTimeout(()=>t.className='',3200)}
+
+if(!CONFIG.SUPABASE_URL||!CONFIG.SUPABASE_KEY)show('setup');
+else{
+const sb=supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_KEY);
+let courses=[],sel=null,lastQ='';
+
+async function rpc(name,args){const{data,error}=await sb.rpc(name,args);if(error){toast(error.message,1);throw error}return data}
+
+async function boot(session){
+  if(!session)return show('loginBox');
+  const{data:ok}=await sb.rpc('is_admin');
+  if(!ok)return show('deny');
+  $('#me').textContent=session.user.email;show('panel');
+  courses=(await sb.from('courses').select('id,title').order('sort')).data||[];
+  search('');
+}
+sb.auth.getSession().then(({data})=>boot(data.session));
+sb.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_OUT')show('loginBox')});
+$('#fLogin').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);
+  const{data,error}=await sb.auth.signInWithPassword({email:f.get('email').trim(),password:f.get('password')});
+  error?$('#lmsg').textContent='Неверная почта или пароль.':(sel=null,boot(data.session))};
+$('#out').onclick=$('#dout').onclick=()=>sb.auth.signOut();
+
+// ---------- поиск ----------
+$('#fSearch').onsubmit=e=>{e.preventDefault();search($('#q').value)};
+async function search(q){
+  lastQ=q;const rows=await rpc('admin_search_users',{q});
+  $('#list').innerHTML=rows.length?rows.map(u=>`<button class="u ${sel&&sel.id===u.id?'on':''}" data-id="${u.id}"><b>${esc(u.full_name||'Без имени')}</b><small>${esc(u.email)}</small><small><span class="tag dk">ID ${u.public_id}</span><span class="tag">${PLAN[u.plan]}${u.plan_until?' до '+fd(u.plan_until):''}</span>${u.blocked?'<span class="tag red">заблокирован</span>':''}${u.is_admin?'<span class="tag ok">админ</span>':''}</small></button>`).join(''):'<p class="muted">Никого не нашли.</p>';
+  $('#list').querySelectorAll('.u').forEach(b=>b.onclick=()=>openUser(rows.find(r=>r.id===b.dataset.id)));
+  if(rows.length===1&&q)openUser(rows[0]);
+}
+async function reload(){const rows=await rpc('admin_search_users',{q:String(sel.public_id)});const u=rows[0];if(u){await search(lastQ);openUser(u)}}
+
+// ---------- карточка аккаунта ----------
+async function openUser(u){
+  sel=u;const d=await rpc('admin_user_details',{p_user:u.id});
+  document.querySelectorAll('.u').forEach(b=>b.classList.toggle('on',b.dataset.id===u.id));
+  const g=id=>d.grants.find(x=>x.course_id===id);
+  $('#detail').innerHTML=`
+  <div class="head"><div><h2>${esc(u.full_name||'Без имени')}</h2><div class="muted">${esc(u.email)} · с ${fd(u.created_at)}</div></div>
+   <div><span class="id" id="cid" title="Скопировать">ID ${u.public_id}</span>${u.blocked?' <span class="tag red">заблокирован</span>':''}</div></div>
+  <div class="muted" style="margin-top:8px">Детей: ${d.children.length}${d.children.length?' ('+d.children.map(c=>esc(c.name)+', '+c.age).join('; ')+')':''} · пройдено уроков: ${d.lessons_done}</div>
+
+  <div class="sec"><h3>Подписка</h3>
+   <div class="row"><select id="plan">${Object.entries(PLAN).map(([k,v])=>`<option value="${k}" ${u.plan===k?'selected':''}>${v}</option>`).join('')}</select><input class="in" type="date" id="until" value="${toIn(u.plan_until)}"></div>
+   <div class="row"><button class="btn line sm" data-add="d7">+7 дней</button><button class="btn line sm" data-add="m1">+1 месяц</button><button class="btn line sm" data-add="m3">+3 месяца</button><button class="btn line sm" data-add="y1">+1 год</button><button class="btn sm" id="savePlan">Сохранить подписку</button></div>
+   <p class="muted" style="margin-top:8px">«Пробный», «Семейный» и «Годовой» открывают все курсы до указанной даты.</p></div>
+
+  <div class="sec"><h3>Отдельные курсы</h3>
+   ${courses.map(c=>{const x=g(c.id);return `<div class="cr" data-c="${c.id}"><b>${esc(c.title)}</b><span class="st">${x?(x.expires_at?'выдан до '+fd(x.expires_at):'выдан бессрочно'):'не выдан'}</span><input class="in" type="date" value="${x?toIn(x.expires_at):''}" title="Пусто — бессрочно"><button class="btn sm" data-grant>${x?'Изменить':'Выдать'}</button>${x?'<button class="btn line sm" data-revoke>Забрать</button>':''}</div>`}).join('')}
+   <p class="muted">Пустая дата — доступ без срока.</p></div>
+
+  <div class="sec"><h3>Пароль</h3>
+   <div class="row"><input class="in" id="pw" type="text" placeholder="Новый пароль (минимум 8 символов)" autocomplete="off"><button class="btn sm" id="setPw">Установить пароль</button></div>
+   <div class="row"><button class="btn line sm" id="mail">Отправить письмо для сброса пароля</button></div></div>
+
+  <div class="sec"><h3>Доступ</h3>
+   ${u.blocked?'<button class="btn sm" id="block">Разблокировать аккаунт</button>':'<button class="btn red sm" id="block">Заблокировать аккаунт</button>'}
+   <p class="muted" style="margin-top:8px">Заблокированный пользователь видит экран блокировки и не может открывать уроки.</p></div>`;
+
+  const run=async(fn,ok)=>{try{await fn();toast(ok);await reload()}catch(e){}};
+  $('#cid').onclick=()=>{navigator.clipboard?.writeText(String(u.public_id));toast('ID скопирован')};
+  $('#detail').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{
+    const cur=$('#until').value?new Date($('#until').value+'T00:00:00'):new Date(),base=cur>new Date()?cur:new Date(),k=b.dataset.add;
+    if(k==='d7')base.setDate(base.getDate()+7);if(k==='m1')base.setMonth(base.getMonth()+1);if(k==='m3')base.setMonth(base.getMonth()+3);if(k==='y1')base.setFullYear(base.getFullYear()+1);
+    $('#until').value=base.toISOString().slice(0,10);if($('#plan').value==='none')$('#plan').value='family'});
+  $('#savePlan').onclick=()=>run(()=>rpc('admin_set_plan',{p_user:u.id,p_plan:$('#plan').value,p_until:eod($('#until').value)}),'Подписка сохранена');
+  $('#detail').querySelectorAll('[data-grant]').forEach(b=>b.onclick=()=>{const r=b.closest('.cr');run(()=>rpc('admin_grant_course',{p_user:u.id,p_course:r.dataset.c,p_until:eod(r.querySelector('input').value)}),'Курс выдан')});
+  $('#detail').querySelectorAll('[data-revoke]').forEach(b=>b.onclick=()=>run(()=>rpc('admin_revoke_course',{p_user:u.id,p_course:b.closest('.cr').dataset.c}),'Курс забран'));
+  $('#block').onclick=()=>{if(confirm(u.blocked?'Разблокировать аккаунт?':'Заблокировать аккаунт '+u.email+'?'))run(()=>rpc('admin_set_blocked',{p_user:u.id,p_blocked:!u.blocked}),u.blocked?'Аккаунт разблокирован':'Аккаунт заблокирован')};
+  $('#mail').onclick=async()=>{const{error}=await sb.auth.resetPasswordForEmail(u.email,{redirectTo:location.origin.startsWith('http')?location.origin+'/cabinet.html':undefined});error?toast(error.message,1):toast('Письмо отправлено на '+u.email)};
+  $('#setPw').onclick=async()=>{const password=$('#pw').value;if(password.length<8)return toast('Пароль — минимум 8 символов',1);
+    if(!confirm('Сменить пароль пользователю '+u.email+'?'))return;
+    const{error}=await sb.functions.invoke('admin-password',{body:{user_id:u.id,password}});
+    if(error){let m=error.message;try{m=(await error.context.json()).error||m}catch{}toast(m,1)}
+    else{toast('Пароль изменён');$('#pw').value=''}};
+}
+}
+</script>
+</body>
+</html>
