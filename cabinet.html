@@ -111,6 +111,16 @@ main{padding:40px 0 80px}
 .expl{font-size:13px;color:var(--grey);margin-top:10px}
 .res{font-family:Unbounded;font-size:20px;margin:20px 0 4px;animation:up .5s}
 .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.me{display:flex;align-items:center;gap:10px;border:0;background:none;cursor:pointer;font:700 14px Manrope;color:var(--ink);padding:0}
+.av{overflow:hidden;flex:none}
+.big{width:88px!important;height:88px!important;font-size:34px}
+.c.lock{opacity:.6}.c.lock:hover{transform:none}
+.pf{display:flex;align-items:center;gap:18px;margin:6px 0 22px}
+.stack{display:grid;gap:12px;max-width:420px}
+.pane{background:var(--soft);border-radius:20px;padding:18px 22px;margin:18px 0;max-width:520px;font-size:14px}
+.pane b{font-size:16px}
+.stack label.t{font-weight:700;font-size:13px;margin-top:6px}
+@media(max-width:560px){#uname{display:none}}
 @media(max-width:820px){#auth{grid-template-columns:1fr}.side{padding:26px;min-height:0}.side svg.bear{display:none}.add{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -167,11 +177,13 @@ main{padding:40px 0 80px}
  </div></div>
 </div>
 
+<div id="blocked" class="hide" style="max-width:520px;margin:80px auto;background:#fff;border-radius:28px;padding:36px;text-align:center"><h2 style="font-family:Unbounded">Аккаунт заблокирован</h2><p style="color:var(--grey);margin:12px 0 22px">Доступ к кабинету закрыт. Если это ошибка, напишите в поддержку и назовите ваш ID: <b id="bid"></b></p><button class="btn" id="bout">Выйти</button></div>
+
 <!-- Кабинет -->
 <div id="app" class="hide">
  <header><div class="wrap">
   <a class="logo" href="index.html">УМ<b>НО</b></a>
-  <div class="who"><div class="av" id="avatar">?</div><span id="uname"></span>
+  <div class="who"><a class="btn line hide" id="adminLink" href="admin.html" style="padding:10px 18px">Админ-панель</a><button class="me" id="me" title="Профиль и настройки"><span class="av" id="avatar">?</span><span id="uname"></span></button>
    <button class="btn line" id="logout" style="padding:10px 18px"><svg class="ic"><use href="#i-out"/></svg> Выйти</button></div>
  </div></header>
  <main class="wrap">
@@ -213,7 +225,7 @@ const CONFIG = {
 };
 
 const $=s=>document.querySelector(s);
-const show=id=>['setup','auth','app'].forEach(x=>$('#'+x).classList.toggle('hide',x!==id));
+const show=id=>['setup','auth','app','blocked'].forEach(x=>$('#'+x).classList.toggle('hide',x!==id));
 const COLORS=['#B07F5E','#4f8ef7','#e0709a','#4caf7d','#e3a53a','#8a63d2'];
 const ERR={'Invalid login credentials':'Неверная почта или пароль.','Email not confirmed':'Подтвердите почту: мы отправили вам письмо.','User already registered':'Этот e-mail уже зарегистрирован. Попробуйте войти.','Password should be at least 6 characters':'Пароль слишком короткий.'};
 const tr=m=>ERR[m]||('Что-то пошло не так: '+m);
@@ -222,7 +234,7 @@ const say=(el,t,k)=>{el.textContent=t;el.className='msg '+(k||'')};
 if(!CONFIG.SUPABASE_URL||!CONFIG.SUPABASE_KEY){show('setup')}
 else{
 const sb=supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_KEY);
-let user=null,kids=[],active=null,recovering=/type=recovery/.test(location.hash);
+let user=null,kids=[],active=null,me={legacy:true},grants=[],recovering=/type=recovery/.test(location.hash);
 
 // ---- переключение форм ----
 const forms={login:$('#fLogin'),reg:$('#fReg'),new:$('#fNew')};
@@ -268,10 +280,9 @@ async function enter(session){
   if(!session){user=null;show('auth');if(forms.new.classList.contains('hide'))mode('login');return}
   if(recovering){show('auth');mode('new');return}
   user=session.user;
-  const name=(user.user_metadata&&user.user_metadata.full_name)||user.email.split('@')[0];
-  $('#uname').textContent=name;$('#avatar').textContent=name[0].toUpperCase();
-  $('#hi').textContent='Привет, '+name+'!';
-  show('app');loadCatalog().then(loadKids);
+  await loadMe();
+  if(me.blocked){$('#bid').textContent=me.public_id||'';show('blocked');return}
+  paintMe();show('app');loadCatalog().then(loadKids);
 }
 
 // ---- дети ----
@@ -324,8 +335,9 @@ function drawCourses(){
   const box=$('#courses');
   if(!courses.length)return;
   box.innerHTML=courses.map((c,i)=>{const ls=ofCourse(c.id),done=ls.filter(l=>prog[l.id]?.completed).length,pct=ls.length?Math.round(done/ls.length*100):0;
-    return `<div class="c" data-id="${esc(c.id)}" style="animation:up .5s ${i*80}ms both"><i><svg class="ic"><use href="#i-${esc(c.icon)}"/></svg></i><h3>${esc(c.title)}</h3><p>${esc(c.description)}</p><div class="bar"><i style="width:${active?pct:0}%"></i></div><div class="cnt">${ls.length?(active?done+' из '+ls.length+' уроков':ls.length+' уроков'):'Уроки скоро появятся'}</div></div>`}).join('');
+    const lock=!canAccess(c.id);return `<div class="c${lock?' lock':''}" data-id="${esc(c.id)}" style="animation:up .5s ${i*80}ms both">${lock?'<span class="soon">закрыто</span>':''}<i><svg class="ic"><use href="#i-${esc(c.icon)}"/></svg></i><h3>${esc(c.title)}</h3><p>${esc(c.description)}</p><div class="bar"><i style="width:${active?pct:0}%"></i></div><div class="cnt">${lock?'Откроется после оформления подписки':ls.length?(active?done+' из '+ls.length+' уроков':ls.length+' уроков'):'Уроки скоро появятся'}</div></div>`}).join('');
   box.querySelectorAll('.c').forEach(el=>el.onclick=()=>{
+    if(el.classList.contains('lock')){say($('#kmsg'),'Этот курс пока закрыт. Напишите нам, чтобы открыть доступ.','err');$('#kids').scrollIntoView({behavior:'smooth',block:'center'});return}
     if(!active){say($('#kmsg'),'Сначала добавьте ребёнка — прогресс сохраняется для него.','err');$('#kids').scrollIntoView({behavior:'smooth',block:'center'});return}
     openCourse(el.dataset.id)});
 }
@@ -374,6 +386,62 @@ async function openLesson(id){
     $('#chk').remove();
     const ok=await save(score,T.length);if(!ok)return;
     $('#out').innerHTML=`<div class="res">Верно: ${score} из ${T.length}${score===T.length?' — отлично!':''}</div>`;after()};
+  showView('view');
+}
+
+// ================= ПРОФИЛЬ, ДОСТУП, ТЕМА =================
+const THEMES={brown:['#B07F5E','#8f6246'],blue:['#4f8ef7','#2f6fd6'],pink:['#e0709a','#c2527c'],green:['#4caf7d','#2e8f5e'],purple:['#8a63d2','#6b45b8'],orange:['#e8873a','#c96a1f']};
+const PLAN={none:'Нет подписки',trial:'Пробный период',family:'Семейный',year:'Годовой'};
+const fd=d=>d?new Date(d).toLocaleDateString('ru'):'';
+function applyTheme(k){const t=THEMES[k]||THEMES.brown,r=document.documentElement.style;r.setProperty('--brown',t[0]);r.setProperty('--brown-d',t[1])}
+const myName=()=>me.full_name||(user.user_metadata&&user.user_metadata.full_name)||user.email.split('@')[0];
+function setAv(el,url,name){el.innerHTML='';if(url){const i=new Image();i.src=url;i.alt='';i.style.cssText='width:100%;height:100%;object-fit:cover';el.append(i)}else el.textContent=name[0].toUpperCase()}
+function paintMe(){const n=myName();$('#uname').textContent=n;setAv($('#avatar'),me.avatar_url,n);$('#hi').textContent='Привет, '+n+'!';$('#adminLink').classList.toggle('hide',!me.is_admin);applyTheme(me.theme)}
+async function loadMe(){
+  const{data,error}=await sb.from('profiles').select('*').eq('id',user.id).single();
+  me=error||!data?{legacy:true}:data;
+  const g=await sb.from('course_access').select('course_id,expires_at');grants=g.data||[];
+}
+function canAccess(cid){
+  if(me.legacy||me.is_admin)return true;const now=new Date();
+  if(['trial','family','year'].includes(me.plan)&&me.plan_until&&new Date(me.plan_until)>now)return true;
+  return grants.some(g=>g.course_id===cid&&(!g.expires_at||new Date(g.expires_at)>now));
+}
+$('#bout').onclick=()=>sb.auth.signOut();
+$('#me').onclick=()=>openSettings();
+async function resizeImg(file){const img=await createImageBitmap(file),S=256,c=document.createElement('canvas');c.width=c.height=S;const r=Math.max(S/img.width,S/img.height),w=img.width*r,h=img.height*r;c.getContext('2d').drawImage(img,(S-w)/2,(S-h)/2,w,h);return new Promise(ok=>c.toBlob(ok,'image/jpeg',.85))}
+function openSettings(){
+  const n=myName(),now=new Date();
+  const live=me.plan&&me.plan!=='none'&&me.plan_until&&new Date(me.plan_until)>now;
+  const sub=me.legacy?'не подключена':live?`${PLAN[me.plan]} · до ${fd(me.plan_until)}`:me.plan==='none'?PLAN.none:`${PLAN[me.plan]} · истекла ${fd(me.plan_until)}`;
+  const gl=grants.filter(g=>!g.expires_at||new Date(g.expires_at)>now).map(g=>(courses.find(c=>c.id===g.course_id)||{title:g.course_id}).title);
+  $('#view').innerHTML=`<section class="box"><button class="back" id="bk">← Назад</button><h2>Профиль</h2>
+   <div class="pf"><div class="av big" id="pav"></div><div><label class="btn line" style="padding:12px 20px;cursor:pointer">Загрузить фото<input type="file" id="file" accept="image/*" hidden></label><div class="cnt">Фото сожмётся автоматически</div></div></div>
+   <form id="fPro" class="stack"><label class="t">Ваше имя</label><input class="in" name="name" value="${esc(n)}" maxlength="60" required>
+    <label class="t">Цвет оформления</label><div class="colors" style="margin:0">${Object.entries(THEMES).map(([k,v])=>`<label><input type="radio" name="theme" value="${k}" ${(me.theme||'brown')===k?'checked':''}><i style="background:${v[0]}"></i></label>`).join('')}</div>
+    <button class="btn" type="submit" style="margin-top:8px">Сохранить</button></form>
+   <div class="pane"><div>Ваш ID: <b>${esc(me.public_id||'—')}</b> <button class="link" id="cpid" type="button">скопировать</button></div><div class="cnt">Назовите ID в поддержке, чтобы мы быстро нашли ваш аккаунт.</div></div>
+   <div class="pane"><div>Подписка: <b>${esc(sub)}</b></div>${gl.length?`<div class="cnt">Открытые курсы: ${esc(gl.join(', '))}</div>`:''}</div>
+   <h2 style="margin-top:28px;font-size:17px">Смена пароля</h2>
+   <form id="fPass" class="stack"><input class="in" name="p" type="password" minlength="8" placeholder="Новый пароль (минимум 8 символов)" required autocomplete="new-password"><button class="btn line" type="submit">Изменить пароль</button></form>
+   <div id="pmsg" class="msg" role="status"></div></section>`;
+  const m=(t,k)=>say($('#pmsg'),t,k);
+  setAv($('#pav'),me.avatar_url,n);
+  $('#bk').onclick=()=>{showView('home')};
+  $('#cpid').onclick=()=>{navigator.clipboard?.writeText(String(me.public_id||''));m('ID скопирован.','ok')};
+  $('#view').querySelectorAll('[name=theme]').forEach(r=>r.onchange=()=>applyTheme(r.value));
+  $('#file').onchange=async e=>{const f=e.target.files[0];if(!f)return;m('Загружаем фото…');
+    try{const blob=await resizeImg(f),path=user.id+'/avatar.jpg';
+      const up=await sb.storage.from('avatars').upload(path,blob,{upsert:true,contentType:'image/jpeg'});if(up.error)throw up.error;
+      const url=sb.storage.from('avatars').getPublicUrl(path).data.publicUrl+'?v='+Date.now();
+      const{error}=await sb.from('profiles').update({avatar_url:url}).eq('id',user.id);if(error)throw error;
+      me.avatar_url=url;setAv($('#pav'),url,n);paintMe();m('Фото обновлено.','ok')}catch(err){m('Не удалось загрузить фото: '+err.message,'err')}};
+  $('#fPro').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),name=f.get('name').trim(),theme=f.get('theme');
+    const{error}=await sb.from('profiles').update({full_name:name,theme}).eq('id',user.id);
+    if(error)return m('Не удалось сохранить: '+error.message,'err');
+    me.full_name=name;me.theme=theme;paintMe();m('Сохранено!','ok')};
+  $('#fPass').onsubmit=async e=>{e.preventDefault();const{error}=await sb.auth.updateUser({password:e.target.p.value});
+    error?m(tr(error.message),'err'):(m('Пароль изменён.','ok'),e.target.reset())};
   showView('view');
 }
 }
