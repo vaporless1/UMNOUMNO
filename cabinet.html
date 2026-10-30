@@ -163,7 +163,7 @@ async function enter(session) {
 const myName = () => me.full_name || (user.user_metadata && user.user_metadata.full_name) || user.email.split('@')[0];
 const curKid = () => kids.find(k => k.id === active);
 async function loadMe() {
-  const { data } = await sb.from('profiles').select('*').eq('id', user.id).single(); me = data || {};
+  const { data } = await sb.from('profiles').select('*').eq('id', user.id).single(); me = data || {}; if (me.role) { const r = await sb.rpc('my_perms'); me.tester = !!(r.data && (r.data.perms || []).includes('test_access')) }
   const g = await sb.from('course_access').select('course_id,expires_at'); grants = g.data || [];
 }
 async function loadCatalog() {
@@ -181,7 +181,7 @@ async function loadChild() {
   (p.data || []).forEach(x => prog[x.lesson_id] = x); stats = s.data || {}; (b.data || []).forEach(x => earned.set(x.badge_id, x.earned_at));
 }
 function canAccess(cid) {
-  if (me.is_admin) return true; const now = new Date();
+  if (me.is_admin || me.tester) return true; const now = new Date();
   if (['trial', 'family', 'year'].includes(me.plan) && me.plan_until && new Date(me.plan_until) > now) return true;
   return grants.some(g => g.course_id === cid && (!g.expires_at || new Date(g.expires_at) > now));
 }
@@ -195,7 +195,7 @@ function header() {
   const k = curKid();
   $('#hdr').innerHTML = `<a class="logo" href="${kidMode ? '#' : 'index.html'}">УМ<b>НО</b>${kidMode ? '<small>детям</small>' : ''}</a><div class="hr">` + (kidMode
     ? `<span class="chip">${ico('star')} ${stats.stars || 0}</span><span class="chip fire">${ico('flame')} ${stats.streak || 0}</span><button class="btn line sm" id="exitKid">${ico('lock')} Выйти</button>`
-    : `${kids.length ? `<button class="btn sm" id="goKid">${ico('baby')} Режим ребёнка</button>` : ''}${me.is_admin ? '<a class="btn line sm" href="admin.html">Админ-панель</a>' : ''}<button class="me" id="me" title="Профиль и настройки">${avEl(me.avatar_url, myName(), null)}<span class="nm">${esc(myName())}</span></button>`) + '</div>';
+    : `${kids.length ? `<button class="btn sm" id="goKid">${ico('baby')} Режим ребёнка</button>` : ''}${me.is_admin || me.role ? '<a class="btn line sm" href="admin.html">Админ-панель</a>' : ''}<button class="me" id="me" title="Профиль и настройки">${avEl(me.avatar_url, myName(), null)}<span class="nm">${esc(myName())}</span></button>`) + '</div>';
   if (kidMode) $('#exitKid').onclick = exitKid; else { $('#me')?.addEventListener('click', () => go('settings')); $('#goKid')?.addEventListener('click', startKid) }
 }
 function go(v, a) { view = [v, a]; header(); ({ home, kidhome, course: openCourse, lesson: openLesson, settings, report: reportView })[v === 'home' && kidMode ? 'kidhome' : v](a); window.scrollTo({ top: 0, behavior: 'smooth' }) }
@@ -337,6 +337,9 @@ function settings() {
     <div class="row"><button class="btn" type="submit">Сохранить</button></div></form>
    <div class="pane">Ваш ID: <b>${esc(me.public_id || '—')}</b> <button class="link" id="cpid" type="button">скопировать</button><div class="cnt">Назовите ID в поддержке, чтобы мы быстро нашли ваш аккаунт.</div></div>
    <div class="pane">Подписка: <b>${esc(sub)}</b>${gl.length ? `<div class="cnt">Открытые курсы: ${esc(gl.join(', '))}</div>` : ''}</div>
+   <h2 style="margin-top:26px;font-size:17px">Промокод</h2>
+   <div class="pane">Есть промокод? Введите его, чтобы получить подписку или курс.
+    <div class="row"><input class="in" id="promo" placeholder="Например, SPRING2026" maxlength="32" autocomplete="off" style="max-width:260px;text-transform:uppercase"><button class="btn sm" id="promoGo" type="button">Применить</button></div><div id="promoMsg" class="msg" role="status"></div></div>
    <h2 style="margin-top:26px;font-size:17px">Родительский контроль</h2>
    <div class="pane">PIN-код для выхода из режима ребёнка: <b>${me.pin_hash ? 'установлен' : 'не задан'}</b>
     <div class="row"><input class="in" id="pin" inputmode="numeric" maxlength="4" placeholder="4 цифры" style="max-width:160px"><button class="btn sm" id="pinSet">${me.pin_hash ? 'Сменить' : 'Установить'}</button>${me.pin_hash ? '<button class="btn line sm" id="pinDel">Убрать PIN</button>' : ''}</div>
@@ -347,6 +350,10 @@ function settings() {
   const m = (t, k) => say($('#pmsg'), t, k);
   $('[data-back]').onclick = () => go('home'); $('#logout').onclick = () => sb.auth.signOut();
   $('#cpid').onclick = () => { navigator.clipboard?.writeText(String(me.public_id || '')); toast('ID скопирован') };
+  $('#promoGo').onclick = async () => { const code = $('#promo').value.trim(); if (!code) return say($('#promoMsg'), 'Введите промокод', 'err'); $('#promoGo').disabled = true; say($('#promoMsg'), 'Проверяем…');
+    const { data, error } = await sb.rpc('redeem_promo', { p_code: code }); $('#promoGo').disabled = false;
+    if (error) return say($('#promoMsg'), error.message, 'err');
+    toast(data || 'Промокод применён'); await loadMe(); settings() };
   $$('[name=theme]').forEach(r => r.onchange = () => applyTheme(r.value));
   let t; $('[name=un]').oninput = e => { clearTimeout(t); const v = e.target.value.trim().replace(/^@/, '').toLowerCase(), mm = $('#um'); if (!v || v === me.username) return say(mm, '');
     if (!UNAME.test(v)) return say(mm, '3–20 символов: латиница, цифры, _', 'err');
