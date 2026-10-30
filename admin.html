@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Админ-панель — УМНО</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -55,7 +55,10 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 .fg label{display:block;font-size:12px;font-weight:700;color:var(--grey);margin-bottom:4px}
 .tab-gap{margin-top:22px}
 #slist svg.thumb-hat{height:56px;width:auto}
-@media(max-width:900px){.grid{grid-template-columns:1fr}.fg{grid-template-columns:1fr}}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.fg{grid-template-columns:1fr}
+ header{position:static}header .wrap{height:auto;padding:10px 14px;row-gap:8px}header .hr{margin-left:auto}#me{display:none}
+ header #tabs{order:3;width:100%;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 0 2px;margin:0}header #tabs::-webkit-scrollbar{display:none}header #tabs button{flex:none;white-space:nowrap}
+ main.wrap{padding-left:12px;padding-right:12px}.card{padding:18px 14px}}
 </style>
 </head>
 <body>
@@ -68,7 +71,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
   <div class="hr"><span id="me" class="muted"></span><a class="btn line sm" href="cabinet.html">Кабинет</a><button class="btn line sm" id="out">Выйти</button></div></div></header>
  <main class="wrap">
   <div id="tab-users" class="grid"><section class="card"><form class="sf" id="fSearch"><input class="in" id="q" placeholder="ID, @юзернейм, e-mail или имя" autocomplete="off"><button class="btn" type="submit">Найти</button></form><div class="row" id="bulkbar" style="margin:0 0 12px"></div><div id="list"></div></section>
-   <section class="card" id="detail"><p class="muted">Выберите аккаунт слева или найдите его по ID или @юзернейму.</p></section></div>
+   <section class="card" id="detail"><p class="muted">Выберите аккаунт из списка или найдите его по ID или @юзернейму.</p></section></div>
   <div id="tab-lessons" class="grid hide"><section class="card"><div class="row" style="margin:0 0 14px"><button class="btn sm" id="newCourse">+ Курс</button></div><div id="tree"></div></section><section class="card" id="editor"><p class="muted">Выберите урок слева или нажмите «+ урок» у нужного курса.</p></section></div>
   <div id="tab-stats" class="hide" style="padding:26px 0 70px"><div id="stats"></div></div>
   <div id="tab-promo" class="hide" style="padding:26px 0 70px"><div class="card"><h2 style="font-size:18px;margin-bottom:14px">Новый промокод</h2><form id="fPromo" class="fg">
@@ -105,6 +108,8 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>window.supabase||document.write('<script src="https://fastly.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"><\/script>')</script>
+<script>window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"><\/script>')</script>
 <script src="common.js"></script>
 <script src="quiz.js"></script>
 <script src="kid.js"></script>
@@ -226,7 +231,7 @@ function bulkModal() {
 
 // ---- карточка аккаунта ----
 async function openUser(u) {
-  sel = u;
+  sel = u; if (innerWidth <= 900) setTimeout(() => $('#detail').scrollIntoView({ behavior: 'smooth', block: 'start' }), 250);
   const [d, notes, log] = await Promise.all([
     rpc('admin_user_details', { p_user: u.id }),
     can('notes') ? sb.from('admin_notes').select('*').eq('user_id', u.id).order('created_at', { ascending: false }).then(r => r.data || []) : [],
