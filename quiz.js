@@ -19,6 +19,30 @@ const Q = (() => {
     } catch { }
   }
 
+  /* ---------- автоозвучка (Web Speech API): читает любое задание само, ничего настраивать не нужно ---------- */
+  const SS = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  const V = { on: false, voice: null };
+  const pickVoice = () => { if (!SS) return; const vs = speechSynthesis.getVoices().filter(v => /^ru/i.test(v.lang));
+    V.voice = vs.find(v => /milena|alena|irina|katya|yuri|google|enhanced|premium/i.test(v.name)) || vs[0] || null; };
+  if (SS) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice }
+  const plain = h => { const d = document.createElement('div'); d.innerHTML = h || ''; return d.textContent.replace(/\s+/g, ' ').trim() };
+  const stopSpeech = () => { if (SS) { try { speechSynthesis.cancel() } catch { } } };
+  function speak(parts) {
+    if (!SS) return; stopSpeech();
+    const list = (Array.isArray(parts) ? parts : [parts]).map(plain).filter(Boolean);
+    setTimeout(() => list.forEach(p => { const u = new SpeechSynthesisUtterance(p); u.lang = 'ru-RU'; if (V.voice) u.voice = V.voice; u.rate = .9; u.pitch = 1.12; speechSynthesis.speak(u) }), 60);
+  }
+  function taskParts(t) {
+    const type = t.type || 'choice', d = t.data || {}, names = (t.options || []).map(opt).map(o => o.t).filter(Boolean), p = [t.question];
+    if (type === 'choice') p.push(...names);
+    else if (type === 'multi') p.push('Выбери все подходящие ответы.', ...names);
+    else if (type === 'text') p.push('Напиши ответ.');
+    else if (type === 'word') p.push('Составь слово из букв.');
+    else if (type === 'match') p.push('Соедини пары. Нажми на картинку слева, потом на пару справа.');
+    else if (type === 'draw') p.push('Обведи букву пальцем или мышкой.');
+    return p;
+  }
+
   function renderTask(t, host, done) {
     const type = t.type || 'choice', d = t.data || {};
     host.classList.remove('lock');
@@ -27,7 +51,9 @@ const Q = (() => {
     let over = false;
     const finish = (ok, extra) => {
       if (over) return; over = true; host.classList.add('lock'); beep(ok);
-      fb.innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}">${pick(ok ? PRAISE : TRY)}${t.explanation ? `<small>${esc(t.explanation)}</small>` : ''}${extra ? `<small>${extra}</small>` : ''}</div>`;
+      const word = pick(ok ? PRAISE : TRY);
+      fb.innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}">${word}${t.explanation ? `<small>${esc(t.explanation)}</small>` : ''}${extra ? `<small>${extra}</small>` : ''}</div>`;
+      if (V.on) speak([word, t.explanation, extra]);
       done(ok);
     };
     const chkBtn = (label = 'Проверить') => `<div class="qa"><button type="button" class="btn chk" disabled>${label}</button></div>`;
@@ -112,11 +138,18 @@ const Q = (() => {
   }
 
   function run(root, tasks, o = {}) {
-    let i = 0, score = 0; const res = [];
+    let i = 0, score = 0; const res = []; if (o.voice !== undefined) V.on = !!o.voice;
+    const vbar = cur => SS ? `<div class="qv"><button type="button" class="qsp" data-v="say" title="Послушать задание" aria-label="Послушать задание">${ico('sound')}</button><button type="button" class="qsp ${V.on ? '' : 'off'}" data-v="auto" title="Автоозвучка: ${V.on ? 'включена' : 'выключена'}" aria-label="Автоозвучка">${ico(V.on ? 'sound' : 'mute')}<small>авто</small></button></div>` : '';
+    const wire = (cur) => root.querySelectorAll('[data-v]').forEach(b => b.onclick = () => {
+      if (b.dataset.v === 'say') return speak(cur ? taskParts(cur) : []);
+      V.on = !V.on; if (!V.on) stopSpeech(); else if (cur) speak(taskParts(cur)); o.onVoice && o.onVoice(V.on);
+      root.querySelectorAll('[data-v=auto]').forEach(x => { x.classList.toggle('off', !V.on); x.innerHTML = ico(V.on ? 'sound' : 'mute') + '<small>авто</small>'; x.title = 'Автоозвучка: ' + (V.on ? 'включена' : 'выключена') }) });
     const step = () => {
       if (i >= tasks.length) return end();
-      root.innerHTML = `<div class="qz"><div class="dots">${tasks.map((_, k) => `<i class="${k < i ? (res[k] ? 'g' : 'b') : k === i ? 'c' : ''}"></i>`).join('')}</div><div class="qt"></div><div class="qa nx"></div></div>`;
-      const host = root.querySelector('.qt'), nx = root.querySelector('.nx'), idx = i;
+      stopSpeech();
+      root.innerHTML = `<div class="qz">${vbar()}<div class="dots">${tasks.map((_, k) => `<i class="${k < i ? (res[k] ? 'g' : 'b') : k === i ? 'c' : ''}"></i>`).join('')}</div><div class="qt"></div><div class="qa nx"></div></div>`;
+      const host = root.querySelector('.qt'), nx = root.querySelector('.nx'), idx = i; wire(tasks[idx]);
+      if (V.on) speak(taskParts(tasks[idx]));
       renderTask(tasks[idx], host, ok => {
         res[idx] = ok; if (ok) score++;
         nx.innerHTML = `<button type="button" class="btn nb">${idx + 1 < tasks.length ? 'Дальше' : 'Готово'}</button>`;
@@ -125,6 +158,7 @@ const Q = (() => {
     };
     async function end() {
       const st = starsFor(score, tasks.length);
+      if (V.on) speak(['Урок пройден!', `Ты правильно ответил на ${score} из ${tasks.length}.`]);
       root.innerHTML = `<div class="qz"><h2 class="qq">Урок пройден!</h2><div class="stars">${[1, 2, 3].map(k => `<span class="${k <= st ? 'on' : ''}" style="animation-delay:${k * .25}s">${ico('star')}</span>`).join('')}</div><p class="qq">Верно: ${score} из ${tasks.length}</p><div class="sv muted"></div><div class="nbd"></div><div class="qa act row" style="justify-content:center"></div></div>`;
       const sv = root.querySelector('.sv'); let info = null;
       if (o.onFinish) { sv.textContent = 'Сохраняем результат…'; try { info = await o.onFinish(score, tasks.length); sv.textContent = '' } catch (e) { sv.innerHTML = `<span class="msg err">Не удалось сохранить: ${esc(e.message || e)}</span>` } }
@@ -133,5 +167,5 @@ const Q = (() => {
     }
     step();
   }
-  return { run, starsFor, renderTask };
+  return { run, starsFor, renderTask, stop: stopSpeech, voice: { get on() { return V.on }, set(v) { V.on = !!v; if (!v) stopSpeech() }, supported: SS, ru: () => !!V.voice } };
 })();
