@@ -13,7 +13,7 @@ header{background:#fff;position:sticky;top:0;z-index:20}
 header .wrap{display:flex;align-items:center;justify-content:space-between;height:68px;gap:10px}
 .hr{display:flex;align-items:center;gap:10px}
 .me{display:flex;align-items:center;gap:10px;border:0;background:none;cursor:pointer;font:700 14px Manrope;color:var(--ink);padding:0}
-main{padding:34px 20px 80px}
+#app{width:100%}header .wrap,main.wrap{width:100%;max-width:1120px;margin-left:auto;margin-right:auto}main{padding:34px 20px 80px}.logo{white-space:nowrap;flex:none}.hr{margin-left:auto;flex-wrap:nowrap}
 .hello{animation:up .5s}.hello h1{font-size:clamp(24px,3.4vw,38px);letter-spacing:-.03em;line-height:1.1}.hello p{color:var(--grey);margin-top:8px}
 .kids{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px}
 .kid{display:flex;align-items:center;gap:12px;background:var(--soft);border-radius:999px;padding:7px 10px 7px 7px;cursor:pointer;border:2px solid transparent;transition:.25s;animation:up .4s both}
@@ -45,6 +45,21 @@ body.kid .c{padding:28px;background:#fff;box-shadow:0 5px 0 rgba(0,0,0,.08)}body
 body.kid .lrow{background:#fff;box-shadow:0 4px 0 rgba(0,0,0,.08);padding:18px 22px;font-size:20px}
 body.kid .box{background:transparent;padding:0}body.kid .box h2{font-size:24px}
 body.kid .bd{background:#fff}
+body.kid header .wrap{height:84px}body.kid .logo{font-size:30px}
+body.kid main.wrap{max-width:1200px}
+body.kid .kh{gap:22px;margin-bottom:14px;padding:22px 26px;background:#fff;border-radius:36px;box-shadow:0 5px 0 rgba(0,0,0,.08)}
+body.kid .kh h1{font-size:clamp(28px,4vw,46px)}
+body.kid .chip{font-size:20px;padding:12px 22px}
+body.kid .hr .btn{font-size:15px;padding:13px 22px}
+body.kid .box{margin-top:30px}body.kid .box h2{font-size:28px;margin-bottom:16px}
+body.kid .courses{grid-template-columns:repeat(auto-fill,minmax(270px,340px));gap:22px;align-items:start}
+body.kid .c{min-height:0;height:auto;padding:26px}body.kid .c h3{font-size:22px}body.kid .c p{font-size:16px}
+body.kid .badges{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
+body.kid .bd{padding:20px 12px;box-shadow:0 4px 0 rgba(0,0,0,.08);overflow:visible;height:auto}
+body.kid .bd i{width:68px;height:68px;font-size:32px;margin-bottom:10px}
+body.kid .bd b{font-size:16px;line-height:1.25}body.kid .bd small{display:block;font-size:13px;margin-top:4px;line-height:1.3}
+@media(max-width:560px){body.kid .courses{grid-template-columns:1fr}body.kid .kh{padding:16px}body.kid .logo{font-size:24px}}
+
 .done-today{background:#fff;border-radius:28px;padding:36px;text-align:center;margin-top:22px}
 @media(max-width:820px){#auth{grid-template-columns:1fr}.side{padding:26px}.side svg.bear{display:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
