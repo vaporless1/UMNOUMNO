@@ -47,6 +47,12 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 .hintx{font-size:12px;color:var(--grey);margin-top:6px}
 .bars{display:flex;gap:6px;align-items:flex-end;height:140px;margin-top:10px}.bars div{flex:1;background:var(--brown);border-radius:8px 8px 0 0;min-height:3px;position:relative;transition:height .6s}.bars div span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:11px;font-weight:700}
 .bl{display:flex;gap:6px;margin-top:4px}.bl span{flex:1;text-align:center;font-size:10px;color:var(--grey)}
+.tabs{flex-wrap:wrap}
+.ur{display:flex;gap:10px;align-items:center}.un{min-width:0}.un b,.un small{overflow:hidden;text-overflow:ellipsis}.uc{width:18px;height:18px;accent-color:var(--brown);flex:none}
+.x{border:0;background:none;cursor:pointer;color:var(--grey);font-size:15px;padding:0 2px;line-height:1}.x:hover{color:#c0392b}
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px 18px;margin-top:6px}
+.fg label{display:block;font-size:12px;font-weight:700;color:var(--grey);margin-bottom:4px}
+.tab-gap{margin-top:22px}
 @media(max-width:900px){.grid{grid-template-columns:1fr}.fg{grid-template-columns:1fr}}
 </style>
 </head>
@@ -56,13 +62,33 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 
 <div id="panel" class="hide">
  <header><div class="wrap"><span class="logo">УМ<b>НО</b><small>админ</small></span>
-  <div class="tabs"><button data-tab="users" class="on">Аккаунты</button><button data-tab="lessons">Уроки и задания</button><button data-tab="stats">Статистика</button></div>
+  <div class="tabs" id="tabs"></div>
   <div class="hr"><span id="me" class="muted"></span><a class="btn line sm" href="cabinet.html">Кабинет</a><button class="btn line sm" id="out">Выйти</button></div></div></header>
  <main class="wrap">
-  <div id="tab-users" class="grid"><section class="card"><form class="sf" id="fSearch"><input class="in" id="q" placeholder="ID, @юзернейм, e-mail или имя" autocomplete="off"><button class="btn" type="submit">Найти</button></form><div id="list"></div></section>
+  <div id="tab-users" class="grid"><section class="card"><form class="sf" id="fSearch"><input class="in" id="q" placeholder="ID, @юзернейм, e-mail или имя" autocomplete="off"><button class="btn" type="submit">Найти</button></form><div class="row" id="bulkbar" style="margin:0 0 12px"></div><div id="list"></div></section>
    <section class="card" id="detail"><p class="muted">Выберите аккаунт слева или найдите его по ID или @юзернейму.</p></section></div>
   <div id="tab-lessons" class="grid hide"><section class="card"><div class="row" style="margin:0 0 14px"><button class="btn sm" id="newCourse">+ Курс</button></div><div id="tree"></div></section><section class="card" id="editor"><p class="muted">Выберите урок слева или нажмите «+ урок» у нужного курса.</p></section></div>
   <div id="tab-stats" class="hide" style="padding:26px 0 70px"><div id="stats"></div></div>
+  <div id="tab-promo" class="hide" style="padding:26px 0 70px"><div class="card"><h2 style="font-size:18px;margin-bottom:14px">Новый промокод</h2><form id="fPromo" class="fg">
+   <div><label>Код</label><div class="row" style="margin:0;flex-wrap:nowrap"><input class="in" id="pcodeN" placeholder="SPRING2026" style="text-transform:uppercase" maxlength="32" autocomplete="off"><button class="btn line sm" type="button" id="pgen">Случайный</button></div></div>
+   <div><label>Подписка</label><select class="in" id="pplan"><option value="">— без подписки —</option><option value="trial">Пробный</option><option value="family">Семейный</option><option value="year">Годовой</option></select></div>
+   <div><label>Дней (для подписки и для курса; у курса пусто — бессрочно)</label><input class="in" id="pdays" type="number" min="1" max="3650" value="30"></div>
+   <div><label>Курс в подарок</label><select class="in" id="pcourse"></select></div>
+   <div><label>Сколько раз можно использовать</label><input class="in" id="pmax" type="number" min="1" placeholder="без ограничений"></div>
+   <div><label>Действует до</label><input class="in" id="puntil" type="date"></div>
+   <div class="full"><label>Заметка для себя</label><input class="in" id="pnote" maxlength="120" placeholder="Например: акция в Telegram"></div>
+   <div class="full"><button class="btn" type="submit">Создать промокод</button></div></form>
+   <p class="hintx">Родитель вводит код в кабинете: Профиль → «Промокод». Один код можно применить к аккаунту только один раз.</p></div>
+   <div class="card" style="margin-top:22px;overflow:auto"><div id="plist"></div></div></div>
+  <div id="tab-badges" class="grid hide"><section class="card"><div id="blist"></div></section>
+   <section class="card"><h3 id="bfh" style="margin-bottom:12px">Новая награда</h3><form id="fBadge" style="display:grid;gap:10px">
+    <input class="in" name="bt" placeholder="Название" maxlength="40"><input class="in" name="bd" placeholder="Описание (за что дают)" maxlength="100">
+    <select class="in" name="bi" id="bi"></select>
+    <select class="in" name="bk"><option value="manual">Только вручную (выдаёт админ)</option><option value="lessons">Автоматически: за число уроков</option><option value="streak">Автоматически: за дни занятий подряд</option><option value="stars">Автоматически: за число звёзд</option><option value="perfect">Автоматически: за уроки на 3 звезды</option></select>
+    <div id="bnw"><input class="in" name="bn" type="number" min="1" value="1"><p class="hintx">Сколько нужно набрать для получения.</p></div>
+    <div class="row" style="margin:0"><button class="btn" type="submit">Сохранить</button><button class="btn line hide" type="button" id="bcancel">Отмена</button></div></form></section></div>
+  <div id="tab-journal" class="hide" style="padding:26px 0 70px"><div class="card"><div class="row" style="margin:0 0 14px"><input class="in" id="logq" placeholder="Поиск по журналу: кто, кого, что" autocomplete="off"><button class="btn line sm" id="logre">Обновить</button><button class="btn line sm" id="logcsv">Скачать CSV</button></div><div id="logbox" style="overflow:auto"></div></div></div>
+  <div id="tab-roles" class="hide" style="padding:26px 0 70px"><div class="card"><div class="row" style="margin:0 0 6px"><button class="btn sm" id="newRole">+ Новая роль</button></div><p class="hintx" style="margin-bottom:14px">Вы сами выбираете, что может делать каждая роль. Назначить роль можно в карточке аккаунта. Изменения вступают в силу сразу.</p><div id="rlist"></div></div></div>
  </main>
 </div>
 
@@ -79,59 +105,225 @@ const TYPES = { choice: 'Выбор одного ответа', multi: 'Неск
 let courses = [], lessons = [], sel = null, lastQ = '', L = null, T = [];
 async function rpc(name, args) { const { data, error } = await sb.rpc(name, args); if (error) { toast(error.message, 1); throw error } return data }
 
-// ---------- вход ----------
+// ---------- права и вход ----------
+const PERMS = {
+  users: 'Видеть аккаунты, детей и прогресс', plans: 'Подписки и выдача курсов', block: 'Блокировка аккаунтов', passwords: 'Пароли пользователей',
+  profiles: 'Редактировать профили родителей и детей', rewards: 'Выдавать и забирать награды и звёзды', badges_edit: 'Создавать и менять виды наград',
+  promo: 'Промокоды', notes: 'Заметки к аккаунтам', journal: 'Смотреть журнал действий', bulk: 'Массовые действия',
+  delete_kids: 'Удалять детей', delete_users: 'Удалять аккаунты целиком', content: 'Курсы, уроки и задания', stats: 'Статистика',
+  test_access: 'Тестовый доступ на сайте: все курсы и черновики'
+};
+let ME = { owner: false, perms: [], role: null }, ROLES = [], ALLB = [];
+const can = p => ME.owner || ME.perms.includes(p);
+const TABS = [
+  { id: 'users', t: 'Аккаунты', need: () => can('users') }, { id: 'lessons', t: 'Уроки и задания', need: () => can('content') },
+  { id: 'promo', t: 'Промокоды', need: () => can('promo') }, { id: 'badges', t: 'Награды', need: () => can('badges_edit') },
+  { id: 'stats', t: 'Статистика', need: () => can('stats') }, { id: 'journal', t: 'Журнал', need: () => can('journal') }, { id: 'roles', t: 'Роли', need: () => ME.owner }
+];
+let curTab = null, usersLoaded = false;
 async function boot(session) {
   if (!session) return show('loginBox');
-  const { data: ok } = await sb.rpc('is_admin'); if (!ok) return show('deny');
-  $('#me').textContent = session.user.email; show('panel'); await loadCat(); search('');
+  const { data: mp } = await sb.rpc('my_perms');
+  ME = { owner: !!mp?.owner, perms: mp?.perms || [], role: mp?.role || null };
+  const tabs = TABS.filter(t => t.need());
+  if (!tabs.length) return show('deny');
+  $('#me').textContent = session.user.email + (ME.owner ? ' · владелец' : ME.role ? ' · ' + ME.role : '');
+  $('#tabs').innerHTML = tabs.map(t => `<button data-tab="${t.id}">${t.t}</button>`).join('');
+  $$('#tabs [data-tab]').forEach(b => b.onclick = () => openTab(b.dataset.tab));
+  show('panel'); usersLoaded = false;
+  await loadCat(); await loadBadges(); if (ME.owner) await loadRolesList();
+  openTab(tabs[0].id);
 }
 sb.auth.getSession().then(({ data }) => boot(data.session)); sb.auth.onAuthStateChange(ev => { if (ev === 'SIGNED_OUT') show('loginBox') });
 $('#fLogin').onsubmit = async e => { e.preventDefault(); const f = new FormData(e.target), { data, error } = await sb.auth.signInWithPassword({ email: f.get('email').trim(), password: f.get('password') }); error ? $('#lmsg').textContent = 'Неверная почта или пароль.' : (sel = null, boot(data.session)) };
 $('#out').onclick = $('#dout').onclick = () => sb.auth.signOut();
-$$('[data-tab]').forEach(b => b.onclick = () => { $$('[data-tab]').forEach(x => x.classList.toggle('on', x === b)); ['users', 'lessons', 'stats'].forEach(t => $('#tab-' + t).classList.toggle('hide', t !== b.dataset.tab)); if (b.dataset.tab === 'lessons') tree(); if (b.dataset.tab === 'stats') loadStats() });
+function openTab(id) {
+  curTab = id; $$('#tabs [data-tab]').forEach(x => x.classList.toggle('on', x.dataset.tab === id));
+  TABS.forEach(t => $('#tab-' + t.id).classList.toggle('hide', t.id !== id));
+  ({ users: () => { if (!usersLoaded) { usersLoaded = true; search('') } }, lessons: tree, stats: loadStats, promo: loadPromo, badges: drawBadges, journal: loadLog, roles: drawRoles })[id]();
+}
 async function loadCat() { courses = (await sb.from('courses').select('*').order('sort')).data || []; lessons = (await sb.from('lessons').select('*').order('sort')).data || [] }
+async function loadBadges() { ALLB = (await sb.from('badges').select('*').order('sort')).data || [] }
+async function loadRolesList() { ROLES = (await sb.from('admin_roles').select('*').order('created_at')).data || [] }
+const avEl = (url, name, color, cls = '') => `<span class="av ${cls}" style="${color ? `background:${color}` : ''}">${url ? `<img src="${esc(url)}" alt="">` : esc((name || '?')[0].toUpperCase())}</span>`;
+const hnd = v => (v || '').trim().replace(/^@/, '').toLowerCase();
+const dt = v => v ? new Date(v).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+const csvDown = (name, rows) => { const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"'; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rows.map(r => r.map(q).join(';')).join('\r\n')], { type: 'text/csv;charset=utf-8' })); a.download = name; a.click() };
+const genCode = () => Array.from({ length: 8 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
 
 // ================= АККАУНТЫ =================
+let rows = [], checked = new Set();
 $('#fSearch').onsubmit = e => { e.preventDefault(); search($('#q').value) };
 async function search(q) {
-  lastQ = q; const rows = await rpc('admin_search_users', { q });
-  $('#list').innerHTML = rows.length ? rows.map(u => `<button class="u ${sel && sel.id === u.id ? 'on' : ''}" data-id="${u.id}"><b>${esc(u.full_name || 'Без имени')}${u.username ? ' <span class="muted">@' + esc(u.username) + '</span>' : ''}</b><small>${esc(u.email)}</small><small><span class="tag dk">ID ${u.public_id}</span><span class="tag">${PLAN[u.plan]}${u.plan_until ? ' до ' + fd(u.plan_until) : ''}</span>${u.blocked ? '<span class="tag red">заблокирован</span>' : ''}${u.is_admin ? '<span class="tag ok">админ</span>' : ''}</small></button>`).join('') : '<p class="muted">Никого не нашли.</p>';
-  $$('#list .u').forEach(b => b.onclick = () => openUser(rows.find(r => r.id === b.dataset.id)));
+  lastQ = q; rows = await rpc('admin_search_users', { q }); checked = new Set([...checked].filter(id => rows.some(r => r.id === id))); drawList();
   if (rows.length === 1 && q) openUser(rows[0]);
 }
-async function reload() { const rows = await rpc('admin_search_users', { q: String(sel.public_id) }); if (rows[0]) { await search(lastQ); openUser(rows[0]) } }
+function drawList() {
+  const B = can('bulk');
+  $('#bulkbar').innerHTML = (B && rows.length ? `<label class="ck"><input type="checkbox" id="ckAll" ${checked.size === rows.length ? 'checked' : ''}> Все (${rows.length})</label>` : '')
+    + (checked.size ? `<span class="tag dk">Выбрано: ${checked.size}</span><button class="btn sm" id="bulkGo">Действие…</button>` : '')
+    + `<button class="link" id="csv" style="margin-left:auto">Скачать CSV</button>`;
+  $('#list').innerHTML = rows.length ? rows.map(u => `<div class="u ${sel && sel.id === u.id ? 'on' : ''}" data-id="${u.id}"><div class="ur">${B ? `<input type="checkbox" class="uc" ${checked.has(u.id) ? 'checked' : ''}>` : ''}${avEl(u.avatar_url, u.full_name || u.email)}<div class="un"><b>${esc(u.full_name || 'Без имени')}${u.username ? ' <span class="muted">@' + esc(u.username) + '</span>' : ''}</b><small>${esc(u.email)}</small></div></div><small style="margin-top:6px"><span class="tag dk">ID ${u.public_id}</span><span class="tag">${PLAN[u.plan]}${u.plan_until ? ' до ' + fd(u.plan_until) : ''}</span>${u.kids ? `<span class="tag">детей: ${u.kids}</span>` : ''}${u.blocked ? '<span class="tag red">заблокирован</span>' : ''}${u.is_admin ? '<span class="tag ok">владелец</span>' : ''}${u.role_title ? `<span class="tag ok">${esc(u.role_title)}</span>` : ''}</small></div>`).join('') : '<p class="muted">Никого не нашли.</p>';
+  $$('#list .u').forEach(b => b.onclick = e => {
+    if (e.target.classList.contains('uc')) { e.target.checked ? checked.add(b.dataset.id) : checked.delete(b.dataset.id); return drawList() }
+    openUser(rows.find(r => r.id === b.dataset.id)) });
+  $('#ckAll')?.addEventListener('change', e => { checked = e.target.checked ? new Set(rows.map(r => r.id)) : new Set(); drawList() });
+  $('#bulkGo')?.addEventListener('click', bulkModal);
+  $('#csv').onclick = () => csvDown('umno_users.csv', [['ID', 'Имя', '@юзернейм', 'E-mail', 'Тариф', 'До', 'Роль', 'Заблокирован', 'Детей', 'Регистрация'], ...rows.filter(r => !checked.size || checked.has(r.id)).map(r => [r.public_id, r.full_name, r.username, r.email, PLAN[r.plan], r.plan_until ? toIn(r.plan_until) : '', r.role_title || (r.is_admin ? 'Владелец' : ''), r.blocked ? 'да' : '', r.kids, toIn(r.created_at)])]);
+}
+async function reload() { await search(lastQ); const r = rows.find(x => x.id === sel?.id) || (await rpc('admin_search_users', { q: String(sel.public_id) }))[0]; if (r) openUser(r) }
+const afterDelete = async () => { sel = null; $('#detail').innerHTML = '<p class="muted">Аккаунт удалён. Выберите другой слева.</p>'; await search(lastQ) };
+
+// ---- массовые действия ----
+function bulkModal() {
+  const ids = [...checked], A = [];
+  if (can('plans')) A.push(['extend', 'Продлить подписку на N дней'], ['plan', 'Установить тариф и дату'], ['grant', 'Выдать курс'], ['revoke', 'Забрать курс']);
+  if (can('promo')) A.push(['promo', 'Применить промокод']);
+  if (can('block')) A.push(['block', 'Заблокировать'], ['unblock', 'Разблокировать']);
+  if (can('delete_users')) A.push(['delete', 'Удалить аккаунты']);
+  const m = modal(`<h3 style="margin-bottom:12px">Массовое действие · ${ids.length} акк.</h3>
+   <select class="in" id="ba">${A.map(([k, t]) => `<option value="${k}">${t}</option>`).join('')}</select><div id="bf" style="display:grid;gap:10px;margin-top:12px"></div>
+   <div id="bm" class="msg" style="margin-top:10px"></div><div class="row"><button class="btn" id="bgo">Выполнить</button><button class="btn line" id="bno">Отмена</button></div>`);
+  const draw = () => { const a = $('#ba', m).value; $('#bf', m).innerHTML = ({
+    extend: '<input class="in" id="b_days" type="number" min="1" max="3650" value="30" placeholder="Дней"><p class="hintx">Если подписки не было — включится «Семейный» на это число дней.</p>',
+    plan: `<select class="in" id="b_plan">${Object.entries(PLAN).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select><input class="in" id="b_until" type="date">`,
+    grant: `<select class="in" id="b_course">${courses.map(c => `<option value="${c.id}">${esc(c.title)}</option>`).join('')}</select><input class="in" id="b_until" type="date" title="Пусто — бессрочно"><p class="hintx">Пустая дата — без срока.</p>`,
+    revoke: `<select class="in" id="b_course">${courses.map(c => `<option value="${c.id}">${esc(c.title)}</option>`).join('')}</select>`,
+    promo: '<input class="in" id="b_code" placeholder="Промокод" style="text-transform:uppercase">',
+    block: '<p class="hintx">Владельцы и вы сами не блокируются.</p>', unblock: '',
+    delete: `<p class="hintx" style="color:#c0392b">Аккаунты, дети, прогресс и награды будут удалены безвозвратно. Для подтверждения введите УДАЛИТЬ.</p><input class="in" id="b_ok" placeholder="УДАЛИТЬ" autocomplete="off">`
+  })[a] };
+  $('#ba', m).onchange = draw; draw(); $('#bno', m).onclick = () => m.remove();
+  $('#bgo', m).onclick = async () => {
+    const a = $('#ba', m).value, v = id => $('#' + id, m)?.value; let arg = {};
+    if (a === 'extend') arg = { days: +v('b_days') }; if (a === 'plan') arg = { plan: v('b_plan'), until: eod(v('b_until')) };
+    if (a === 'grant') arg = { course: v('b_course'), until: eod(v('b_until')) }; if (a === 'revoke') arg = { course: v('b_course') };
+    if (a === 'promo') arg = { code: v('b_code') };
+    if (a === 'extend' && !(arg.days > 0)) return say($('#bm', m), 'Укажите число дней', 'err');
+    if (a === 'plan' && arg.plan !== 'none' && !arg.until) return say($('#bm', m), 'Укажите дату окончания', 'err');
+    if (a === 'promo' && !(arg.code || '').trim()) return say($('#bm', m), 'Введите промокод', 'err');
+    if (a === 'delete' && v('b_ok') !== 'УДАЛИТЬ') return say($('#bm', m), 'Введите слово УДАЛИТЬ', 'err');
+    $('#bgo', m).disabled = true; say($('#bm', m), 'Выполняем…');
+    const { data, error } = await sb.rpc('admin_bulk', { p_users: ids, p_action: a, p_arg: arg });
+    if (error) { $('#bgo', m).disabled = false; return say($('#bm', m), error.message, 'err') }
+    m.remove(); toast(`Готово: ${data.ok}` + (data.fail ? `, не удалось: ${data.fail} (${(data.errors || []).join('; ')})` : ''), !!data.fail);
+    checked = new Set(); if (a === 'delete') { sel = null; $('#detail').innerHTML = '<p class="muted">Выберите аккаунт слева.</p>' } await search(lastQ); if (sel) reload();
+  };
+}
+
+// ---- карточка аккаунта ----
 async function openUser(u) {
-  sel = u; const d = await rpc('admin_user_details', { p_user: u.id });
+  sel = u;
+  const [d, notes, log] = await Promise.all([
+    rpc('admin_user_details', { p_user: u.id }),
+    can('notes') ? sb.from('admin_notes').select('*').eq('user_id', u.id).order('created_at', { ascending: false }).then(r => r.data || []) : [],
+    can('journal') ? sb.from('admin_log').select('*').eq('target', u.id).order('at', { ascending: false }).limit(12).then(r => r.data || []) : []]);
   $$('#list .u').forEach(b => b.classList.toggle('on', b.dataset.id === u.id));
-  const g = id => d.grants.find(x => x.course_id === id);
+  const g = id => d.grants.find(x => x.course_id === id), P = d.profile || {}, cp = can('profiles'), cr = can('rewards');
+  let pAv = P.avatar_url || null;
+  const kid = c => { const have = new Set(c.badges.map(b => b.id)), free = ALLB.filter(b => !have.has(b.id)); return `<div class="kb" data-child="${c.id}">
+    <div class="row" style="margin:0;flex-wrap:nowrap;align-items:flex-start;gap:12px">${avEl(c.avatar_url, c.name, c.color, 'l')}<div style="flex:1;min-width:0"><b style="font-size:16px">${esc(c.name)}</b>, ${c.age} ${c.username ? '· <span class="muted">@' + esc(c.username) + '</span>' : ''}
+      <div class="muted">★ ${c.nums.stars} · уроков: ${c.nums.lessons} · серия: ${c.nums.streak} дн. · на 3 звезды: ${c.nums.perfect}${c.daily_limit ? ' · лимит ' + c.daily_limit + '/день' : ''}</div>${c.about ? `<div class="muted">${esc(c.about)}</div>` : ''}
+      <div class="row" style="margin-top:8px">${cp ? '<button class="btn line sm" data-kedit>Изменить профиль</button>' : ''}${can('delete_kids') ? '<button class="btn red sm" data-kdel>Удалить ребёнка</button>' : ''}</div></div></div>
+    <div style="margin-top:10px"><b style="font-size:12px">Награды:</b> ${c.badges.length ? c.badges.map(b => `<span class="tag">${esc(b.title)}${cr ? ` <button class="x" data-btake="${b.id}" title="Забрать">×</button>` : ''}</span>`).join('') : '<span class="muted">нет</span>'}</div>
+    ${cr ? `<div class="row"><select class="in" data-bsel>${free.length ? free.map(b => `<option value="${b.id}">${esc(b.title)}</option>`).join('') : '<option value="">Все награды выданы</option>'}</select><button class="btn line sm" data-bgive ${free.length ? '' : 'disabled'}>Выдать награду</button></div>
+    <div class="row"><input class="in" type="number" min="1" max="1000" data-sd placeholder="Звёзды" style="max-width:110px"><input class="in" data-sr placeholder="Причина (необязательно)" maxlength="80"><button class="btn line sm" data-sadd>Выдать ★</button><button class="btn line sm" data-stake>Забрать ★</button></div>
+    ${c.adjusts.length ? `<div class="hintx">${c.adjusts.map(a => `${a.delta > 0 ? '+' : ''}${a.delta}★ ${a.reason ? '— ' + esc(a.reason) : ''} <i>(${esc(a.by || '')}, ${fd(a.at)})</i>`).join('<br>')}</div>` : ''}` : ''}
+    <details style="margin-top:8px"><summary class="muted" style="cursor:pointer">Пройденные уроки (${c.done.length})</summary>${c.done.length ? `<table style="margin-top:8px"><tr><th>Урок</th><th>Результат</th><th>Звёзды</th><th>Когда</th></tr>${c.done.map(x => `<tr><td>${esc(x.lesson)}<br><span class="muted">${esc(x.course)}</span></td><td>${x.total ? x.score + ' из ' + x.total : 'просмотрен'}</td><td>${'★'.repeat(x.stars)}</td><td>${fd(x.at)}</td></tr>`).join('')}</table>` : '<div class="muted" style="margin-top:6px">Уроков ещё не проходил.</div>'}</details></div>` };
   $('#detail').innerHTML = `
-  <div class="head"><div><h2>${esc(u.full_name || 'Без имени')}${u.username ? ' <span class="muted" style="font-size:16px">@' + esc(u.username) + '</span>' : ''}</h2><div class="muted">${esc(u.email)} · с ${fd(u.created_at)}</div></div><div><span class="id" id="cid" title="Скопировать">ID ${u.public_id}</span>${u.blocked ? ' <span class="tag red">заблокирован</span>' : ''}</div></div>
+  <div class="head"><div class="row" style="margin:0;flex-wrap:nowrap;gap:14px">${avEl(u.avatar_url, u.full_name || u.email, null, 'l')}<div><h2>${esc(u.full_name || 'Без имени')}${u.username ? ' <span class="muted" style="font-size:16px">@' + esc(u.username) + '</span>' : ''}</h2><div class="muted">${esc(u.email)} · с ${fd(u.created_at)}</div>
+   <div style="margin-top:6px">${u.is_admin ? '<span class="tag ok">владелец</span>' : ''}${u.role_title ? `<span class="tag ok">${esc(u.role_title)}</span>` : ''}${u.blocked ? '<span class="tag red">заблокирован</span>' : ''}</div></div></div><div><span class="id" id="cid" title="Скопировать">ID ${u.public_id}</span></div></div>
 
-  <div class="sec"><h3>Дети и прогресс</h3>${d.children.length ? d.children.map(c => `<div class="kb"><b>${esc(c.name)}</b>, ${c.age} ${c.username ? '· @' + esc(c.username) : ''}
-    <div class="muted">★ ${c.nums.stars} · уроков: ${c.nums.lessons} · серия: ${c.nums.streak} дн. · на 3 звезды: ${c.nums.perfect}${c.badges.length ? ' · награды: ' + c.badges.map(esc).join(', ') : ''}</div>
-    ${c.done.length ? `<table style="margin-top:8px"><tr><th>Урок</th><th>Результат</th><th>Звёзды</th><th>Когда</th></tr>${c.done.map(x => `<tr><td>${esc(x.lesson)}<br><span class="muted">${esc(x.course)}</span></td><td>${x.total ? x.score + ' из ' + x.total : 'просмотрен'}</td><td>${'★'.repeat(x.stars)}</td><td>${fd(x.at)}</td></tr>`).join('')}</table>` : '<div class="muted" style="margin-top:6px">Уроков ещё не проходил.</div>'}</div>`).join('') : '<p class="muted">Детей нет.</p>'}</div>
+  <div class="sec"><h3>Профиль родителя</h3>
+   <div class="row" style="margin:0 0 12px"><div id="pav">${avEl(pAv, u.full_name || u.email, null, 'l')}</div>${cp ? '<button class="btn line sm" id="pUpl">Загрузить фото</button><button class="link" id="pRm">убрать</button>' : ''}</div>
+   <div class="fg"><div><label>Имя</label><input class="in" id="pName" value="${esc(u.full_name || '')}" maxlength="60" ${cp ? '' : 'readonly'}></div><div><label>@юзернейм</label><input class="in" id="pUser" value="${esc(u.username ? '@' + u.username : '')}" maxlength="21" autocapitalize="off" ${cp ? '' : 'readonly'}></div>
+    <div class="full"><label>О себе</label><textarea class="in" id="pAbout" maxlength="300" style="min-height:64px;resize:vertical" ${cp ? '' : 'readonly'}>${esc(P.about || '')}</textarea></div></div>
+   ${cp ? '<div class="row"><button class="btn sm" id="pSave">Сохранить профиль</button></div>' : ''}</div>
 
-  <div class="sec"><h3>Подписка</h3><div class="row"><select id="plan">${Object.entries(PLAN).map(([k, v]) => `<option value="${k}" ${u.plan === k ? 'selected' : ''}>${v}</option>`).join('')}</select><input class="in" type="date" id="until" value="${toIn(u.plan_until)}"></div>
+  ${ME.owner && !u.is_admin ? `<div class="sec"><h3>Роль в админ-панели</h3><div class="row"><select class="in" id="roleSel"><option value="">Нет (обычный пользователь)</option>${ROLES.map(r => `<option value="${r.id}" ${u.role === r.id ? 'selected' : ''}>${esc(r.title)}</option>`).join('')}</select><button class="btn sm" id="roleSave">Назначить</button></div><p class="hintx">Права ролей настраиваются во вкладке «Роли».</p></div>` : ''}
+
+  <div class="sec"><h3>Дети и прогресс</h3>${d.children.length ? d.children.map(kid).join('') : '<p class="muted">Детей нет.</p>'}</div>
+
+  ${can('plans') ? `<div class="sec"><h3>Подписка</h3><div class="row"><select id="plan">${Object.entries(PLAN).map(([k, v]) => `<option value="${k}" ${u.plan === k ? 'selected' : ''}>${v}</option>`).join('')}</select><input class="in" type="date" id="until" value="${toIn(u.plan_until)}"></div>
    <div class="row"><button class="btn line sm" data-add="d7">+7 дней</button><button class="btn line sm" data-add="m1">+1 месяц</button><button class="btn line sm" data-add="m3">+3 месяца</button><button class="btn line sm" data-add="y1">+1 год</button><button class="btn sm" id="savePlan">Сохранить подписку</button></div>
    <p class="hintx">«Пробный», «Семейный» и «Годовой» открывают все курсы до указанной даты.</p></div>
+  <div class="sec"><h3>Отдельные курсы</h3>${courses.map(c => { const x = g(c.id); return `<div class="cr" data-c="${c.id}"><b>${esc(c.title)}</b><span class="st">${x ? (x.expires_at ? 'выдан до ' + fd(x.expires_at) : 'выдан бессрочно') : 'не выдан'}</span><input class="in" type="date" value="${x ? toIn(x.expires_at) : ''}" title="Пусто — бессрочно"><button class="btn sm" data-grant>${x ? 'Изменить' : 'Выдать'}</button>${x ? '<button class="btn line sm" data-revoke>Забрать</button>' : ''}</div>` }).join('')}<p class="hintx">Пустая дата — доступ без срока.</p></div>` : ''}
 
-  <div class="sec"><h3>Отдельные курсы</h3>${courses.map(c => { const x = g(c.id); return `<div class="cr" data-c="${c.id}"><b>${esc(c.title)}</b><span class="st">${x ? (x.expires_at ? 'выдан до ' + fd(x.expires_at) : 'выдан бессрочно') : 'не выдан'}</span><input class="in" type="date" value="${x ? toIn(x.expires_at) : ''}" title="Пусто — бессрочно"><button class="btn sm" data-grant>${x ? 'Изменить' : 'Выдать'}</button>${x ? '<button class="btn line sm" data-revoke>Забрать</button>' : ''}</div>` }).join('')}<p class="hintx">Пустая дата — доступ без срока.</p></div>
+  ${can('promo') ? `<div class="sec"><h3>Промокод</h3><div class="row"><input class="in" id="pcode" placeholder="Код промокода" style="text-transform:uppercase"><button class="btn sm" id="pApply">Выдать промокод</button></div>
+   ${d.promos.length ? `<p class="hintx">Использованные: ${d.promos.map(p => `<b>${esc(p.code)}</b> (${fd(p.at)}${p.by_admin ? ', выдан админом' : ''})`).join(', ')}</p>` : ''}</div>` : ''}
 
-  <div class="sec"><h3>Пароль</h3><div class="row"><input class="in" id="pw" type="text" placeholder="Новый пароль (минимум 8 символов)" autocomplete="off"><button class="btn sm" id="setPw">Установить пароль</button></div><div class="row"><button class="btn line sm" id="mail">Отправить письмо для сброса пароля</button></div></div>
-  <div class="sec"><h3>Доступ</h3>${u.blocked ? '<button class="btn sm" id="block">Разблокировать аккаунт</button>' : '<button class="btn red sm" id="block">Заблокировать аккаунт</button>'}<p class="hintx">Заблокированный пользователь видит экран блокировки и не может открывать уроки.</p></div>`;
-  const run = async (fn, ok) => { try { await fn(); toast(ok); await reload() } catch (e) { } };
+  ${can('passwords') ? `<div class="sec"><h3>Пароль</h3><div class="row"><input class="in" id="pw" type="text" placeholder="Новый пароль (минимум 8 символов)" autocomplete="off"><button class="btn sm" id="setPw">Установить пароль</button></div><div class="row"><button class="btn line sm" id="mail">Отправить письмо для сброса пароля</button></div></div>` : ''}
+  ${can('block') && !u.is_admin ? `<div class="sec"><h3>Доступ</h3>${u.blocked ? '<button class="btn sm" id="block">Разблокировать аккаунт</button>' : '<button class="btn red sm" id="block">Заблокировать аккаунт</button>'}<p class="hintx">Заблокированный пользователь видит экран блокировки и не может открывать уроки.</p></div>` : ''}
+
+  ${can('notes') ? `<div class="sec"><h3>Заметки (видны только команде)</h3><div class="row" style="margin:0 0 10px"><textarea class="in" id="noteT" maxlength="2000" placeholder="Например: написала в поддержку, оплатила переводом…" style="min-height:56px;resize:vertical"></textarea></div><div class="row" style="margin:0 0 6px"><button class="btn sm" id="noteAdd">Добавить заметку</button></div>
+   ${notes.map(n => `<div class="kb" data-n="${n.id}"><div style="white-space:pre-wrap">${esc(n.body)}</div><div class="hintx">${esc(n.author_email || '')} · ${dt(n.created_at)} <button class="link" data-ndel>удалить</button></div></div>`).join('') || '<p class="muted">Заметок пока нет.</p>'}</div>` : ''}
+
+  ${can('journal') ? `<div class="sec"><h3>История действий по аккаунту</h3>${log.length ? `<table>${log.map(l => `<tr><td style="white-space:nowrap">${dt(l.at)}</td><td>${esc(l.actor_email || '')}</td><td>${esc(ACT[l.action] || l.action)}<br><span class="muted">${esc(det(l.details))}</span></td></tr>`).join('')}</table>` : '<p class="muted">Пока пусто.</p>'}</div>` : ''}
+
+  ${can('delete_users') && !u.is_admin ? `<div class="sec"><h3 style="color:#c0392b">Опасная зона</h3><button class="btn red sm" id="delUser">Удалить аккаунт навсегда</button><p class="hintx">Удалятся аккаунт, все дети, прогресс, награды и доступы. Отменить нельзя.</p></div>` : ''}`;
+
+  const run = async (fn, ok) => { try { await fn(); if (ok) toast(ok); await reload() } catch (e) { } };
   $('#cid').onclick = () => { navigator.clipboard?.writeText(String(u.public_id)); toast('ID скопирован') };
+  // профиль родителя
+  const pPaint = () => $('#pav').innerHTML = avEl(pAv, $('#pName').value || u.email, null, 'l');
+  $('#pUpl')?.addEventListener('click', async () => { const f = await pickFile('image/*'); if (!f) return; toast('Загружаем фото…'); try { pAv = await uploadPublic('avatars', `${u.id}/avatar.jpg`, await resizeImg(f, 256, true), 'image/jpeg'); pPaint(); toast('Фото загружено — нажмите «Сохранить профиль»') } catch (e) { toast(e.message, 1) } });
+  $('#pRm')?.addEventListener('click', () => { pAv = null; pPaint(); toast('Фото уберётся после сохранения') });
+  $('#pSave')?.addEventListener('click', () => run(() => rpc('admin_update_profile', { p_user: u.id, p_name: $('#pName').value, p_username: hnd($('#pUser').value), p_about: $('#pAbout').value, p_avatar: pAv }), 'Профиль сохранён'));
+  $('#roleSave')?.addEventListener('click', () => run(() => rpc('admin_set_role', { p_user: u.id, p_role: $('#roleSel').value }), 'Роль назначена'));
+  // дети
+  $$('#detail [data-child]').forEach(box => {
+    const c = d.children.find(x => x.id === box.dataset.child), q = s => box.querySelector(s);
+    q('[data-kedit]')?.addEventListener('click', () => kidEditor(c, u));
+    q('[data-kdel]')?.addEventListener('click', () => { if (confirm(`Удалить ребёнка «${c.name}»? Прогресс и награды тоже удалятся.`)) run(() => rpc('admin_delete_child', { p_child: c.id }), 'Ребёнок удалён') });
+    box.querySelectorAll('[data-btake]').forEach(b => b.onclick = () => { if (confirm('Забрать награду? Автоматически она больше не выдастся.')) run(() => rpc('admin_take_badge', { p_child: c.id, p_badge: b.dataset.btake }), 'Награда забрана') });
+    q('[data-bgive]')?.addEventListener('click', () => { const v = q('[data-bsel]').value; if (v) run(() => rpc('admin_give_badge', { p_child: c.id, p_badge: v }), 'Награда выдана') });
+    const stars = sign => { const n = parseInt(q('[data-sd]').value, 10); if (!(n >= 1 && n <= 1000)) return toast('Укажите число звёзд от 1 до 1000', 1); run(() => rpc('admin_adjust_stars', { p_child: c.id, p_delta: sign * n, p_reason: q('[data-sr]').value }), sign > 0 ? 'Звёзды выданы' : 'Звёзды забраны') };
+    q('[data-sadd]')?.addEventListener('click', () => stars(1)); q('[data-stake]')?.addEventListener('click', () => stars(-1));
+  });
+  // подписка и курсы
   $$('#detail [data-add]').forEach(b => b.onclick = () => { const cur = $('#until').value ? new Date($('#until').value + 'T00:00:00') : new Date(), base = cur > new Date() ? cur : new Date(), k = b.dataset.add;
     if (k === 'd7') base.setDate(base.getDate() + 7); if (k === 'm1') base.setMonth(base.getMonth() + 1); if (k === 'm3') base.setMonth(base.getMonth() + 3); if (k === 'y1') base.setFullYear(base.getFullYear() + 1);
     $('#until').value = base.toISOString().slice(0, 10); if ($('#plan').value === 'none') $('#plan').value = 'family' });
-  $('#savePlan').onclick = () => run(() => rpc('admin_set_plan', { p_user: u.id, p_plan: $('#plan').value, p_until: eod($('#until').value) }), 'Подписка сохранена');
+  $('#savePlan')?.addEventListener('click', () => run(() => rpc('admin_set_plan', { p_user: u.id, p_plan: $('#plan').value, p_until: eod($('#until').value) }), 'Подписка сохранена'));
   $$('#detail [data-grant]').forEach(b => b.onclick = () => { const r = b.closest('.cr'); run(() => rpc('admin_grant_course', { p_user: u.id, p_course: r.dataset.c, p_until: eod(r.querySelector('input').value) }), 'Курс выдан') });
   $$('#detail [data-revoke]').forEach(b => b.onclick = () => run(() => rpc('admin_revoke_course', { p_user: u.id, p_course: b.closest('.cr').dataset.c }), 'Курс забран'));
-  $('#block').onclick = () => { if (confirm(u.blocked ? 'Разблокировать аккаунт?' : 'Заблокировать аккаунт ' + u.email + '?')) run(() => rpc('admin_set_blocked', { p_user: u.id, p_blocked: !u.blocked }), u.blocked ? 'Аккаунт разблокирован' : 'Аккаунт заблокирован') };
-  $('#mail').onclick = async () => { const { error } = await sb.auth.resetPasswordForEmail(u.email, { redirectTo: location.origin + '/cabinet.html' }); error ? toast(error.message, 1) : toast('Письмо отправлено на ' + u.email) };
-  $('#setPw').onclick = async () => { const password = $('#pw').value; if (password.length < 8) return toast('Пароль — минимум 8 символов', 1); if (!confirm('Сменить пароль пользователю ' + u.email + '?')) return;
+  $('#pApply')?.addEventListener('click', () => { const code = $('#pcode').value.trim(); if (!code) return toast('Введите код', 1); run(async () => { const m = await rpc('admin_apply_promo', { p_user: u.id, p_code: code }); toast(m || 'Промокод применён') }, '') });
+  $('#block')?.addEventListener('click', () => { if (confirm(u.blocked ? 'Разблокировать аккаунт?' : 'Заблокировать аккаунт ' + u.email + '?')) run(() => rpc('admin_set_blocked', { p_user: u.id, p_blocked: !u.blocked }), u.blocked ? 'Аккаунт разблокирован' : 'Аккаунт заблокирован') });
+  $('#mail')?.addEventListener('click', async () => { const { error } = await sb.auth.resetPasswordForEmail(u.email, { redirectTo: location.origin + '/cabinet.html' }); error ? toast(error.message, 1) : toast('Письмо отправлено на ' + u.email) });
+  $('#setPw')?.addEventListener('click', async () => { const password = $('#pw').value; if (password.length < 8) return toast('Пароль — минимум 8 символов', 1); if (!confirm('Сменить пароль пользователю ' + u.email + '?')) return;
     const { error } = await sb.functions.invoke('admin-password', { body: { user_id: u.id, password } });
-    if (error) { let m = error.message; try { m = (await error.context.json()).error || m } catch { } toast(m, 1) } else { toast('Пароль изменён'); $('#pw').value = '' } };
+    if (error) { let m = error.message; try { m = (await error.context.json()).error || m } catch { } toast(m, 1) } else { toast('Пароль изменён'); $('#pw').value = '' } });
+  // заметки
+  $('#noteAdd')?.addEventListener('click', () => { const t = $('#noteT').value.trim(); if (!t) return toast('Напишите текст заметки', 1); run(() => rpc('admin_add_note', { p_user: u.id, p_body: t }), 'Заметка добавлена') });
+  $$('#detail [data-ndel]').forEach(b => b.onclick = () => { if (confirm('Удалить заметку?')) run(() => rpc('admin_del_note', { p_note: b.closest('[data-n]').dataset.n }), 'Заметка удалена') });
+  // удаление аккаунта
+  $('#delUser')?.addEventListener('click', () => {
+    const m = modal(`<h3 style="color:#c0392b;margin-bottom:10px">Удалить аккаунт?</h3><p>${esc(u.email)} · ID ${u.public_id}<br>Будут удалены: аккаунт, ${d.children.length} дет., весь прогресс, награды и доступы.</p><p class="hintx">Это нельзя отменить. Для подтверждения введите УДАЛИТЬ.</p>
+     <input class="in" id="dok" placeholder="УДАЛИТЬ" autocomplete="off" style="margin-top:10px"><div class="row"><button class="btn red" id="dyes">Удалить навсегда</button><button class="btn line" id="dno">Отмена</button></div>`);
+    $('#dno', m).onclick = () => m.remove();
+    $('#dyes', m).onclick = async () => { if ($('#dok', m).value !== 'УДАЛИТЬ') return toast('Введите слово УДАЛИТЬ', 1); try { await rpc('admin_delete_user', { p_user: u.id }); m.remove(); toast('Аккаунт удалён'); await afterDelete() } catch (e) { } };
+  });
+}
+
+// ---- редактор профиля ребёнка ----
+function kidEditor(c, u) {
+  let av = c.avatar_url || null, color = c.color || '#B07F5E';
+  const m = modal(`<h3 style="margin-bottom:12px">Профиль ребёнка</h3>
+   <div class="row" style="margin:0 0 12px"><div id="kav">${avEl(av, c.name, color, 'l')}</div><button class="btn line sm" id="kup">Загрузить фото</button><button class="link" id="krm">убрать</button></div>
+   <div class="fg"><div><label>Имя</label><input class="in" id="kn" value="${esc(c.name)}" maxlength="40"></div><div><label>Возраст</label><input class="in" id="ka" type="number" min="2" max="12" value="${c.age}"></div>
+    <div><label>@юзернейм</label><input class="in" id="ku" value="${esc(c.username ? '@' + c.username : '')}" maxlength="21" autocapitalize="off"></div><div><label>Цвет</label><input class="in" id="kc" type="color" value="${esc(color)}" style="padding:4px;height:46px"></div>
+    <div><label>Лимит уроков в день</label><select class="in" id="kl">${[0, 1, 2, 3, 4, 5, 6, 8, 10].map(n => `<option value="${n}" ${c.daily_limit === n ? 'selected' : ''}>${n ? n : 'без лимита'}</option>`).join('')}</select></div>
+    <div class="full"><label>О ребёнке</label><textarea class="in" id="kab" maxlength="300" style="min-height:60px;resize:vertical">${esc(c.about || '')}</textarea></div></div>
+   <div id="km" class="msg" style="margin-top:8px"></div><div class="row"><button class="btn" id="ksave">Сохранить</button><button class="btn line" id="kno">Отмена</button></div>`);
+  const paint = () => $('#kav', m).innerHTML = avEl(av, $('#kn', m).value || '?', $('#kc', m).value, 'l');
+  $('#kc', m).oninput = paint; $('#kn', m).oninput = paint; $('#kno', m).onclick = () => m.remove(); $('#krm', m).onclick = () => { av = null; paint() };
+  $('#kup', m).onclick = async () => { const f = await pickFile('image/*'); if (!f) return; say($('#km', m), 'Загружаем фото…'); try { av = await uploadPublic('avatars', `${u.id}/child_${c.id}.jpg`, await resizeImg(f, 256, true), 'image/jpeg'); paint(); say($('#km', m), 'Фото загружено. Не забудьте сохранить.', 'ok') } catch (e) { say($('#km', m), e.message, 'err') } };
+  $('#ksave', m).onclick = async () => {
+    const age = parseInt($('#ka', m).value, 10); if (!$('#kn', m).value.trim()) return say($('#km', m), 'Введите имя', 'err'); if (!(age >= 2 && age <= 12)) return say($('#km', m), 'Возраст — от 2 до 12', 'err');
+    const { error } = await sb.rpc('admin_update_child', { p_child: c.id, p_name: $('#kn', m).value, p_age: age, p_username: hnd($('#ku', m).value), p_about: $('#kab', m).value, p_color: $('#kc', m).value, p_avatar: av, p_limit: +$('#kl', m).value });
+    if (error) return say($('#km', m), error.message.includes('unique') ? 'Такой юзернейм уже занят' : error.message, 'err');
+    m.remove(); toast('Профиль ребёнка сохранён'); reload();
+  };
 }
 
 // ================= УРОКИ И ЗАДАНИЯ =================
@@ -277,6 +469,90 @@ async function loadStats() {
   <div class="grid" style="grid-template-columns:1fr 1fr;padding-bottom:0"><div class="card"><h2 style="font-size:17px;margin-bottom:10px">Популярные уроки</h2>${s.top.length ? `<table><tr><th>Урок</th><th>Прохождений</th><th>Ср. звёзд</th></tr>${s.top.map(t => `<tr><td>${esc(t.lesson)}<br><span class="muted">${esc(t.course)}</span></td><td>${t.n}</td><td>${t.avg_stars}</td></tr>`).join('')}</table>` : '<p class="muted">Пока нет данных.</p>'}</div>
   <div class="card"><h2 style="font-size:17px;margin-bottom:10px">Последние прохождения</h2>${s.recent.length ? `<table><tr><th>Ребёнок</th><th>Урок</th><th>Итог</th><th>Когда</th></tr>${s.recent.map(r => `<tr><td>${esc(r.child)}<br><span class="muted">ID ${r.pid}</span></td><td>${esc(r.lesson)}</td><td>${r.total ? r.score + '/' + r.total : '—'} ${'★'.repeat(r.stars)}</td><td>${fd(r.at)}</td></tr>`).join('')}</table>` : '<p class="muted">Пока нет данных.</p>'}</div></div>`;
 }
+
+// ================= ЖУРНАЛ =================
+const ACT = { plan: 'Изменил подписку', course_give: 'Выдал курс', course_take: 'Забрал курс', block: 'Заблокировал', unblock: 'Разблокировал', role: 'Назначил роль', profile: 'Изменил профиль родителя', child_edit: 'Изменил профиль ребёнка', child_del: 'Удалил ребёнка', user_del: 'Удалил аккаунт',
+  note_add: 'Добавил заметку', note_del: 'Удалил заметку', badge_give: 'Выдал награду', badge_take: 'Забрал награду', stars_give: 'Выдал звёзды', stars_take: 'Забрал звёзды', promo_new: 'Создал промокод', promo_give: 'Применил промокод', promo_on: 'Включил промокод', promo_off: 'Выключил промокод', promo_del: 'Удалил промокод',
+  password: 'Сменил пароль', bulk_plan: 'Массово: тариф', bulk_extend: 'Массово: продление', bulk_course_give: 'Массово: выдал курс', bulk_course_take: 'Массово: забрал курс', bulk_block: 'Массово: блокировка', bulk_unblock: 'Массово: разблокировка' };
+const DK = { plan: 'тариф', until: 'до', course: 'курс', code: 'код', child: 'ребёнок', badge: 'награда', delta: 'звёзды', reason: 'причина', total: 'итого', text: 'текст', name: 'имя', username: '@', role: 'роль', days: 'дней', max: 'лимит', children: 'детей', bulk: 'массово' };
+const det = o => Object.entries(o || {}).filter(([, v]) => v !== null && v !== '' && v !== undefined).map(([k, v]) => `${DK[k] || k}: ${k === 'until' ? fd(v) : v}`).join(' · ');
+let logRows = [];
+async function loadLog() {
+  $('#logbox').innerHTML = '<p class="muted">Загрузка…</p>';
+  const { data, error } = await sb.from('admin_log').select('*').order('at', { ascending: false }).limit(300); if (error) return toast(error.message, 1);
+  logRows = data || []; drawLog();
+}
+function drawLog() {
+  const q = $('#logq').value.trim().toLowerCase(), r = logRows.filter(l => !q || [l.actor_email, l.target_label, ACT[l.action] || l.action, det(l.details)].join(' ').toLowerCase().includes(q));
+  $('#logbox').innerHTML = r.length ? `<table><tr><th>Когда</th><th>Кто</th><th>Действие</th><th>Аккаунт</th><th>Детали</th></tr>${r.map(l => `<tr><td style="white-space:nowrap">${dt(l.at)}</td><td>${esc(l.actor_email || '—')}</td><td>${esc(ACT[l.action] || l.action)}</td><td>${esc(l.target_label || '—')}</td><td class="muted">${esc(det(l.details))}</td></tr>`).join('')}</table>` : '<p class="muted">Записей нет.</p>';
+}
+$('#logq').oninput = drawLog; $('#logre').onclick = loadLog;
+$('#logcsv').onclick = () => csvDown('umno_journal.csv', [['Когда', 'Кто', 'Действие', 'Аккаунт', 'Детали'], ...logRows.map(l => [dt(l.at), l.actor_email, ACT[l.action] || l.action, l.target_label, det(l.details)])]);
+
+// ================= ПРОМОКОДЫ =================
+async function loadPromo() {
+  const { data, error } = await sb.from('promo_codes').select('*').order('created_at', { ascending: false }); if (error) return toast(error.message, 1);
+  $('#pcourse').innerHTML = '<option value="">— без курса —</option>' + courses.map(c => `<option value="${c.id}">${esc(c.title)}</option>`).join('');
+  const give = p => [p.plan ? `${PLAN[p.plan]}, ${p.days || 30} дн.` : '', p.course_id ? `курс «${esc((courses.find(c => c.id === p.course_id) || { title: p.course_id }).title)}»${p.days ? ', ' + p.days + ' дн.' : ', бессрочно'}` : ''].filter(Boolean).join(' + ');
+  $('#plist').innerHTML = data.length ? `<table><tr><th>Код</th><th>Даёт</th><th>Использован</th><th>До</th><th>Статус</th><th></th></tr>${data.map(p => {
+    const dead = !p.active || (p.expires_at && new Date(p.expires_at) < new Date()) || (p.max_uses && p.used >= p.max_uses);
+    return `<tr data-code="${esc(p.code)}"><td><b style="font-family:Unbounded;font-size:13px">${esc(p.code)}</b>${p.note ? `<br><span class="muted">${esc(p.note)}</span>` : ''}</td><td>${give(p)}</td><td>${p.used}${p.max_uses ? ' из ' + p.max_uses : ''}</td><td>${p.expires_at ? fd(p.expires_at) : '—'}</td>
+     <td><span class="tag ${dead ? 'red' : 'ok'}">${!p.active ? 'выключен' : dead ? 'исчерпан' : 'действует'}</span></td><td style="white-space:nowrap"><button class="btn line sm" data-tg>${p.active ? 'Выключить' : 'Включить'}</button> <button class="btn line sm" data-cp>Копировать</button> <button class="btn red sm" data-rm>Удалить</button></td></tr>` }).join('')}</table>` : '<p class="muted">Промокодов пока нет.</p>';
+  $$('#plist tr[data-code]').forEach(tr => { const code = tr.dataset.code, p = data.find(x => x.code === code);
+    tr.querySelector('[data-tg]').onclick = async () => { try { await rpc('admin_set_promo_active', { p_code: code, p_active: !p.active }); loadPromo() } catch (e) { } };
+    tr.querySelector('[data-cp]').onclick = () => { navigator.clipboard?.writeText(code); toast('Код скопирован') };
+    tr.querySelector('[data-rm]').onclick = async () => { if (!confirm('Удалить промокод ' + code + '?')) return; try { await rpc('admin_del_promo', { p_code: code }); toast('Промокод удалён'); loadPromo() } catch (e) { } } });
+}
+$('#pgen').onclick = () => $('#pcodeN').value = genCode();
+$('#fPromo').onsubmit = async e => {
+  e.preventDefault(); const code = $('#pcodeN').value.trim().toUpperCase(), plan = $('#pplan').value, course = $('#pcourse').value, days = parseInt($('#pdays').value, 10), max = parseInt($('#pmax').value, 10);
+  if (!/^[A-Z0-9_-]{3,32}$/.test(code)) return toast('Код: 3–32 символа, латиница, цифры, - и _', 1);
+  if (!plan && !course) return toast('Выберите, что даёт промокод: подписку и/или курс', 1);
+  if (plan && !(days >= 1)) return toast('Укажите число дней подписки', 1);
+  try { await rpc('admin_save_promo', { p_code: code, p_plan: plan, p_course: course, p_days: days >= 1 ? days : null, p_max: max >= 1 ? max : null, p_until: eod($('#puntil').value), p_note: $('#pnote').value }); toast('Промокод создан: ' + code); e.target.reset(); $('#pdays').value = 30; loadPromo() } catch (er) { }
+};
+
+// ================= НАГРАДЫ =================
+const BKIND = { manual: 'Только вручную', lessons: 'За число уроков', streak: 'За дни подряд', stars: 'За число звёзд', perfect: 'За уроки на 3 звезды' };
+const BICON = ['star', 'rocket', 'book', 'trophy', 'flame', 'crown', 'abc', 'puzzle', 'music', 'brush', 'baby', 'globe', 'chat'];
+let bEdit = null;
+function drawBadges() {
+  $('#blist').innerHTML = ALLB.map(b => `<div class="kb" data-b="${esc(b.id)}" style="display:flex;gap:12px;align-items:center"><span class="av" style="width:44px;height:44px">${ico(b.icon)}</span><div style="flex:1"><b>${esc(b.title)}</b><div class="muted">${esc(b.description || '')} · ${BKIND[b.kind]}${b.kind !== 'manual' ? ': ' + b.need : ''}</div></div><button class="btn line sm" data-be>Изменить</button><button class="btn red sm" data-bd>Удалить</button></div>`).join('') || '<p class="muted">Наград нет.</p>';
+  $$('#blist [data-b]').forEach(r => { const b = ALLB.find(x => x.id === r.dataset.b); r.querySelector('[data-be]').onclick = () => badgeForm(b);
+    r.querySelector('[data-bd]').onclick = async () => { if (!confirm(`Удалить награду «${b.title}»? Она пропадёт у всех детей.`)) return; const { error } = await sb.from('badges').delete().eq('id', b.id); if (error) return toast(error.message, 1); toast('Награда удалена'); await loadBadges(); drawBadges() } });
+}
+function badgeForm(b) {
+  bEdit = b; const f = $('#fBadge');
+  f.bt.value = b?.title || ''; f.bd.value = b?.description || ''; f.bi.value = b?.icon || 'star'; f.bk.value = b?.kind || 'manual'; f.bn.value = b?.need || 1;
+  $('#bfh').textContent = b ? 'Изменить награду' : 'Новая награда'; $('#bcancel').classList.toggle('hide', !b); kindUI(); f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+const kindUI = () => $('#bnw').classList.toggle('hide', $('#fBadge').bk.value === 'manual');
+$('#fBadge').bk.onchange = kindUI;
+$('#bi').innerHTML = BICON.map(i => `<option value="${i}">${i}</option>`).join('');
+$('#bcancel').onclick = () => badgeForm(null);
+$('#fBadge').onsubmit = async e => {
+  e.preventDefault(); const f = e.target, kind = f.bk.value, need = kind === 'manual' ? 0 : parseInt(f.bn.value, 10);
+  if (!f.bt.value.trim()) return toast('Введите название награды', 1); if (kind !== 'manual' && !(need >= 1)) return toast('Укажите, сколько нужно набрать', 1);
+  const row = { title: f.bt.value.trim(), description: f.bd.value.trim() || null, icon: f.bi.value, kind, need };
+  const { error } = bEdit ? await sb.from('badges').update(row).eq('id', bEdit.id) : await sb.from('badges').insert({ ...row, id: 'b_' + Date.now().toString(36), sort: ALLB.length + 1 + 100 });
+  if (error) return toast(error.message, 1); toast('Награда сохранена'); await loadBadges(); badgeForm(null); drawBadges();
+};
+
+// ================= РОЛИ =================
+async function drawRoles() {
+  await loadRolesList();
+  const groups = [['Аккаунты', ['users', 'plans', 'block', 'passwords', 'profiles', 'delete_kids', 'delete_users', 'bulk', 'notes']], ['Награды и промо', ['rewards', 'badges_edit', 'promo']], ['Контент и данные', ['content', 'stats', 'journal']], ['Сайт', ['test_access']]];
+  $('#rlist').innerHTML = `<div class="kb"><b>Владелец</b> <span class="tag ok">вы</span><div class="muted">Полный доступ ко всему, включая роли. Назначается только через базу (is_admin).</div></div>` + ROLES.map(r => `<div class="tk" data-r="${esc(r.id)}">
+   <div class="row" style="margin:0 0 10px"><input class="in" data-rt value="${esc(r.title)}" maxlength="40" style="max-width:260px"><span class="muted">${esc(r.id)}</span><span style="flex:1"></span><button class="btn red sm" data-rd>Удалить роль</button></div>
+   ${groups.map(([t, ks]) => `<div class="hintx" style="margin-top:10px"><b>${t}</b></div><div class="pg">${ks.map(k => `<label class="ck"><input type="checkbox" data-pk="${k}" ${r.perms.includes(k) ? 'checked' : ''}> ${PERMS[k]}</label>`).join('')}</div>`).join('')}
+   <div class="row"><button class="btn sm" data-rs>Сохранить права</button></div></div>`).join('');
+  $$('#rlist [data-r]').forEach(box => { const r = ROLES.find(x => x.id === box.dataset.r);
+    box.querySelector('[data-rs]').onclick = async () => { const perms = [...box.querySelectorAll('[data-pk]:checked')].map(i => i.dataset.pk), title = box.querySelector('[data-rt]').value.trim(); if (title.length < 2) return toast('Название роли — минимум 2 символа', 1);
+      const { error } = await sb.from('admin_roles').update({ title, perms }).eq('id', r.id); error ? toast(error.message, 1) : toast('Права роли сохранены') };
+    box.querySelector('[data-rd]').onclick = async () => { if (!confirm(`Удалить роль «${r.title}»? У пользователей с этой ролью права пропадут.`)) return; const { error } = await sb.from('admin_roles').delete().eq('id', r.id); if (error) return toast(error.message, 1); toast('Роль удалена'); drawRoles() } });
+}
+$('#newRole').onclick = async () => { const t = prompt('Название новой роли (например, «Куратор»)'); if (!t || t.trim().length < 2) return;
+  const { error } = await sb.from('admin_roles').insert({ id: 'role_' + Math.random().toString(36).slice(2, 8), title: t.trim(), perms: [] }); if (error) return toast(error.message, 1); toast('Роль создана — отметьте права'); drawRoles() };
 </script>
 </body>
 </html>
