@@ -92,3 +92,11 @@ textarea{border-radius:20px;resize:vertical;min-height:84px}
 .link{background:none;border:0;color:var(--brown-d);font:700 13px Manrope;cursor:pointer;padding:4px 0}.link:hover{text-decoration:underline}
 .ck{display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer}.ck input{width:18px;height:18px;accent-color:var(--brown)}
 .logo{font-family:Unbounded;font-weight:800;font-size:22px;text-decoration:none}.logo b{color:var(--brown)}
+
+/* ---- озвучка заданий ---- */
+.qz{position:relative}
+.qv{position:absolute;top:-6px;right:0;display:flex;gap:8px;z-index:2}
+.qsp{border:0;background:var(--soft);color:var(--ink);border-radius:999px;min-width:42px;height:42px;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;gap:4px;cursor:pointer;font-size:20px;transition:.2s}
+.qsp small{font:700 11px Manrope}.qsp:hover{background:var(--brown);color:#fff}.qsp.off{opacity:.55}
+/* точки прогресса: класс .c у «текущей» точки не должен получать стили карточки курса */
+.dots i.c{padding:0;cursor:default;box-shadow:none;animation:none;border-radius:50%}.dots i.c:hover{transform:scale(1.3)}
