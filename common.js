@@ -53,7 +53,10 @@ function injectIcons() {
     brush: 'M18 3l3 3-9 9-3-3zM9 12c-3 0-4 2-4 4 0 2-1 3-2 4 4 1 8 0 8-4', rocket: 'M14 5c3-2 6-2 6-2s0 3-2 6l-5 5-4-4zM9 15l-4 1 1 4 4-1M5 19c1-4 3-6 5-7',
     crown: 'M3 8l4 4 5-7 5 7 4-4-2 11H5z', lock: 'M6 11h12v9H6zM8 11V8a4 4 0 018 0v3', gear: 'M12 8a4 4 0 100 8 4 4 0 000-8zM12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2',
     home: 'M3 11l9-8 9 8M5 10v10h14V10', chart: 'M4 20V4M4 20h16M8 16v-5M12 16V8M16 16v-3', baby: 'M12 3a9 9 0 100 18 9 9 0 000-18zM9 10h.01M15 10h.01M9 15c1 1 5 1 6 0',
-    image: 'M3 5h18v14H3zM3 16l5-5 4 4 3-3 6 5M16 9h.01', edit: 'M4 20h4L19 9l-4-4L4 16zM13 7l4 4', video: 'M3 6h13v12H3zM16 10l5-3v10l-5-3'
+    image: 'M3 5h18v14H3zM3 16l5-5 4 4 3-3 6 5M16 9h.01', edit: 'M4 20h4L19 9l-4-4L4 16zM13 7l4 4', video: 'M3 6h13v12H3zM16 10l5-3v10l-5-3',
+    sound: 'M4 9v6h4l5 4V5L8 9zM16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12', mute: 'M4 9v6h4l5 4V5L8 9zM17 9.5l4 5M21 9.5l-4 5',
+    shop: 'M5 8h14l-1.2 12H6.2zM9 8V7a3 3 0 016 0v1', play: 'M7 4.5l12 7.5-12 7.5z', heart: 'M12 20s-8-5-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 9c0 6-8 11-8 11z',
+    clock: 'M12 3a9 9 0 100 18 9 9 0 000-18zM12 7v5l3 2', back: 'M15 5l-7 7 7 7', gift: 'M4 11h16v9H4zM3 8h18v3H3zM12 8v12M12 8C9 8 8 4 10.5 4S13 8 12 8zM12 8c3 0 4-4 1.5-4S11 8 12 8z'
   };
   const s = document.createElement('div'); s.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
   s.innerHTML = '<svg><defs>' + Object.entries(P).map(([k, d]) => `<symbol id="i-${k}" viewBox="0 0 24 24"><path d="${d}"/></symbol>`).join('') + '</defs></svg>';
