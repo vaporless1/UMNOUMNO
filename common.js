@@ -3,7 +3,18 @@ const CONFIG = {
   SUPABASE_URL: "https://oqwnpqjwznlcuudzvntp.supabase.co",
   SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xd25wcWp3em5sY3V1ZHp2bnRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzMDEwNjAsImV4cCI6MjEwODg3NzA2MH0.fBgSrNFTz07DE9uYzjyFTupOpZEw9E_xjnx9zq3-6LM"
 };
-const sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+// Если библиотека не загрузилась (блокировка CDN, плохая сеть) — показываем понятное сообщение вместо пустой страницы
+if (typeof supabase === 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => { document.body.innerHTML = '<div style="max-width:420px;margin:12vh auto;padding:0 20px;text-align:center;font-family:system-ui,sans-serif"><h2 style="margin-bottom:12px">Не удалось загрузить сайт</h2><p style="color:#666;line-height:1.5;margin-bottom:20px">Проверьте интернет. Если включён VPN или блокировщик рекламы, отключите его и обновите страницу.</p><button onclick="location.reload()" style="border:0;background:#B07F5E;color:#fff;font:700 16px system-ui;padding:14px 28px;border-radius:99px">Обновить</button></div>' });
+  throw new Error('supabase-js не загружен');
+}
+// На телефонах localStorage бывает недоступен (приватный режим, встроенные браузеры мессенджеров) — тогда храним сессию в памяти, а не падаем
+const _mem = {}, safeStorage = {
+  getItem: k => { try { return localStorage.getItem(k) } catch (e) { return _mem[k] ?? null } },
+  setItem: (k, v) => { try { localStorage.setItem(k, v) } catch (e) { _mem[k] = v } },
+  removeItem: k => { try { localStorage.removeItem(k) } catch (e) { delete _mem[k] } }
+};
+const sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY, { auth: { storage: safeStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const say = (el, t, k) => { el.textContent = t; el.className = 'msg ' + (k || '') };
