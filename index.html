@@ -154,6 +154,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv,.hero p,.hero .btn,.hero h1 span.w,.bear{opacity:1;transform:none}}
 </style>
+<link rel="stylesheet" href="legal-ui.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -292,6 +293,10 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
     <div class="f"><select name="plan" id="plan" aria-label="Тариф">
      <option>Попробовать</option><option selected>Семейный</option><option>Год</option></select></div>
     <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <div class="cons">
+     <label><input type="checkbox" name="c_pd" required> <span>Даю <a href="consent.html" target="_blank" rel="noopener">согласие на обработку персональных данных</a> и ознакомлен(а) с <a href="privacy.html" target="_blank" rel="noopener">Политикой конфиденциальности</a></span></label>
+     <label><input type="checkbox" name="c_ads"> <span>Хочу получать новости и акции (<a href="consent-ads.html" target="_blank" rel="noopener">согласие на рассылки</a>, необязательно)</span></label>
+    </div>
     <button class="btn" id="send" type="submit">Записаться на курс</button>
     <div class="msg" id="msg" role="status"></div>
    </form>
@@ -302,7 +307,9 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 </section>
 </main>
 
-<footer><div class="wrap"><span>© 2026 УМНО. Мультики, которые учат.</span><span>hello@umno.example · @umno_support</span></div></footer>
+<footer><div class="wrap"><span>© 2026 УМНО. Мультики, которые учат. · 0+</span><span>hello@umno.example · @umno_support</span></div>
+<div id="lfoot"></div></footer>
+<script src="legal.js" defer></script>
 
 <script>
 /* ============ НАСТРОЙКА ЗАЯВОК ============
@@ -345,20 +352,22 @@ form.addEventListener('submit',async e=>{
   e.preventDefault();msg.className='msg';msg.textContent='';
   const d=Object.fromEntries(new FormData(form));
   if(d.website)return; // антиспам
+  if(!d.c_pd){msg.className='msg err';msg.textContent='Отметьте согласие на обработку персональных данных.';return}
+  d.consent_pd='Да, '+new Date().toISOString()+', редакция '+(window.LEGAL?LEGAL.ver:'2026-10-30');d.consent_ads=d.c_ads?'Да':'Нет';delete d.c_pd;delete d.c_ads;
   if(!d.name.trim()||!d.telegram.trim()||!/^\S+@\S+\.\S+$/.test(d.email)){msg.className='msg err';msg.textContent='Заполните имя, Telegram и корректный e-mail.';return}
   d.telegram='@'+d.telegram.trim().replace(/^@/,'');delete d.website;
   btn.disabled=true;btn.textContent='Отправляем…';
   try{
     const subject=`Новая заявка: ${d.course} (${d.plan})`;
     if(CONFIG.WEB3FORMS_KEY){
-      const r=await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({access_key:CONFIG.WEB3FORMS_KEY,subject,from_name:'Сайт УМНО',name:d.name,telegram:d.telegram,email:d.email,course:d.course,plan:d.plan})});
+      const r=await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({access_key:CONFIG.WEB3FORMS_KEY,subject,from_name:'Сайт УМНО',name:d.name,telegram:d.telegram,email:d.email,course:d.course,plan:d.plan,consent_pd:d.consent_pd,consent_ads:d.consent_ads})});
       const j=await r.json().catch(()=>({}));
       if(!r.ok||j.success===false)throw new Error(j.message||('Ошибка сервера '+r.status));
     }else if(CONFIG.FORMSPREE_URL){
       const r=await fetch(CONFIG.FORMSPREE_URL,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({...d,_subject:subject})});
       if(!r.ok)throw new Error('Ошибка сервера '+r.status);
     }else if(CONFIG.FALLBACK_EMAIL){
-      const body=`Имя: ${d.name}\nTelegram: ${d.telegram}\nE-mail: ${d.email}\nКурс: ${d.course}\nТариф: ${d.plan}`;
+      const body=`Имя: ${d.name}\nTelegram: ${d.telegram}\nE-mail: ${d.email}\nКурс: ${d.course}\nТариф: ${d.plan}\nСогласие на обработку ПДн: ${d.consent_pd}\nРассылки: ${d.consent_ads}`;
       location.href=`mailto:${CONFIG.FALLBACK_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }else{
       console.warn('Заявки не настроены: заполните CONFIG в index.html');throw new Error('Не заполнен CONFIG в index.html');
