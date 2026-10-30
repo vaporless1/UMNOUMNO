@@ -42,6 +42,7 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
 @media(max-width:380px){.logo small{display:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
+<link rel="stylesheet" href="legal-ui.css">
 </head>
 <body>
 
@@ -64,6 +65,11 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
    <div><input class="in" name="username" placeholder="@юзернейм (необязательно)" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false"><div id="unmsg" class="msg"></div></div>
    <input class="in" name="email" type="email" inputmode="email" placeholder="E-mail" required autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false">
    <input class="in" name="password" type="password" placeholder="Пароль (минимум 8 символов)" minlength="8" required autocomplete="new-password">
+   <div class="cons">
+    <label><input type="checkbox" name="c_terms"> <span>Мне исполнилось 18 лет, я принимаю <a href="terms.html" target="_blank" rel="noopener">Пользовательское соглашение</a> и ознакомлен(а) с <a href="privacy.html" target="_blank" rel="noopener">Политикой конфиденциальности</a></span></label>
+    <label><input type="checkbox" name="c_pd"> <span>Даю <a href="consent.html" target="_blank" rel="noopener">согласие на обработку моих персональных данных</a></span></label>
+    <label><input type="checkbox" name="c_ads"> <span>Хочу получать новости и акции (<a href="consent-ads.html" target="_blank" rel="noopener">необязательно</a>)</span></label>
+   </div>
    <button class="btn" type="submit">Зарегистрироваться</button></form>
   <form id="fNew" class="hide"><h2>Новый пароль</h2><p class="sub">Придумайте новый пароль для входа.</p>
    <input class="in" name="password" type="password" placeholder="Новый пароль (минимум 8 символов)" minlength="8" required autocomplete="new-password">
@@ -75,6 +81,7 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
 <div id="blocked" class="hide"><h2 style="font-family:Unbounded">Аккаунт заблокирован</h2><p class="muted" style="margin:12px 0 22px">Доступ закрыт. Если это ошибка, напишите в поддержку и назовите ваш ID: <b id="bid"></b></p><button class="btn" id="bout">Выйти</button></div>
 
 <div id="app" class="hide"><header><div class="wrap" id="hdr"></div></header><main class="wrap" id="main"></main></div>
+<div id="lfoot"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>window.supabase||document.write('<script src="https://fastly.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"><\/script>')</script>
@@ -82,6 +89,7 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
 <script src="common.js"></script>
 <script src="quiz.js"></script>
 <script src="kid.js"></script>
+<script src="legal.js" defer></script>
 <script>
 injectIcons();
 const show = id => ['auth', 'app', 'blocked'].forEach(x => $('#' + x).classList.toggle('hide', x !== id));
@@ -109,7 +117,10 @@ let unT; forms.reg.username.oninput = e => { clearTimeout(unT); const v = e.targ
 forms.reg.onsubmit = e => { e.preventDefault(); busy(forms.reg, async () => {
   const f = new FormData(forms.reg), un = f.get('username').trim().replace(/^@/, '').toLowerCase();
   if (un && !UNAME.test(un)) return say($('#amsg'), 'Юзернейм: 3–20 символов, латиница, цифры и _', 'err');
-  const { data, error } = await sb.auth.signUp({ email: f.get('email').trim(), password: f.get('password'), options: { data: { full_name: f.get('name').trim(), username: un || null }, emailRedirectTo: location.href.split('#')[0] } });
+  if (!f.get('c_terms')) return say($('#amsg'), 'Подтвердите, что вам есть 18 лет, и примите Пользовательское соглашение.', 'err');
+  if (!f.get('c_pd')) return say($('#amsg'), 'Для регистрации нужно согласие на обработку персональных данных.', 'err');
+  const ver = (window.LEGAL && LEGAL.ver) || '2026-10-30', at = new Date().toISOString();
+  const { data, error } = await sb.auth.signUp({ email: f.get('email').trim(), password: f.get('password'), options: { data: { full_name: f.get('name').trim(), username: un || null, consent_terms: { v: ver, at }, consent_pd: { v: ver, at }, consent_ads: f.get('c_ads') ? { v: ver, at } : null }, emailRedirectTo: location.href.split('#')[0] } });
   if (error) return say($('#amsg'), tr(error.message), 'err');
   if (!data.session) { mode('login'); say($('#amsg'), 'Готово! Мы отправили письмо — подтвердите почту и войдите.', 'ok') } }) };
 $('#forgot').onclick = async () => { const email = forms.login.email.value.trim();
@@ -366,6 +377,7 @@ function kidEditor(k) {
    <div class="f"><label>Цвет профиля</label><div class="colors">${COLORS.map(c => `<label><input type="radio" name="kc" value="${c}" ${c === color ? 'checked' : ''}><i style="background:${c}"></i></label>`).join('')}</div></div>
    <div class="f"><label>Лимит: уроков в день (режим ребёнка)</label><select id="kl">${[[0, 'Без ограничений'], [1, '1 урок'], [2, '2 урока'], [3, '3 урока'], [5, '5 уроков'], [10, '10 уроков']].map(([v, t]) => `<option value="${v}" ${(k?.daily_limit || 0) === v ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
    <div class="f"><label>Курсы, доступные ребёнку</label>${courses.map(c => `<label class="ck"><input type="checkbox" data-hc="${esc(c.id)}" ${hid.has(c.id) ? '' : 'checked'}> ${esc(c.title)}</label>`).join('')}</div>
+   ${isNew ? `<div class="cons"><label><input type="checkbox" id="kcons"> <span>Я законный представитель ребёнка и даю <a href="consent-child.html" target="_blank" rel="noopener">согласие на обработку его данных</a>. Фамилию, адрес и телефон не указываю.</span></label></div>` : ''}
    <div id="km" class="msg"></div><div class="row"><button class="btn" id="ksave">Сохранить</button><button class="btn line" id="kcancel">Отмена</button>${isNew ? '' : '<button class="btn red sm" id="kdel" style="margin-left:auto">Удалить</button>'}</div>`);
   const paint = () => $('#kav', m).innerHTML = avEl(av, $('#kn', m).value || '?', color, 'l');
   $('#kn', m).oninput = paint; m.querySelectorAll('[name=kc]').forEach(r => r.onchange = () => { color = r.value; paint() });
@@ -378,6 +390,7 @@ function kidEditor(k) {
   $('#kcancel', m).onclick = () => m.remove();
   $('#ksave', m).onclick = async e => {
     const name = $('#kn', m).value.trim(), un = $('#ku', m).value.trim().replace(/^@/, '').toLowerCase();
+    if (isNew && !$('#kcons', m).checked) return say($('#km', m), 'Нужно согласие законного представителя на обработку данных ребёнка.', 'err');
     if (!name) return say($('#km', m), 'Введите имя', 'err'); if (un && !UNAME.test(un)) return say($('#km', m), 'Юзернейм: 3–20 символов, латиница, цифры и _', 'err');
     const row = { name, age: +$('#ka', m).value, username: un || null, about: $('#kab', m).value.trim() || null, color, avatar_url: av, daily_limit: +$('#kl', m).value, hidden_courses: $$('[data-hc]', m).filter(c => !c.checked).map(c => c.dataset.hc) };
     e.target.disabled = true;
@@ -413,9 +426,15 @@ function settings() {
     <div class="cnt">Лимит уроков в день и доступные курсы настраиваются в профиле каждого ребёнка.</div></div>
    <h2 style="margin-top:26px;font-size:17px">Смена пароля</h2>
    <form id="fPass" style="max-width:460px;display:grid;gap:10px"><input class="in" name="p" type="password" minlength="8" placeholder="Новый пароль (минимум 8 символов)" required autocomplete="new-password"><button class="btn line" type="submit">Изменить пароль</button></form>
+   <h2 style="margin-top:26px;font-size:17px">Документы и ваши данные</h2>
+   <div class="pane">Вы можете в любой момент удалить профиль ребёнка (раздел «Мои дети»), отключить недельный отчёт или отозвать согласие и удалить аккаунт.
+    <div class="cnt" style="margin-top:8px"><a href="privacy.html" target="_blank" rel="noopener">Политика конфиденциальности</a> · <a href="terms.html" target="_blank" rel="noopener">Пользовательское соглашение</a> · <a href="cookies.html" target="_blank" rel="noopener">Cookie</a></div>
+    <div class="row"><a class="btn line sm" id="delAcc" href="#">Запросить удаление аккаунта и данных</a></div></div>
    <div class="row"><button class="btn line" id="logout">${ico('out')} Выйти из аккаунта</button></div><div id="pmsg" class="msg" role="status"></div></section>`;
   const m = (t, k) => say($('#pmsg'), t, k);
   $('[data-back]').onclick = () => go('home'); $('#logout').onclick = () => sb.auth.signOut();
+  $('#delAcc').onclick = e => { e.preventDefault(); const to = (window.LEGAL && LEGAL.op_email) || ''; if (!to || to[0] === '[') return toast('Адрес для обращений пока не указан. Напишите в поддержку.');
+    location.href = 'mailto:' + to + '?subject=' + encodeURIComponent('Удаление аккаунта') + '&body=' + encodeURIComponent('Прошу удалить мой аккаунт и все связанные персональные данные, включая профили детей.\nE-mail аккаунта: ' + user.email + '\nID: ' + (me.public_id || '')) };
   $('#cpid').onclick = () => { navigator.clipboard?.writeText(String(me.public_id || '')); toast('ID скопирован') };
   $('#promoGo').onclick = async () => { const code = $('#promo').value.trim(); if (!code) return say($('#promoMsg'), 'Введите промокод', 'err'); $('#promoGo').disabled = true; say($('#promoMsg'), 'Проверяем…');
     const { data, error } = await sb.rpc('redeem_promo', { p_code: code }); $('#promoGo').disabled = false;
