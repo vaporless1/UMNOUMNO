@@ -192,3 +192,13 @@ body.kid .btn.poor{opacity:.6}
 .buy h2{font-size:26px}.buy p{margin:8px 0 14px}
 body.kid .qsp[data-v=auto]{display:none}
 @media(max-width:480px){.chip.fire{display:none}body.kid .hr{gap:6px}.kbtn{width:40px;height:40px;font-size:19px}body.kid .hr .btn.sm{padding:9px 12px}.chip{padding:6px 12px;font-size:16px}}
+
+/* узкие телефоны: строки уроков не должны сжимать название */
+@media(max-width:480px){
+ body.kid .lrow{font-size:17px;padding:12px 14px;gap:10px;flex-wrap:wrap}
+ body.kid .lrow>div:not(.n){flex:1 1 130px;min-width:0}
+ body.kid .lrow .n{width:36px;height:36px}
+ body.kid .lrow em,body.kid .lrow .go{margin-left:auto}
+ body.kid .box{padding:16px 14px;border-radius:24px}
+ .kcont{gap:12px;padding:14px}.kplay{width:58px;height:58px;font-size:24px}
+}
