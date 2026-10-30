@@ -8,167 +8,274 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<link rel="stylesheet" href="common.css">
 <style>
-:root{--brown:#B07F5E;--brown-d:#8f6246;--ink:#111;--grey:#6b6b6b;--soft:#f0efee;--cream:#fbf7f3;--r:24px}
-*{box-sizing:border-box;margin:0}
-body{font-family:Manrope,system-ui,sans-serif;color:var(--ink);background:var(--cream);line-height:1.5;min-height:100vh}
-h1,h2,h3,.btn{font-family:Unbounded,Manrope,sans-serif}
-.hide{display:none!important}
-@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-.btn{border:0;cursor:pointer;background:var(--brown);color:#fff;font-weight:500;font-size:13px;padding:13px 22px;border-radius:999px;transition:.25s;white-space:nowrap}
-.btn:hover{background:var(--brown-d);transform:translateY(-2px)}
-.btn:disabled{opacity:.5;pointer-events:none}
-.btn.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
-.btn.line:hover{background:var(--ink);color:#fff}
-.btn.red{background:#c0392b}.btn.red:hover{background:#992d22}
-.btn.sm{padding:9px 14px;font-size:12px}
-.in,select{width:100%;border:2px solid transparent;background:var(--soft);border-radius:999px;padding:13px 20px;font:500 14px Manrope;outline:0;transition:.25s;color:var(--ink)}
-.in:focus,select:focus{border-color:var(--brown);background:#fff}
-header{background:#fff;position:sticky;top:0;z-index:5}
-.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
-header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px}
-.logo{font-family:Unbounded;font-weight:800;font-size:20px}.logo b{color:var(--brown)}
+:root{--r:24px}
+header{background:#fff;position:sticky;top:0;z-index:20}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px;flex-wrap:wrap}
 .logo small{font:700 11px Manrope;background:var(--ink);color:#fff;padding:3px 9px;border-radius:99px;margin-left:8px;vertical-align:middle}
+.tabs{display:flex;gap:6px}.tabs button{border:0;background:none;padding:9px 16px;border-radius:999px;font:700 13px Manrope;cursor:pointer;color:var(--grey)}.tabs button.on{background:var(--ink);color:#fff}
 .hr{display:flex;gap:10px;align-items:center;font-size:13px;font-weight:700}
-.center{max-width:420px;margin:90px auto;background:#fff;border-radius:var(--r);padding:34px;animation:up .5s}
-.center h2{font-size:22px;margin-bottom:16px}.center form{display:grid;gap:12px}
-.grid{display:grid;grid-template-columns:380px 1fr;gap:22px;padding:28px 0 70px;align-items:start}
+.center{max-width:420px;margin:90px auto;background:#fff;border-radius:var(--r);padding:34px;animation:up .5s}.center h2{font-size:22px;margin-bottom:16px}.center form{display:grid;gap:12px}
+.grid{display:grid;grid-template-columns:380px 1fr;gap:22px;padding:26px 0 70px;align-items:start}
 .card{background:#fff;border-radius:var(--r);padding:24px;animation:up .4s}
 .sf{display:flex;gap:8px;margin-bottom:16px}
 .u{display:block;width:100%;text-align:left;border:2px solid transparent;background:var(--soft);border-radius:18px;padding:12px 16px;margin-bottom:8px;cursor:pointer;font:inherit;transition:.2s}
-.u:hover{transform:translateX(4px)}.u.on{border-color:var(--brown);background:var(--cream)}
-.u b{display:block}.u small{color:var(--grey);display:block}
-.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;background:#fff;margin-right:4px}
-.tag.red{background:#c0392b;color:#fff}.tag.ok{background:#2e7d4f;color:#fff}.tag.dk{background:var(--ink);color:#fff}
-.sec{border-top:1px solid #eee;padding:20px 0}
-.sec h3{font-size:14px;margin-bottom:12px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.u:hover{transform:translateX(4px)}.u.on{border-color:var(--brown);background:var(--cream)}.u b{display:block}.u small{color:var(--grey);display:block}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;background:#fff;margin-right:4px}.tag.red{background:#c0392b;color:#fff}.tag.ok{background:#2e7d4f;color:#fff}.tag.dk{background:var(--ink);color:#fff}
+.sec{border-top:1px solid #eee;padding:20px 0}.sec h3{font-size:14px;margin-bottom:12px}
 .row>.in,.row>select{flex:1;min-width:140px}
-.cr{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 0}
-.cr b{min-width:140px}.cr .st{font-size:12px;color:var(--grey);min-width:120px}.cr .in{width:160px;padding:9px 14px}
-.head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.head h2{font-size:22px}.muted{color:var(--grey);font-size:13px}
+.cr{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 0}.cr b{min-width:140px}.cr .st{font-size:12px;color:var(--grey);min-width:120px}.cr .in{width:160px;padding:9px 14px}
+.head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.head h2{font-size:22px;margin:0}
 .id{font-family:Unbounded;font-size:13px;background:var(--soft);padding:4px 12px;border-radius:99px;cursor:pointer}
-#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(30px);background:var(--ink);color:#fff;padding:13px 22px;border-radius:99px;font-size:14px;font-weight:700;opacity:0;transition:.35s;pointer-events:none;z-index:20;max-width:90vw}
-#toast.on{opacity:1;transform:translateX(-50%)}#toast.err{background:#c0392b}
-@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.kb{background:var(--soft);border-radius:18px;padding:14px 16px;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #eee;vertical-align:top}th{color:var(--grey);font-weight:700}
+/* уроки */
+.cg{margin-bottom:14px}.ch{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--soft);border-radius:14px;padding:9px 12px;margin-bottom:6px;cursor:pointer;border:2px solid transparent;font-size:14px}
+.li:hover{border-color:#ddd}.li.on{border-color:var(--brown);background:var(--cream)}.li em{font-size:11px;color:#c0392b;font-style:normal}
+.li button{border:0;background:none;cursor:pointer;color:var(--grey);padding:2px 4px}.li button:hover{color:var(--ink)}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fg .full{grid-column:1/-1}
+.tk{border:2px solid var(--soft);border-radius:22px;padding:18px;margin-top:14px;background:#fff}
+.tk:focus-within{border-color:var(--brown)}
+.tkh{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.tkh .n{font:800 15px Unbounded}.tkh select{width:auto;flex:0 0 auto}
+.tkh .sp{flex:1}.ib{border:0;background:var(--soft);border-radius:50%;width:34px;height:34px;cursor:pointer;display:grid;place-items:center;color:var(--ink);font-size:16px}.ib:hover{background:#e6e3e0}.ib.d:hover{background:#c0392b;color:#fff}
+.opr{display:flex;gap:8px;align-items:center;margin-top:8px}.opr .in{flex:1;padding:11px 16px}.opr input[type=radio],.opr input[type=checkbox]{width:20px;height:20px;accent-color:var(--brown);flex:none}
+.th{width:44px;height:44px;border-radius:10px;object-fit:cover;flex:none}
+.mpr{display:grid;grid-template-columns:1fr 24px 1fr 34px;gap:8px;align-items:center;margin-top:8px}.mpr .sd{display:flex;gap:6px;align-items:center}.mpr .sd .in{padding:11px 14px;min-width:0}
+.addb{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.hintx{font-size:12px;color:var(--grey);margin-top:6px}
+.bars{display:flex;gap:6px;align-items:flex-end;height:140px;margin-top:10px}.bars div{flex:1;background:var(--brown);border-radius:8px 8px 0 0;min-height:3px;position:relative;transition:height .6s}.bars div span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:11px;font-weight:700}
+.bl{display:flex;gap:6px;margin-top:4px}.bl span{flex:1;text-align:center;font-size:10px;color:var(--grey)}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.fg{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-
-<div id="loginBox" class="center hide">
- <h2>Вход в админ-панель</h2>
- <form id="fLogin"><input class="in" name="email" type="email" placeholder="E-mail" required autocomplete="email"><input class="in" name="password" type="password" placeholder="Пароль" required autocomplete="current-password"><button class="btn" type="submit">Войти</button><div id="lmsg" class="muted" style="color:#c0392b;font-weight:700"></div></form>
-</div>
-<div id="deny" class="center hide"><h2>Нет доступа</h2><p class="muted" style="margin:10px 0 18px">У этого аккаунта нет прав администратора.</p><a class="btn" href="cabinet.html" style="display:inline-block;text-decoration:none">В кабинет</a> <button class="btn line" id="dout">Выйти</button></div>
-<div id="setup" class="center hide"><h2>Подключите базу</h2><p class="muted">Впишите SUPABASE_URL и SUPABASE_KEY в блок CONFIG в конце файла admin.html.</p></div>
+<div id="loginBox" class="center hide"><h2>Вход в админ-панель</h2><form id="fLogin"><input class="in" name="email" type="email" placeholder="E-mail" required autocomplete="email"><input class="in" name="password" type="password" placeholder="Пароль" required autocomplete="current-password"><button class="btn" type="submit">Войти</button><div id="lmsg" class="msg err"></div></form></div>
+<div id="deny" class="center hide"><h2>Нет доступа</h2><p class="muted" style="margin:10px 0 18px">У этого аккаунта нет прав администратора.</p><a class="btn" href="cabinet.html">В кабинет</a> <button class="btn line" id="dout">Выйти</button></div>
 
 <div id="panel" class="hide">
- <header><div class="wrap">
-  <span class="logo">УМ<b>НО</b><small>админ</small></span>
-  <div class="hr"><span id="me" class="muted"></span><a class="btn line sm" href="cabinet.html" style="text-decoration:none">Кабинет</a><button class="btn line sm" id="out">Выйти</button></div>
- </div></header>
- <main class="wrap grid">
-  <section class="card">
-   <form class="sf" id="fSearch"><input class="in" id="q" placeholder="ID, e-mail или имя" autocomplete="off"><button class="btn" type="submit">Найти</button></form>
-   <div id="list"></div>
-  </section>
-  <section class="card" id="detail"><p class="muted">Выберите аккаунт слева или найдите его по ID.</p></section>
+ <header><div class="wrap"><span class="logo">УМ<b>НО</b><small>админ</small></span>
+  <div class="tabs"><button data-tab="users" class="on">Аккаунты</button><button data-tab="lessons">Уроки и задания</button><button data-tab="stats">Статистика</button></div>
+  <div class="hr"><span id="me" class="muted"></span><a class="btn line sm" href="cabinet.html">Кабинет</a><button class="btn line sm" id="out">Выйти</button></div></div></header>
+ <main class="wrap">
+  <div id="tab-users" class="grid"><section class="card"><form class="sf" id="fSearch"><input class="in" id="q" placeholder="ID, @юзернейм, e-mail или имя" autocomplete="off"><button class="btn" type="submit">Найти</button></form><div id="list"></div></section>
+   <section class="card" id="detail"><p class="muted">Выберите аккаунт слева или найдите его по ID или @юзернейму.</p></section></div>
+  <div id="tab-lessons" class="grid hide"><section class="card"><div class="row" style="margin:0 0 14px"><button class="btn sm" id="newCourse">+ Курс</button></div><div id="tree"></div></section><section class="card" id="editor"><p class="muted">Выберите урок слева или нажмите «+ урок» у нужного курса.</p></section></div>
+  <div id="tab-stats" class="hide" style="padding:26px 0 70px"><div id="stats"></div></div>
  </main>
 </div>
-<div id="toast" role="status"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="common.js"></script>
+<script src="quiz.js"></script>
 <script>
-const CONFIG={
-  SUPABASE_URL:"https://oqwnpqjwznlcuudzvntp.supabase.co",
-  SUPABASE_KEY:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xd25wcWp3em5sY3V1ZHp2bnRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzMDEwNjAsImV4cCI6MjEwODg3NzA2MH0.fBgSrNFTz07DE9uYzjyFTupOpZEw9E_xjnx9zq3-6LM"
-};
-const $=s=>document.querySelector(s);
-const show=id=>['loginBox','deny','setup','panel'].forEach(x=>$('#'+x).classList.toggle('hide',x!==id));
-const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const PLAN={none:'Нет подписки',trial:'Пробный',family:'Семейный',year:'Годовой'};
-const fd=d=>d?new Date(d).toLocaleDateString('ru'):'—';
-const toIn=d=>d?new Date(d).toISOString().slice(0,10):'';
-const eod=v=>v?new Date(v+'T23:59:59').toISOString():null;
-let tt;function toast(m,err){const t=$('#toast');t.textContent=m;t.className=(err?'err ':'')+'on';clearTimeout(tt);tt=setTimeout(()=>t.className='',3200)}
+injectIcons();
+const show = id => ['loginBox', 'deny', 'panel'].forEach(x => $('#' + x).classList.toggle('hide', x !== id));
+const toIn = d => d ? new Date(d).toISOString().slice(0, 10) : '';
+const eod = v => v ? new Date(v + 'T23:59:59').toISOString() : null;
+const ICONS = ['abc', 'globe', 'puzzle', 'chat', 'book', 'music', 'brush', 'rocket', 'star', 'baby', 'trophy'];
+const TYPES = { choice: 'Выбор одного ответа', multi: 'Несколько ответов', text: 'Ввод ответа', word: 'Собери слово из букв', match: 'Соедини пары', draw: 'Нарисуй букву' };
+let courses = [], lessons = [], sel = null, lastQ = '', L = null, T = [];
+async function rpc(name, args) { const { data, error } = await sb.rpc(name, args); if (error) { toast(error.message, 1); throw error } return data }
 
-if(!CONFIG.SUPABASE_URL||!CONFIG.SUPABASE_KEY)show('setup');
-else{
-const sb=supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_KEY);
-let courses=[],sel=null,lastQ='';
-
-async function rpc(name,args){const{data,error}=await sb.rpc(name,args);if(error){toast(error.message,1);throw error}return data}
-
-async function boot(session){
-  if(!session)return show('loginBox');
-  const{data:ok}=await sb.rpc('is_admin');
-  if(!ok)return show('deny');
-  $('#me').textContent=session.user.email;show('panel');
-  courses=(await sb.from('courses').select('id,title').order('sort')).data||[];
-  search('');
+// ---------- вход ----------
+async function boot(session) {
+  if (!session) return show('loginBox');
+  const { data: ok } = await sb.rpc('is_admin'); if (!ok) return show('deny');
+  $('#me').textContent = session.user.email; show('panel'); await loadCat(); search('');
 }
-sb.auth.getSession().then(({data})=>boot(data.session));
-sb.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_OUT')show('loginBox')});
-$('#fLogin').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);
-  const{data,error}=await sb.auth.signInWithPassword({email:f.get('email').trim(),password:f.get('password')});
-  error?$('#lmsg').textContent='Неверная почта или пароль.':(sel=null,boot(data.session))};
-$('#out').onclick=$('#dout').onclick=()=>sb.auth.signOut();
+sb.auth.getSession().then(({ data }) => boot(data.session)); sb.auth.onAuthStateChange(ev => { if (ev === 'SIGNED_OUT') show('loginBox') });
+$('#fLogin').onsubmit = async e => { e.preventDefault(); const f = new FormData(e.target), { data, error } = await sb.auth.signInWithPassword({ email: f.get('email').trim(), password: f.get('password') }); error ? $('#lmsg').textContent = 'Неверная почта или пароль.' : (sel = null, boot(data.session)) };
+$('#out').onclick = $('#dout').onclick = () => sb.auth.signOut();
+$$('[data-tab]').forEach(b => b.onclick = () => { $$('[data-tab]').forEach(x => x.classList.toggle('on', x === b)); ['users', 'lessons', 'stats'].forEach(t => $('#tab-' + t).classList.toggle('hide', t !== b.dataset.tab)); if (b.dataset.tab === 'lessons') tree(); if (b.dataset.tab === 'stats') loadStats() });
+async function loadCat() { courses = (await sb.from('courses').select('*').order('sort')).data || []; lessons = (await sb.from('lessons').select('*').order('sort')).data || [] }
 
-// ---------- поиск ----------
-$('#fSearch').onsubmit=e=>{e.preventDefault();search($('#q').value)};
-async function search(q){
-  lastQ=q;const rows=await rpc('admin_search_users',{q});
-  $('#list').innerHTML=rows.length?rows.map(u=>`<button class="u ${sel&&sel.id===u.id?'on':''}" data-id="${u.id}"><b>${esc(u.full_name||'Без имени')}</b><small>${esc(u.email)}</small><small><span class="tag dk">ID ${u.public_id}</span><span class="tag">${PLAN[u.plan]}${u.plan_until?' до '+fd(u.plan_until):''}</span>${u.blocked?'<span class="tag red">заблокирован</span>':''}${u.is_admin?'<span class="tag ok">админ</span>':''}</small></button>`).join(''):'<p class="muted">Никого не нашли.</p>';
-  $('#list').querySelectorAll('.u').forEach(b=>b.onclick=()=>openUser(rows.find(r=>r.id===b.dataset.id)));
-  if(rows.length===1&&q)openUser(rows[0]);
+// ================= АККАУНТЫ =================
+$('#fSearch').onsubmit = e => { e.preventDefault(); search($('#q').value) };
+async function search(q) {
+  lastQ = q; const rows = await rpc('admin_search_users', { q });
+  $('#list').innerHTML = rows.length ? rows.map(u => `<button class="u ${sel && sel.id === u.id ? 'on' : ''}" data-id="${u.id}"><b>${esc(u.full_name || 'Без имени')}${u.username ? ' <span class="muted">@' + esc(u.username) + '</span>' : ''}</b><small>${esc(u.email)}</small><small><span class="tag dk">ID ${u.public_id}</span><span class="tag">${PLAN[u.plan]}${u.plan_until ? ' до ' + fd(u.plan_until) : ''}</span>${u.blocked ? '<span class="tag red">заблокирован</span>' : ''}${u.is_admin ? '<span class="tag ok">админ</span>' : ''}</small></button>`).join('') : '<p class="muted">Никого не нашли.</p>';
+  $$('#list .u').forEach(b => b.onclick = () => openUser(rows.find(r => r.id === b.dataset.id)));
+  if (rows.length === 1 && q) openUser(rows[0]);
 }
-async function reload(){const rows=await rpc('admin_search_users',{q:String(sel.public_id)});const u=rows[0];if(u){await search(lastQ);openUser(u)}}
+async function reload() { const rows = await rpc('admin_search_users', { q: String(sel.public_id) }); if (rows[0]) { await search(lastQ); openUser(rows[0]) } }
+async function openUser(u) {
+  sel = u; const d = await rpc('admin_user_details', { p_user: u.id });
+  $$('#list .u').forEach(b => b.classList.toggle('on', b.dataset.id === u.id));
+  const g = id => d.grants.find(x => x.course_id === id);
+  $('#detail').innerHTML = `
+  <div class="head"><div><h2>${esc(u.full_name || 'Без имени')}${u.username ? ' <span class="muted" style="font-size:16px">@' + esc(u.username) + '</span>' : ''}</h2><div class="muted">${esc(u.email)} · с ${fd(u.created_at)}</div></div><div><span class="id" id="cid" title="Скопировать">ID ${u.public_id}</span>${u.blocked ? ' <span class="tag red">заблокирован</span>' : ''}</div></div>
 
-// ---------- карточка аккаунта ----------
-async function openUser(u){
-  sel=u;const d=await rpc('admin_user_details',{p_user:u.id});
-  document.querySelectorAll('.u').forEach(b=>b.classList.toggle('on',b.dataset.id===u.id));
-  const g=id=>d.grants.find(x=>x.course_id===id);
-  $('#detail').innerHTML=`
-  <div class="head"><div><h2>${esc(u.full_name||'Без имени')}</h2><div class="muted">${esc(u.email)} · с ${fd(u.created_at)}</div></div>
-   <div><span class="id" id="cid" title="Скопировать">ID ${u.public_id}</span>${u.blocked?' <span class="tag red">заблокирован</span>':''}</div></div>
-  <div class="muted" style="margin-top:8px">Детей: ${d.children.length}${d.children.length?' ('+d.children.map(c=>esc(c.name)+', '+c.age).join('; ')+')':''} · пройдено уроков: ${d.lessons_done}</div>
+  <div class="sec"><h3>Дети и прогресс</h3>${d.children.length ? d.children.map(c => `<div class="kb"><b>${esc(c.name)}</b>, ${c.age} ${c.username ? '· @' + esc(c.username) : ''}
+    <div class="muted">★ ${c.nums.stars} · уроков: ${c.nums.lessons} · серия: ${c.nums.streak} дн. · на 3 звезды: ${c.nums.perfect}${c.badges.length ? ' · награды: ' + c.badges.map(esc).join(', ') : ''}</div>
+    ${c.done.length ? `<table style="margin-top:8px"><tr><th>Урок</th><th>Результат</th><th>Звёзды</th><th>Когда</th></tr>${c.done.map(x => `<tr><td>${esc(x.lesson)}<br><span class="muted">${esc(x.course)}</span></td><td>${x.total ? x.score + ' из ' + x.total : 'просмотрен'}</td><td>${'★'.repeat(x.stars)}</td><td>${fd(x.at)}</td></tr>`).join('')}</table>` : '<div class="muted" style="margin-top:6px">Уроков ещё не проходил.</div>'}</div>`).join('') : '<p class="muted">Детей нет.</p>'}</div>
 
-  <div class="sec"><h3>Подписка</h3>
-   <div class="row"><select id="plan">${Object.entries(PLAN).map(([k,v])=>`<option value="${k}" ${u.plan===k?'selected':''}>${v}</option>`).join('')}</select><input class="in" type="date" id="until" value="${toIn(u.plan_until)}"></div>
+  <div class="sec"><h3>Подписка</h3><div class="row"><select id="plan">${Object.entries(PLAN).map(([k, v]) => `<option value="${k}" ${u.plan === k ? 'selected' : ''}>${v}</option>`).join('')}</select><input class="in" type="date" id="until" value="${toIn(u.plan_until)}"></div>
    <div class="row"><button class="btn line sm" data-add="d7">+7 дней</button><button class="btn line sm" data-add="m1">+1 месяц</button><button class="btn line sm" data-add="m3">+3 месяца</button><button class="btn line sm" data-add="y1">+1 год</button><button class="btn sm" id="savePlan">Сохранить подписку</button></div>
-   <p class="muted" style="margin-top:8px">«Пробный», «Семейный» и «Годовой» открывают все курсы до указанной даты.</p></div>
+   <p class="hintx">«Пробный», «Семейный» и «Годовой» открывают все курсы до указанной даты.</p></div>
 
-  <div class="sec"><h3>Отдельные курсы</h3>
-   ${courses.map(c=>{const x=g(c.id);return `<div class="cr" data-c="${c.id}"><b>${esc(c.title)}</b><span class="st">${x?(x.expires_at?'выдан до '+fd(x.expires_at):'выдан бессрочно'):'не выдан'}</span><input class="in" type="date" value="${x?toIn(x.expires_at):''}" title="Пусто — бессрочно"><button class="btn sm" data-grant>${x?'Изменить':'Выдать'}</button>${x?'<button class="btn line sm" data-revoke>Забрать</button>':''}</div>`}).join('')}
-   <p class="muted">Пустая дата — доступ без срока.</p></div>
+  <div class="sec"><h3>Отдельные курсы</h3>${courses.map(c => { const x = g(c.id); return `<div class="cr" data-c="${c.id}"><b>${esc(c.title)}</b><span class="st">${x ? (x.expires_at ? 'выдан до ' + fd(x.expires_at) : 'выдан бессрочно') : 'не выдан'}</span><input class="in" type="date" value="${x ? toIn(x.expires_at) : ''}" title="Пусто — бессрочно"><button class="btn sm" data-grant>${x ? 'Изменить' : 'Выдать'}</button>${x ? '<button class="btn line sm" data-revoke>Забрать</button>' : ''}</div>` }).join('')}<p class="hintx">Пустая дата — доступ без срока.</p></div>
 
-  <div class="sec"><h3>Пароль</h3>
-   <div class="row"><input class="in" id="pw" type="text" placeholder="Новый пароль (минимум 8 символов)" autocomplete="off"><button class="btn sm" id="setPw">Установить пароль</button></div>
-   <div class="row"><button class="btn line sm" id="mail">Отправить письмо для сброса пароля</button></div></div>
-
-  <div class="sec"><h3>Доступ</h3>
-   ${u.blocked?'<button class="btn sm" id="block">Разблокировать аккаунт</button>':'<button class="btn red sm" id="block">Заблокировать аккаунт</button>'}
-   <p class="muted" style="margin-top:8px">Заблокированный пользователь видит экран блокировки и не может открывать уроки.</p></div>`;
-
-  const run=async(fn,ok)=>{try{await fn();toast(ok);await reload()}catch(e){}};
-  $('#cid').onclick=()=>{navigator.clipboard?.writeText(String(u.public_id));toast('ID скопирован')};
-  $('#detail').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{
-    const cur=$('#until').value?new Date($('#until').value+'T00:00:00'):new Date(),base=cur>new Date()?cur:new Date(),k=b.dataset.add;
-    if(k==='d7')base.setDate(base.getDate()+7);if(k==='m1')base.setMonth(base.getMonth()+1);if(k==='m3')base.setMonth(base.getMonth()+3);if(k==='y1')base.setFullYear(base.getFullYear()+1);
-    $('#until').value=base.toISOString().slice(0,10);if($('#plan').value==='none')$('#plan').value='family'});
-  $('#savePlan').onclick=()=>run(()=>rpc('admin_set_plan',{p_user:u.id,p_plan:$('#plan').value,p_until:eod($('#until').value)}),'Подписка сохранена');
-  $('#detail').querySelectorAll('[data-grant]').forEach(b=>b.onclick=()=>{const r=b.closest('.cr');run(()=>rpc('admin_grant_course',{p_user:u.id,p_course:r.dataset.c,p_until:eod(r.querySelector('input').value)}),'Курс выдан')});
-  $('#detail').querySelectorAll('[data-revoke]').forEach(b=>b.onclick=()=>run(()=>rpc('admin_revoke_course',{p_user:u.id,p_course:b.closest('.cr').dataset.c}),'Курс забран'));
-  $('#block').onclick=()=>{if(confirm(u.blocked?'Разблокировать аккаунт?':'Заблокировать аккаунт '+u.email+'?'))run(()=>rpc('admin_set_blocked',{p_user:u.id,p_blocked:!u.blocked}),u.blocked?'Аккаунт разблокирован':'Аккаунт заблокирован')};
-  $('#mail').onclick=async()=>{const{error}=await sb.auth.resetPasswordForEmail(u.email,{redirectTo:location.origin.startsWith('http')?location.origin+'/cabinet.html':undefined});error?toast(error.message,1):toast('Письмо отправлено на '+u.email)};
-  $('#setPw').onclick=async()=>{const password=$('#pw').value;if(password.length<8)return toast('Пароль — минимум 8 символов',1);
-    if(!confirm('Сменить пароль пользователю '+u.email+'?'))return;
-    const{error}=await sb.functions.invoke('admin-password',{body:{user_id:u.id,password}});
-    if(error){let m=error.message;try{m=(await error.context.json()).error||m}catch{}toast(m,1)}
-    else{toast('Пароль изменён');$('#pw').value=''}};
+  <div class="sec"><h3>Пароль</h3><div class="row"><input class="in" id="pw" type="text" placeholder="Новый пароль (минимум 8 символов)" autocomplete="off"><button class="btn sm" id="setPw">Установить пароль</button></div><div class="row"><button class="btn line sm" id="mail">Отправить письмо для сброса пароля</button></div></div>
+  <div class="sec"><h3>Доступ</h3>${u.blocked ? '<button class="btn sm" id="block">Разблокировать аккаунт</button>' : '<button class="btn red sm" id="block">Заблокировать аккаунт</button>'}<p class="hintx">Заблокированный пользователь видит экран блокировки и не может открывать уроки.</p></div>`;
+  const run = async (fn, ok) => { try { await fn(); toast(ok); await reload() } catch (e) { } };
+  $('#cid').onclick = () => { navigator.clipboard?.writeText(String(u.public_id)); toast('ID скопирован') };
+  $$('#detail [data-add]').forEach(b => b.onclick = () => { const cur = $('#until').value ? new Date($('#until').value + 'T00:00:00') : new Date(), base = cur > new Date() ? cur : new Date(), k = b.dataset.add;
+    if (k === 'd7') base.setDate(base.getDate() + 7); if (k === 'm1') base.setMonth(base.getMonth() + 1); if (k === 'm3') base.setMonth(base.getMonth() + 3); if (k === 'y1') base.setFullYear(base.getFullYear() + 1);
+    $('#until').value = base.toISOString().slice(0, 10); if ($('#plan').value === 'none') $('#plan').value = 'family' });
+  $('#savePlan').onclick = () => run(() => rpc('admin_set_plan', { p_user: u.id, p_plan: $('#plan').value, p_until: eod($('#until').value) }), 'Подписка сохранена');
+  $$('#detail [data-grant]').forEach(b => b.onclick = () => { const r = b.closest('.cr'); run(() => rpc('admin_grant_course', { p_user: u.id, p_course: r.dataset.c, p_until: eod(r.querySelector('input').value) }), 'Курс выдан') });
+  $$('#detail [data-revoke]').forEach(b => b.onclick = () => run(() => rpc('admin_revoke_course', { p_user: u.id, p_course: b.closest('.cr').dataset.c }), 'Курс забран'));
+  $('#block').onclick = () => { if (confirm(u.blocked ? 'Разблокировать аккаунт?' : 'Заблокировать аккаунт ' + u.email + '?')) run(() => rpc('admin_set_blocked', { p_user: u.id, p_blocked: !u.blocked }), u.blocked ? 'Аккаунт разблокирован' : 'Аккаунт заблокирован') };
+  $('#mail').onclick = async () => { const { error } = await sb.auth.resetPasswordForEmail(u.email, { redirectTo: location.origin + '/cabinet.html' }); error ? toast(error.message, 1) : toast('Письмо отправлено на ' + u.email) };
+  $('#setPw').onclick = async () => { const password = $('#pw').value; if (password.length < 8) return toast('Пароль — минимум 8 символов', 1); if (!confirm('Сменить пароль пользователю ' + u.email + '?')) return;
+    const { error } = await sb.functions.invoke('admin-password', { body: { user_id: u.id, password } });
+    if (error) { let m = error.message; try { m = (await error.context.json()).error || m } catch { } toast(m, 1) } else { toast('Пароль изменён'); $('#pw').value = '' } };
 }
+
+// ================= УРОКИ И ЗАДАНИЯ =================
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function tree() {
+  $('#tree').innerHTML = courses.map(c => `<div class="cg"><div class="ch"><span>${ico(c.icon)} <b>${esc(c.title)}</b></span><span><button class="btn line sm" data-ce="${esc(c.id)}" title="Редактировать курс">${ico('edit')}</button> <button class="btn sm" data-nl="${esc(c.id)}">${ico('plus')} урок</button></span></div>
+   ${lessons.filter(l => l.course_id === c.id).map(l => `<div class="li ${L && L.id === l.id ? 'on' : ''}" data-l="${l.id}"><span>${esc(l.title)}${l.published ? '' : ' <em>черновик</em>'}</span><span><button data-mv="${l.id}|-1" title="Выше">${ico('up')}</button><button data-mv="${l.id}|1" title="Ниже">${ico('down')}</button></span></div>`).join('') || '<p class="muted" style="font-size:12px">Уроков пока нет.</p>'}</div>`).join('') || '<p class="muted">Курсов нет. Нажмите «+ Курс».</p>';
+  $$('#tree [data-l]').forEach(el => el.onclick = e => { if (e.target.closest('[data-mv]')) return; openLesson(el.dataset.l) });
+  $$('#tree [data-mv]').forEach(b => b.onclick = async e => { e.stopPropagation(); const [id, dir] = b.dataset.mv.split('|'), l = lessons.find(x => x.id === id), sib = lessons.filter(x => x.course_id === l.course_id), i = sib.indexOf(l), j = i + +dir; if (j < 0 || j >= sib.length) return;
+    [sib[i], sib[j]] = [sib[j], sib[i]]; await Promise.all(sib.map((x, k) => sb.from('lessons').update({ sort: k + 1 }).eq('id', x.id))); await loadCat(); tree() });
+  $$('#tree [data-nl]').forEach(b => b.onclick = () => newLesson(b.dataset.nl)); $$('#tree [data-ce]').forEach(b => b.onclick = () => courseEditor(courses.find(c => c.id === b.dataset.ce)));
+}
+$('#newCourse').onclick = () => courseEditor(null);
+function courseEditor(c) {
+  const isNew = !c, m = modal(`<h2 style="font-family:Unbounded;font-size:20px;margin-bottom:12px">${isNew ? 'Новый курс' : 'Курс'}</h2>
+   <div class="f"><label>Название</label><input class="in" id="cn" value="${esc(c?.title || '')}"></div>
+   <div class="f"><label>Описание</label><input class="in" id="cd" value="${esc(c?.description || '')}"></div>
+   <div class="f"><label>Иконка</label><select id="ci">${ICONS.map(i => `<option ${(c?.icon || 'abc') === i ? 'selected' : ''}>${i}</option>`).join('')}</select></div>
+   <div class="f"><label>Порядок (число)</label><input class="in" id="cs" type="number" value="${c?.sort ?? courses.length + 1}"></div>
+   <div id="cm" class="msg"></div><div class="row"><button class="btn" id="cok">Сохранить</button><button class="btn line" id="cno">Отмена</button>${isNew ? '' : '<button class="btn red sm" id="cdel" style="margin-left:auto">Удалить курс</button>'}</div>`);
+  $('#cno', m).onclick = () => m.remove();
+  $('#cok', m).onclick = async () => { const title = $('#cn', m).value.trim(); if (!title) return say($('#cm', m), 'Введите название', 'err');
+    const row = { title, description: $('#cd', m).value.trim(), icon: $('#ci', m).value, sort: +$('#cs', m).value || 0 };
+    let id = c?.id; if (isNew) { id = slug(title) || 'c' + Date.now().toString(36); if (courses.some(x => x.id === id)) id += '-' + Math.random().toString(36).slice(2, 5) }
+    const { error } = isNew ? await sb.from('courses').insert({ id, ...row }) : await sb.from('courses').update(row).eq('id', id);
+    if (error) return say($('#cm', m), error.message, 'err'); m.remove(); await loadCat(); tree(); toast('Курс сохранён') };
+  $('#cdel', m)?.addEventListener('click', async () => { if (!confirm('Удалить курс «' + c.title + '» вместе со ВСЕМИ уроками, заданиями и прогрессом?')) return; const { error } = await sb.from('courses').delete().eq('id', c.id); if (error) return say($('#cm', m), error.message, 'err'); m.remove(); if (L && L.course_id === c.id) { L = null; $('#editor').innerHTML = '<p class="muted">Выберите урок слева.</p>' } await loadCat(); tree() });
+}
+
+const blank = type => ({ id: uid(), type, question: '', image_url: null, explanation: '', options: type === 'choice' || type === 'multi' ? [{ t: '' }, { t: '' }] : [], correct: 0, multi: [], answers: '', word: '', extra: '', pairs: [{ l: { t: '' }, r: { t: '' } }, { l: { t: '' }, r: { t: '' } }], letter: '' });
+const fromRow = r => { const d = r.data || {}; return { id: r.id, type: r.type || 'choice', question: r.question || '', image_url: r.image_url || null, explanation: r.explanation || '',
+  options: (r.options || []).map(o => typeof o === 'string' ? { t: o } : { t: o.t || '', img: o.img || null }), correct: r.correct ?? 0, multi: (d.correct || []).map(Number), answers: (d.answers || []).join('\n'), word: d.word || '', extra: d.extra || '',
+  pairs: (d.pairs || []).map(p => ({ l: { t: p.l?.t || '', img: p.l?.img || null }, r: { t: p.r?.t || '', img: p.r?.img || null } })), letter: d.letter || '' } };
+const clean = o => { const r = { t: (o.t || '').trim() }; if (o.img) r.img = o.img; return r };
+function toRow(t, lessonId, sort) {
+  const base = { id: t.id, lesson_id: lessonId, sort, type: t.type, question: t.question.trim(), image_url: t.image_url || null, explanation: t.explanation.trim() || null, options: null, correct: null, data: {} };
+  if (t.type === 'choice') { base.options = t.options.map(clean); base.correct = t.correct }
+  if (t.type === 'multi') { base.options = t.options.map(clean); base.data = { correct: t.multi } }
+  if (t.type === 'text') base.data = { answers: t.answers.split('\n').map(s => s.trim()).filter(Boolean) };
+  if (t.type === 'word') base.data = { word: t.word.trim(), extra: t.extra.trim() };
+  if (t.type === 'match') base.data = { pairs: t.pairs.map(p => ({ l: clean(p.l), r: clean(p.r) })) };
+  if (t.type === 'draw') base.data = { letter: t.letter.trim().slice(0, 2) };
+  return base;
+}
+function validate(t, i) {
+  const n = 'Задание ' + (i + 1) + ': ', has = o => (o.t || '').trim() || o.img;
+  if (!t.question.trim()) return n + 'введите вопрос';
+  if (t.type === 'choice' || t.type === 'multi') { if (t.options.filter(has).length < 2 || t.options.some(o => !has(o))) return n + 'нужно минимум 2 заполненных варианта (пустые удалите)';
+    if (t.type === 'choice' && !t.options[t.correct]) return n + 'отметьте правильный ответ'; if (t.type === 'multi' && !t.multi.length) return n + 'отметьте хотя бы один правильный ответ' }
+  if (t.type === 'text' && !t.answers.trim()) return n + 'введите правильный ответ';
+  if (t.type === 'word' && !t.word.trim()) return n + 'введите слово';
+  if (t.type === 'match' && (t.pairs.length < 2 || t.pairs.some(p => !has(p.l) || !has(p.r)))) return n + 'нужно минимум 2 пары, обе стороны заполнены';
+  return null;
+}
+
+async function newLesson(courseId) { const sib = lessons.filter(l => l.course_id === courseId); L = { id: null, course_id: courseId, title: '', description: '', video_url: '', duration_min: null, sort: (sib.length ? Math.max(...sib.map(l => l.sort)) : 0) + 1, published: true }; T = []; edLesson() }
+async function openLesson(id) { L = { ...lessons.find(l => l.id === id) }; const { data, error } = await sb.from('tasks').select('*').eq('lesson_id', id).order('sort'); if (error) toast(error.message, 1); T = (data || []).map(fromRow); edLesson(); tree() }
+
+function edLesson() {
+  $('#editor').innerHTML = `<div class="head"><h2>${L.id ? 'Редактирование урока' : 'Новый урок'}</h2>${L.id ? '<button class="btn red sm" id="ldel">Удалить урок</button>' : ''}</div>
+  <div class="fg" style="margin-top:14px">
+   <div class="f full"><label>Название урока</label><input class="in" id="lt" value="${esc(L.title)}"></div>
+   <div class="f full"><label>Описание</label><textarea id="ld">${esc(L.description || '')}</textarea></div>
+   <div class="f"><label>Курс</label><select id="lc">${courses.map(c => `<option value="${esc(c.id)}" ${c.id === L.course_id ? 'selected' : ''}>${esc(c.title)}</option>`).join('')}</select></div>
+   <div class="f"><label>Длительность, мин</label><input class="in" id="lm" type="number" min="0" value="${L.duration_min ?? ''}"></div>
+   <div class="f full"><label>Видео</label><div class="row" style="margin:0"><input class="in" id="lv" value="${esc(L.video_url || '')}" placeholder="Ссылка (Rutube, YouTube, .mp4) или загрузите файл"><button class="btn line sm" id="lvu" type="button">${ico('video')} Загрузить файл</button></div><div class="hintx" id="lvh">Файл до 50 МБ загружается в хранилище Supabase. Более крупные видео разместите на Rutube/YouTube и вставьте ссылку.</div></div>
+   <div class="f"><label class="ck"><input type="checkbox" id="lp" ${L.published ? 'checked' : ''}> Опубликован (виден родителям)</label></div></div>
+  <div class="sec" style="margin-top:20px"><h3 style="font-size:17px">Задания (${T.length})</h3><div id="tasks"></div>
+   <div class="addb">${Object.entries(TYPES).map(([k, v]) => `<button class="btn line sm" data-add="${k}">${ico('plus')} ${v}</button>`).join('')}</div></div>
+  <div id="lmsg2" class="msg"></div><div class="row"><button class="btn" id="lsave">Сохранить урок</button><button class="btn line" id="lprev">Предпросмотр заданий</button></div>`;
+  const bind = (id, k, fn) => $('#' + id).addEventListener('input', e => L[k] = fn ? fn(e.target) : e.target.value);
+  bind('lt', 'title'); bind('ld', 'description'); bind('lv', 'video_url'); bind('lm', 'duration_min', t => t.value === '' ? null : +t.value);
+  $('#lc').onchange = e => L.course_id = e.target.value; $('#lp').onchange = e => L.published = e.target.checked;
+  $('#lvu').onclick = async () => { const f = await pickFile('video/*'); if (!f) return; if (f.size > 50 * 1024 * 1024 && !confirm('Файл больше 50 МБ — на бесплатном тарифе Supabase он может не загрузиться. Продолжить?')) return;
+    $('#lvh').textContent = 'Загружаем видео… не закрывайте страницу.'; try { const ext = (f.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, ''); const url = await uploadPublic('videos', `lessons/${uid()}.${ext}`, f, f.type); L.video_url = url; $('#lv').value = url; $('#lvh').textContent = 'Видео загружено. Нажмите «Сохранить урок».' } catch (e) { $('#lvh').textContent = 'Не удалось загрузить: ' + e.message } };
+  $$('#editor [data-add]').forEach(b => b.onclick = () => { T.push(blank(b.dataset.add)); drawTasks(); $$('#tasks .tk').pop()?.scrollIntoView({ behavior: 'smooth', block: 'center' }) });
+  $('#ldel')?.addEventListener('click', async () => { if (!confirm('Удалить урок «' + L.title + '» вместе с заданиями и прогрессом детей?')) return; const { error } = await sb.from('lessons').delete().eq('id', L.id); if (error) return toast(error.message, 1); L = null; $('#editor').innerHTML = '<p class="muted">Урок удалён.</p>'; await loadCat(); tree() });
+  $('#lsave').onclick = saveLesson; $('#lprev').onclick = preview; drawTasks();
+}
+
+const optRow = (t, o, k, multi) => `<div class="opr"><input type="${multi ? 'checkbox' : 'radio'}" name="c${t.id}" data-p="${multi ? 'multi' : 'correct'}" value="${k}" ${(multi ? t.multi.includes(k) : t.correct === k) ? 'checked' : ''} title="Правильный ответ"><input class="in" data-p="options.${k}.t" value="${esc(o.t)}" placeholder="Вариант ${k + 1}">${o.img ? `<img class="th" src="${esc(o.img)}" alt="">` : ''}<button class="ib" data-act="oimg" data-k="${k}" title="Картинка">${ico('image')}</button>${o.img ? `<button class="ib" data-act="oimgx" data-k="${k}" title="Убрать картинку">${ico('x')}</button>` : ''}<button class="ib d" data-act="odel" data-k="${k}" title="Удалить">${ico('trash')}</button></div>`;
+const side = (p, k, s) => `<div class="sd"><input class="in" data-p="pairs.${k}.${s}.t" value="${esc(p[s].t)}" placeholder="${s === 'l' ? 'Слева' : 'Справа'}">${p[s].img ? `<img class="th" src="${esc(p[s].img)}" alt="">` : ''}<button class="ib" data-act="pimg" data-k="${k}" data-s="${s}" title="Картинка">${ico('image')}</button>${p[s].img ? `<button class="ib" data-act="pimgx" data-k="${k}" data-s="${s}" title="Убрать">${ico('x')}</button>` : ''}</div>`;
+function taskCard(t, i) {
+  let body = '';
+  if (t.type === 'choice' || t.type === 'multi') body = `<div class="hintx">Отметьте ${t.type === 'multi' ? 'все правильные ответы (галочки)' : 'правильный ответ (кружок)'}. К варианту можно добавить картинку.</div>` + t.options.map((o, k) => optRow(t, o, k, t.type === 'multi')).join('') + `<button class="btn line sm" data-act="oadd" style="margin-top:10px">${ico('plus')} Вариант</button>`;
+  if (t.type === 'text') body = `<div class="f"><label>Правильные ответы (каждый с новой строки; регистр не важен)</label><textarea data-p="answers" placeholder="арбуз">${esc(t.answers)}</textarea></div>`;
+  if (t.type === 'word') body = `<div class="fg"><div class="f"><label>Слово, которое нужно собрать</label><input class="in" data-p="word" value="${esc(t.word)}" placeholder="АРБУЗ"></div><div class="f"><label>Лишние буквы (необязательно)</label><input class="in" data-p="extra" value="${esc(t.extra)}" placeholder="ОЯ"></div></div>`;
+  if (t.type === 'match') body = '<div class="hintx">Слева и справа — слова или картинки. Порядок справа ребёнку перемешается.</div>' + t.pairs.map((p, k) => `<div class="mpr">${side(p, k, 'l')}<span>→</span>${side(p, k, 'r')}<button class="ib d" data-act="pdel" data-k="${k}" title="Удалить пару">${ico('trash')}</button></div>`).join('') + `<button class="btn line sm" data-act="padd" style="margin-top:10px">${ico('plus')} Пара</button>`;
+  if (t.type === 'draw') body = `<div class="f"><label>Буква-подсказка (ребёнок обводит её)</label><input class="in" data-p="letter" value="${esc(t.letter)}" maxlength="2" style="max-width:120px" placeholder="А"></div><div class="hintx">Это задание не проверяется автоматически: засчитывается, когда ребёнок что-то нарисовал.</div>`;
+  return `<div class="tk" data-i="${i}"><div class="tkh"><span class="n">${i + 1}</span><select data-act="type">${Object.entries(TYPES).map(([k, v]) => `<option value="${k}" ${k === t.type ? 'selected' : ''}>${v}</option>`).join('')}</select><span class="sp"></span>
+   <button class="ib" data-act="up" title="Выше">${ico('up')}</button><button class="ib" data-act="down" title="Ниже">${ico('down')}</button><button class="ib" data-act="dup" title="Дублировать">${ico('plus')}</button><button class="ib d" data-act="del" title="Удалить">${ico('trash')}</button></div>
+   <div class="f" style="margin-top:0"><input class="in" data-p="question" value="${esc(t.question)}" placeholder="Вопрос или задание, например: С какой буквы начинается слово?"></div>
+   <div class="row" style="margin:8px 0">${t.image_url ? `<img class="th" style="width:64px;height:64px" src="${esc(t.image_url)}" alt="">` : ''}<button class="btn line sm" data-act="qimg">${ico('image')} ${t.image_url ? 'Заменить картинку' : 'Добавить картинку к вопросу'}</button>${t.image_url ? '<button class="btn line sm" data-act="qimgx">Убрать</button>' : ''}</div>
+   ${body}<div class="f"><input class="in" data-p="explanation" value="${esc(t.explanation)}" placeholder="Подсказка после ответа (необязательно)"></div></div>`;
+}
+function drawTasks() { $('#tasks').innerHTML = T.map(taskCard).join('') || '<p class="muted">Заданий пока нет. Добавьте первое кнопками ниже.</p>'; $('#editor h3').textContent = 'Задания (' + T.length + ')' }
+const setPath = (o, path, v) => { const p = path.split('.'); let c = o; p.slice(0, -1).forEach(k => c = c[k]); c[p[p.length - 1]] = v };
+async function uploadImg() { const f = await pickFile('image/*'); if (!f) return null; toast('Загружаем картинку…'); try { return await uploadPublic('media', `tasks/${uid()}.jpg`, await resizeImg(f, 900), 'image/jpeg') } catch (e) { toast('Не удалось загрузить: ' + e.message, 1); return null } }
+const tasksEl = () => $('#tasks');
+document.addEventListener('input', e => { const el = e.target.closest('#tasks [data-p]'); if (!el || el.type === 'radio' || el.type === 'checkbox') return; const i = +el.closest('[data-i]').dataset.i; setPath(T[i], el.dataset.p, el.value) });
+document.addEventListener('change', e => {
+  const el = e.target.closest('#tasks [data-p], #tasks [data-act=type]'); if (!el) return; const i = +el.closest('[data-i]').dataset.i, t = T[i];
+  if (el.dataset.act === 'type') { const n = blank(el.value); n.id = t.id; n.question = t.question; n.image_url = t.image_url; n.explanation = t.explanation; if (['choice', 'multi'].includes(t.type) && ['choice', 'multi'].includes(n.type)) n.options = t.options; T[i] = n; return drawTasks() }
+  if (el.dataset.p === 'correct') t.correct = +el.value; if (el.dataset.p === 'multi') { const k = +el.value; t.multi = el.checked ? [...new Set([...t.multi, k])] : t.multi.filter(x => x !== k) } });
+document.addEventListener('click', async e => {
+  const b = e.target.closest('#tasks [data-act]'); if (!b || b.tagName === 'SELECT') return; e.preventDefault(); const c = b.closest('[data-i]'), i = +c.dataset.i, t = T[i], a = b.dataset.act, k = +b.dataset.k;
+  if (a === 'del') { if (!confirm('Удалить задание ' + (i + 1) + '?')) return; T.splice(i, 1) }
+  else if (a === 'up' && i > 0) [T[i - 1], T[i]] = [T[i], T[i - 1]]; else if (a === 'down' && i < T.length - 1) [T[i + 1], T[i]] = [T[i], T[i + 1]];
+  else if (a === 'dup') { const n = JSON.parse(JSON.stringify(t)); n.id = uid(); T.splice(i + 1, 0, n) }
+  else if (a === 'oadd') t.options.push({ t: '' }); else if (a === 'odel') { t.options.splice(k, 1); if (t.correct >= t.options.length) t.correct = 0; t.multi = t.multi.filter(x => x !== k).map(x => x > k ? x - 1 : x) }
+  else if (a === 'padd') t.pairs.push({ l: { t: '' }, r: { t: '' } }); else if (a === 'pdel') t.pairs.splice(k, 1);
+  else if (a === 'qimg') { const u = await uploadImg(); if (!u) return; t.image_url = u } else if (a === 'qimgx') t.image_url = null;
+  else if (a === 'oimg') { const u = await uploadImg(); if (!u) return; t.options[k].img = u } else if (a === 'oimgx') delete t.options[k].img;
+  else if (a === 'pimg') { const u = await uploadImg(); if (!u) return; t.pairs[k][b.dataset.s].img = u } else if (a === 'pimgx') delete t.pairs[k][b.dataset.s].img;
+  else return; drawTasks();
+});
+
+function checkAll() { if (!L.title.trim()) return 'Введите название урока'; for (let i = 0; i < T.length; i++) { const e = validate(T[i], i); if (e) return e } return null }
+async function saveLesson() {
+  const err = checkAll(); if (err) return say($('#lmsg2'), err, 'err');
+  const btn = $('#lsave'); btn.disabled = true; say($('#lmsg2'), 'Сохраняем…');
+  try {
+    const row = { course_id: L.course_id, title: L.title.trim(), description: L.description?.trim() || null, video_url: L.video_url?.trim() || null, duration_min: L.duration_min, sort: L.sort, published: L.published };
+    if (!L.id) { const { data, error } = await sb.from('lessons').insert(row).select().single(); if (error) throw error; L.id = data.id } else { const { error } = await sb.from('lessons').update(row).eq('id', L.id); if (error) throw error }
+    const rows = T.map((t, i) => toRow(t, L.id, i + 1));
+    if (rows.length) { const { error } = await sb.from('tasks').upsert(rows); if (error) throw error }
+    let q = sb.from('tasks').delete().eq('lesson_id', L.id); if (rows.length) q = q.not('id', 'in', `(${rows.map(r => r.id).join(',')})`); const { error: de } = await q; if (de) throw de;
+    say($('#lmsg2'), 'Урок сохранён!', 'ok'); toast('Урок сохранён'); await loadCat(); tree(); edLesson(); say($('#lmsg2'), 'Урок сохранён!', 'ok');
+  } catch (e) { say($('#lmsg2'), 'Не удалось сохранить: ' + (e.message || e), 'err'); btn.disabled = false }
+}
+function preview() {
+  const err = checkAll(); if (err) return say($('#lmsg2'), err, 'err'); if (!T.length) return say($('#lmsg2'), 'Добавьте хотя бы одно задание', 'err');
+  const m = modal('<div id="pv"></div>'); m.firstChild.style.maxWidth = '760px';
+  Q.run($('#pv', m), T.map((t, i) => toRow(t, null, i)), { actions: el => { el.innerHTML = '<button class="btn" id="pc">Закрыть</button>'; $('#pc', el).onclick = () => m.remove() } });
+}
+function modal(html) { const m = document.createElement('div'); m.className = 'modal'; m.innerHTML = '<div>' + html + '</div>'; m.addEventListener('mousedown', e => { if (e.target === m) m.remove() }); document.body.append(m); return m }
+
+// ================= СТАТИСТИКА =================
+async function loadStats() {
+  const s = await rpc('admin_stats'), mx = Math.max(1, ...s.days.map(d => d.n));
+  $('#stats').innerHTML = `<div class="tiles"><div class="tile"><b>${s.users}</b><span>аккаунтов (+${s.new7} за неделю)</span></div><div class="tile"><b>${s.kids}</b><span>профилей детей</span></div><div class="tile"><b>${s.paid}</b><span>платных подписок</span></div><div class="tile"><b>${s.active7}</b><span>активных за 7 дней</span></div><div class="tile"><b>${s.done_total}</b><span>пройдено уроков (+${s.done7} за неделю)</span></div></div>
+  <div class="card" style="margin-top:20px"><h2 style="font-size:17px">Пройдено уроков за 14 дней</h2><div class="bars">${s.days.map(d => `<div style="height:${Math.round(d.n / mx * 100)}%"><span>${d.n || ''}</span></div>`).join('')}</div><div class="bl">${s.days.map(d => `<span>${d.d.slice(8)}.${d.d.slice(5, 7)}</span>`).join('')}</div></div>
+  <div class="grid" style="grid-template-columns:1fr 1fr;padding-bottom:0"><div class="card"><h2 style="font-size:17px;margin-bottom:10px">Популярные уроки</h2>${s.top.length ? `<table><tr><th>Урок</th><th>Прохождений</th><th>Ср. звёзд</th></tr>${s.top.map(t => `<tr><td>${esc(t.lesson)}<br><span class="muted">${esc(t.course)}</span></td><td>${t.n}</td><td>${t.avg_stars}</td></tr>`).join('')}</table>` : '<p class="muted">Пока нет данных.</p>'}</div>
+  <div class="card"><h2 style="font-size:17px;margin-bottom:10px">Последние прохождения</h2>${s.recent.length ? `<table><tr><th>Ребёнок</th><th>Урок</th><th>Итог</th><th>Когда</th></tr>${s.recent.map(r => `<tr><td>${esc(r.child)}<br><span class="muted">ID ${r.pid}</span></td><td>${esc(r.lesson)}</td><td>${r.total ? r.score + '/' + r.total : '—'} ${'★'.repeat(r.stars)}</td><td>${fd(r.at)}</td></tr>`).join('')}</table>` : '<p class="muted">Пока нет данных.</p>'}</div></div>`;
 }
 </script>
 </body>
