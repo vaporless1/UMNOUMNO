@@ -333,6 +333,9 @@ async function openLesson(id) {
   const pv = views.find(x => x.lesson_id === id); touchLesson(id, pv?.position_sec || 0);
   const vid = $('.video video');
   if (vid) {
+    vid.addEventListener('error', () => { const e = vid.error, code = e ? e.code : 0, src = vid.currentSrc || vid.getAttribute('src'); console.error('Видео не загрузилось', code, e && e.message, src);
+      const why = code === 4 ? 'Браузер не может воспроизвести этот файл (формат или кодек не подходит, либо файл по ссылке недоступен).' : code === 3 ? 'Файл повреждён или не декодируется.' : code === 2 ? 'Ошибка сети при загрузке видео.' : 'Загрузка видео прервана.';
+      vid.parentNode.innerHTML = '<div style="padding:24px;text-align:center;line-height:1.5"><b>Видео не загрузилось</b><br><span style="opacity:.8">' + why + '</span><br><a href="' + esc(src) + '" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">Открыть файл напрямую</a></div>' });
     let lastSave = 0, resumed = false; const savePos = () => touchLesson(id, vid.currentTime);
     vid.addEventListener('loadedmetadata', () => { if (!resumed && pv && pv.position_sec > 5 && pv.position_sec < vid.duration - 8) { resumed = true; vid.currentTime = pv.position_sec; toast('Продолжаем с ' + fmtT(pv.position_sec)) } });
     vid.addEventListener('timeupdate', () => { if (Date.now() - lastSave > 10000) { lastSave = Date.now(); savePos() } });
