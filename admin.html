@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="kid.css">
 <style>
 :root{--r:24px}
 header{background:#fff;position:sticky;top:0;z-index:20}
@@ -53,6 +54,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 .pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px 18px;margin-top:6px}
 .fg label{display:block;font-size:12px;font-weight:700;color:var(--grey);margin-bottom:4px}
 .tab-gap{margin-top:22px}
+#slist svg.thumb-hat{height:56px;width:auto}
 @media(max-width:900px){.grid{grid-template-columns:1fr}.fg{grid-template-columns:1fr}}
 </style>
 </head>
@@ -87,6 +89,16 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
     <select class="in" name="bk"><option value="manual">Только вручную (выдаёт админ)</option><option value="lessons">Автоматически: за число уроков</option><option value="streak">Автоматически: за дни занятий подряд</option><option value="stars">Автоматически: за число звёзд</option><option value="perfect">Автоматически: за уроки на 3 звезды</option></select>
     <div id="bnw"><input class="in" name="bn" type="number" min="1" value="1"><p class="hintx">Сколько нужно набрать для получения.</p></div>
     <div class="row" style="margin:0"><button class="btn" type="submit">Сохранить</button><button class="btn line hide" type="button" id="bcancel">Отмена</button></div></form></section></div>
+  <div id="tab-shop" class="grid hide"><section class="card"><div id="slist"></div></section>
+   <section class="card"><h3 id="sfh" style="margin-bottom:12px">Новый товар</h3><form id="fShop" style="display:grid;gap:10px">
+    <select class="in" name="kind"><option value="bg">Фон детского режима</option><option value="frame">Рамка аватарки</option><option value="hat">Наряд маскота</option></select>
+    <select class="in" name="art"></select>
+    <div id="sprv" style="height:150px;border-radius:18px;overflow:hidden;background:#eaf5ff;display:grid;place-items:center"></div>
+    <input class="in" name="title" placeholder="Название (видит ребёнок)" maxlength="40">
+    <div class="fg"><div><label>Цена, звёзд (0 — бесплатно для всех)</label><input class="in" name="price" type="number" min="0" max="1000" value="10"></div><div><label>Порядок в списке</label><input class="in" name="sort" type="number" value="10"></div></div>
+    <label class="ck"><input type="checkbox" name="active" checked> Показывать в магазине</label>
+    <div class="row" style="margin:0"><button class="btn" type="submit">Сохранить</button><button class="btn line hide" type="button" id="scancel">Отмена</button></div>
+    <p class="hintx">Новые рисунки добавляются в код, а здесь вы управляете ценами, названиями и тем, что продаётся. Если скрыть товар, он пропадёт из магазина, но у тех, кто уже купил, останется.</p></form></section></div>
   <div id="tab-journal" class="hide" style="padding:26px 0 70px"><div class="card"><div class="row" style="margin:0 0 14px"><input class="in" id="logq" placeholder="Поиск по журналу: кто, кого, что" autocomplete="off"><button class="btn line sm" id="logre">Обновить</button><button class="btn line sm" id="logcsv">Скачать CSV</button></div><div id="logbox" style="overflow:auto"></div></div></div>
   <div id="tab-roles" class="hide" style="padding:26px 0 70px"><div class="card"><div class="row" style="margin:0 0 6px"><button class="btn sm" id="newRole">+ Новая роль</button></div><p class="hintx" style="margin-bottom:14px">Вы сами выбираете, что может делать каждая роль. Назначить роль можно в карточке аккаунта. Изменения вступают в силу сразу.</p><div id="rlist"></div></div></div>
  </main>
@@ -95,6 +107,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="common.js"></script>
 <script src="quiz.js"></script>
+<script src="kid.js"></script>
 <script>
 injectIcons();
 const show = id => ['loginBox', 'deny', 'panel'].forEach(x => $('#' + x).classList.toggle('hide', x !== id));
@@ -108,7 +121,7 @@ async function rpc(name, args) { const { data, error } = await sb.rpc(name, args
 // ---------- права и вход ----------
 const PERMS = {
   users: 'Видеть аккаунты, детей и прогресс', plans: 'Подписки и выдача курсов', block: 'Блокировка аккаунтов', passwords: 'Пароли пользователей',
-  profiles: 'Редактировать профили родителей и детей', rewards: 'Выдавать и забирать награды и звёзды', badges_edit: 'Создавать и менять виды наград',
+  profiles: 'Редактировать профили родителей и детей', rewards: 'Выдавать и забирать награды и звёзды', badges_edit: 'Награды и магазин: создавать и менять',
   promo: 'Промокоды', notes: 'Заметки к аккаунтам', journal: 'Смотреть журнал действий', bulk: 'Массовые действия',
   delete_kids: 'Удалять детей', delete_users: 'Удалять аккаунты целиком', content: 'Курсы, уроки и задания', stats: 'Статистика',
   test_access: 'Тестовый доступ на сайте: все курсы и черновики'
@@ -117,7 +130,7 @@ let ME = { owner: false, perms: [], role: null }, ROLES = [], ALLB = [];
 const can = p => ME.owner || ME.perms.includes(p);
 const TABS = [
   { id: 'users', t: 'Аккаунты', need: () => can('users') }, { id: 'lessons', t: 'Уроки и задания', need: () => can('content') },
-  { id: 'promo', t: 'Промокоды', need: () => can('promo') }, { id: 'badges', t: 'Награды', need: () => can('badges_edit') },
+  { id: 'promo', t: 'Промокоды', need: () => can('promo') }, { id: 'badges', t: 'Награды', need: () => can('badges_edit') }, { id: 'shop', t: 'Магазин', need: () => can('badges_edit') },
   { id: 'stats', t: 'Статистика', need: () => can('stats') }, { id: 'journal', t: 'Журнал', need: () => can('journal') }, { id: 'roles', t: 'Роли', need: () => ME.owner }
 ];
 let curTab = null, usersLoaded = false;
@@ -140,7 +153,7 @@ $('#out').onclick = $('#dout').onclick = () => sb.auth.signOut();
 function openTab(id) {
   curTab = id; $$('#tabs [data-tab]').forEach(x => x.classList.toggle('on', x.dataset.tab === id));
   TABS.forEach(t => $('#tab-' + t.id).classList.toggle('hide', t.id !== id));
-  ({ users: () => { if (!usersLoaded) { usersLoaded = true; search('') } }, lessons: tree, stats: loadStats, promo: loadPromo, badges: drawBadges, journal: loadLog, roles: drawRoles })[id]();
+  ({ users: () => { if (!usersLoaded) { usersLoaded = true; search('') } }, lessons: tree, stats: loadStats, promo: loadPromo, badges: drawBadges, shop: drawShop, journal: loadLog, roles: drawRoles })[id]();
 }
 async function loadCat() { courses = (await sb.from('courses').select('*').order('sort')).data || []; lessons = (await sb.from('lessons').select('*').order('sort')).data || [] }
 async function loadBadges() { ALLB = (await sb.from('badges').select('*').order('sort')).data || [] }
@@ -553,6 +566,33 @@ async function drawRoles() {
 }
 $('#newRole').onclick = async () => { const t = prompt('Название новой роли (например, «Куратор»)'); if (!t || t.trim().length < 2) return;
   const { error } = await sb.from('admin_roles').insert({ id: 'role_' + Math.random().toString(36).slice(2, 8), title: t.trim(), perms: [] }); if (error) return toast(error.message, 1); toast('Роль создана — отметьте права'); drawRoles() };
+
+// ================= МАГАЗИН =================
+const SART = { bg: { meadow: 'Луг', space: 'Космос', sea: 'Подводный мир', forest: 'Лес', winter: 'Зима', candy: 'Конфетная страна' }, frame: { gold: 'Золотая', rainbow: 'Радужная', stars: 'Звёздная', hearts: 'Сердечки' }, hat: { bow: 'Бантик', cap: 'Кепка', glasses: 'Очки', party: 'Колпак', astro: 'Шлем космонавта', crown: 'Корона' } };
+const SKIND = { bg: 'Фоны', frame: 'Рамки', hat: 'Наряды маскота' };
+let SHOP = [], sEdit = null;
+async function drawShop() {
+  const { data, error } = await sb.from('shop_items').select('*').order('sort'); if (error) return toast(error.message, 1); SHOP = data || [];
+  $('#slist').innerHTML = Object.entries(SKIND).map(([k, t]) => `<h3 style="margin:${k === 'bg' ? 0 : 18}px 0 8px;font-size:14px">${t}</h3>` + (SHOP.filter(i => i.kind === k).map(i => `<div class="kb" data-s="${esc(i.id)}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div style="width:84px;height:56px;border-radius:12px;overflow:hidden;background:#eaf5ff;display:grid;place-items:center;flex:none">${i.kind === 'frame' ? Kid.avatar(null, 'У', '#B07F5E', 's', i.art) : Kid.thumb(i.kind, i.art)}</div>
+    <div style="flex:1;min-width:130px"><b>${esc(i.title)}</b> ${i.active ? '' : '<span class="tag red">скрыт</span>'}<div class="muted">${i.price ? i.price + ' ★' : 'бесплатно'} · ${esc(SART[i.kind][i.art] || i.art)}</div></div><button class="btn line sm" data-se>Изменить</button><button class="btn red sm" data-sd>Удалить</button></div>`).join('') || '<p class="muted">Пусто.</p>')).join('');
+  $$('#slist [data-s]').forEach(r => { const it = SHOP.find(x => x.id === r.dataset.s); r.querySelector('[data-se]').onclick = () => shopForm(it);
+    r.querySelector('[data-sd]').onclick = async () => { if (!confirm(`Удалить «${it.title}»? Кто успел купить — получит звёзды обратно.`)) return; const { error } = await sb.from('shop_items').delete().eq('id', it.id); if (error) return toast(error.message, 1); toast('Товар удалён'); drawShop() } });
+}
+function shopArt() { const f = $('#fShop'), k = f.kind.value, cur = f.art.value; f.art.innerHTML = Object.entries(SART[k]).map(([a, n]) => `<option value="${a}">${n}</option>`).join(''); if (SART[k][cur]) f.art.value = cur; shopPrev() }
+function shopPrev() { const f = $('#fShop'); $('#sprv').innerHTML = f.kind.value === 'frame' ? Kid.avatar(null, 'У', '#B07F5E', 'l', f.art.value) : Kid.thumb(f.kind.value, f.art.value); $('#sprv svg')?.setAttribute('style', 'height:100%;' + (f.kind.value === 'bg' ? 'width:100%' : 'width:auto')) }
+function shopForm(it) {
+  sEdit = it; const f = $('#fShop'); f.kind.value = it?.kind || 'bg'; shopArt(); if (it) f.art.value = it.art; shopPrev();
+  f.title.value = it?.title || ''; f.price.value = it ? it.price : 10; f.sort.value = it ? it.sort : (SHOP.length + 1) * 10; f.active.checked = it ? it.active : true;
+  $('#sfh').textContent = it ? 'Изменить товар' : 'Новый товар'; $('#scancel').classList.toggle('hide', !it); f.kind.disabled = !!it; f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+$('#fShop').kind.onchange = shopArt; $('#fShop').art.onchange = shopPrev; $('#scancel').onclick = () => shopForm(null); shopArt();
+$('#fShop').onsubmit = async e => {
+  e.preventDefault(); const f = e.target, price = parseInt(f.price.value, 10);
+  if (f.title.value.trim().length < 2) return toast('Введите название (минимум 2 символа)', 1); if (!(price >= 0 && price <= 1000)) return toast('Цена — от 0 до 1000', 1);
+  const row = { art: f.art.value, title: f.title.value.trim(), price, sort: parseInt(f.sort.value, 10) || 0, active: f.active.checked };
+  const { error } = sEdit ? await sb.from('shop_items').update(row).eq('id', sEdit.id) : await sb.from('shop_items').insert({ ...row, id: 'it_' + Date.now().toString(36), kind: f.kind.value });
+  if (error) return toast(error.message, 1); toast('Товар сохранён'); shopForm(null); drawShop();
+};
 </script>
 </body>
 </html>
