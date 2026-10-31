@@ -122,6 +122,30 @@ h2{font-size:clamp(28px,4vw,48px);line-height:1.08;font-weight:800;letter-spacin
 .av{width:44px;height:44px;border-radius:50%;background:var(--brown);color:#fff;display:grid;place-items:center;font-weight:800}
 .who span{color:var(--grey);display:block;font-size:13px}
 
+/* отзывы: форма */
+.revbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:34px}
+.revbar p{color:var(--grey);font-size:14px;max-width:520px}
+.rc .stars i{font-style:normal;color:#d6d3d0}.rc .stars i.on{color:#e3a53a}
+.rc .nm{font-size:12px;color:var(--grey)}
+.mdl{position:fixed;inset:0;z-index:200;background:rgba(17,17,17,.55);display:none;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.mdl.open{display:flex}
+.mdl .box{background:#fff;border-radius:var(--r);padding:32px 28px;width:100%;max-width:480px;max-height:100%;overflow:auto;position:relative}
+.mdl h3{font-size:22px;margin-bottom:6px}
+.mdl .x{position:absolute;right:14px;top:12px;border:0;background:none;font-size:28px;cursor:pointer;color:var(--grey);line-height:1}
+.mdl form{max-width:none}
+.mdl textarea{width:100%;border:2px solid transparent;background:var(--soft);border-radius:24px;padding:16px 22px;font:500 16px Manrope;outline:0;resize:vertical;min-height:110px;color:var(--ink)}
+.mdl textarea:focus,.mdl input:focus{border-color:var(--brown);background:#fff}
+.mdl .f input{padding:16px 22px}
+.rate{display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:6px;align-items:center}
+.rate input{position:absolute;opacity:0;width:1px;height:1px}
+.rate label{font-size:34px;line-height:1;color:#d6d3d0;cursor:pointer;padding:2px}
+.rate label.on{color:#e3a53a}
+.rate input:focus-visible+label{outline:2px solid var(--brown);border-radius:6px}
+.mdl .cons{display:grid;gap:8px;font-size:13px;color:var(--grey)}
+.mdl .cons label{display:flex;gap:10px;align-items:flex-start}
+.mdl .cons input{width:auto;margin-top:3px}
+.mdl .cons a{text-decoration:underline}
+.cnt{font-size:12px;color:var(--grey);text-align:right;margin-top:-6px}
 /* faq */
 details{border-top:1px solid #e5e5e5;padding:20px 0;max-width:760px}
 details:last-of-type{border-bottom:1px solid #e5e5e5}
@@ -271,15 +295,41 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 
 <section id="reviews">
  <div class="wrap">
-  <h2 class="rv">Что говорят <span class="acc">родители</span></h2>
-  <p class="lead rv">Реальные истории от семей, которые учатся с Мишкой.</p>
-  <div class="rev">
-   <div class="rc rv"><div class="stars">★★★★★</div><p>Дочка за месяц выучила все буквы и теперь «читает» вывески по дороге в садик. Я наконец спокойно готовлю ужин и знаю, что на экране ничего лишнего.</p><div class="who"><div class="av">А</div><div>Анна, мама Софии, 4 года<span>Курс «Азбука»</span></div></div></div>
-   <div class="rc rv"><div class="stars">★★★★★</div><p>Ни одной рекламы — для меня это главный аргумент. Сын сам просит «ещё один урок про животных», а мы смотрим ровно один и закрываем.</p><div class="who"><div class="av">Д</div><div>Дмитрий, папа Матвея, 5 лет<span>Курс «Окружающий мир»</span></div></div></div>
-   <div class="rc rv"><div class="stars">★★★★★</div><p>Логопед отметил, что речь стала чище и словарь вырос. Уроки короткие, ребёнок не устаёт и повторяет за героями.</p><div class="who"><div class="av">Е</div><div>Елена, мама Артёма, 6 лет<span>Курс «Развитие речи»</span></div></div></div>
+  <h2 class="rv">Отзывы <span class="acc">пользователей</span></h2>
+  <p class="lead rv">Мы только запускаемся и публикуем только настоящие отзывы тех, кто пробовал сайт.</p>
+  <div class="rev" id="revList">
+   <div class="rc rv"><div class="stars" aria-label="4 из 5"><i class="on">★</i><i class="on">★</i><i class="on">★</i><i class="on">★</i><i>★</i></div><p>Сайт сделан красиво, но не хватает некоторых курсов. Также диктовка к заданиям может напугать ребёнка. Надеюсь, в будущем исправят.</p><div class="who"><div class="av">Е</div><div>Елена <span class="nm">(имя изменено)</span><span>пользователь сайта</span></div></div></div>
+   <div class="rc rv"><div class="stars" aria-label="5 из 5"><i class="on">★</i><i class="on">★</i><i class="on">★</i><i class="on">★</i><i class="on">★</i></div><p>Понравился детский режим и возможность преображать вид детского режима за счёт наград, которые выдаются за каждое пройденное задание. В принципе, всё хорошо.</p><div class="who"><div class="av">Д</div><div>Дмитрий<span>пользователь сайта</span></div></div></div>
   </div>
+  <div class="revbar rv"><p>Пробовали УМНО? Расскажите, что понравилось и что стоит улучшить. Отзыв появится на сайте после проверки.</p><button type="button" class="btn line" id="revOpen">Оставить отзыв</button></div>
  </div>
 </section>
+
+<div class="mdl" id="revModal" role="dialog" aria-modal="true" aria-labelledby="revT">
+ <div class="box">
+  <button type="button" class="x" id="revX" aria-label="Закрыть">×</button>
+  <h3 id="revT">Ваш отзыв</h3>
+  <p style="color:var(--grey);font-size:14px;margin-bottom:16px">Отзывы публикуются после проверки администратором.</p>
+  <form id="revForm" novalidate>
+   <div class="f"><input name="name" placeholder="Ваше имя" maxlength="40" required autocomplete="given-name"></div>
+   <div class="rate" role="radiogroup" aria-label="Оценка">
+    <input type="radio" name="rating" id="r5" value="5"><label for="r5" title="5">★</label>
+    <input type="radio" name="rating" id="r4" value="4"><label for="r4" title="4">★</label>
+    <input type="radio" name="rating" id="r3" value="3"><label for="r3" title="3">★</label>
+    <input type="radio" name="rating" id="r2" value="2"><label for="r2" title="2">★</label>
+    <input type="radio" name="rating" id="r1" value="1"><label for="r1" title="1">★</label>
+   </div>
+   <textarea name="body" placeholder="Что понравилось? Что стоит улучшить?" maxlength="600" required></textarea>
+   <div class="cnt"><span id="revCnt">0</span> / 600</div>
+   <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+   <div class="cons">
+    <label><input type="checkbox" name="c_pub" required> <span>Согласен(на) на публикацию отзыва на сайте и на <a href="consent.html" target="_blank" rel="noopener">обработку персональных данных</a> (<a href="privacy.html" target="_blank" rel="noopener">Политика</a>)</span></label>
+   </div>
+   <button class="btn" id="revSend" type="submit">Отправить отзыв</button>
+   <div class="msg" id="revMsg" role="status"></div>
+  </form>
+ </div>
+</div>
 
 <section id="faq" style="padding-top:60px">
  <div class="wrap">
@@ -332,6 +382,8 @@ const CONFIG = {
   WEB3FORMS_KEY: "98a69cb2-83cc-4477-8f87-9ad401376494",      // <-- Access Key из письма от Web3Forms
   FORMSPREE_URL: "",      // <-- или ссылка вида https://formspree.io/f/xxxx
   FALLBACK_EMAIL: "",     // <-- запасной вариант: откроется почтовая программа
+  SUPABASE_URL: "https://oqwnpqjwznlcuudzvntp.supabase.co",
+  SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xd25wcWp3em5sY3V1ZHp2bnRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzMDEwNjAsImV4cCI6MjEwODg3NzA2MH0.fBgSrNFTz07DE9uYzjyFTupOpZEw9E_xjnx9zq3-6LM",   // публичный anon-ключ
   RUSTORE_URL: ""         // <-- ссылка на приложение в RuStore, когда оно выйдет (кнопка «скоро» станет рабочей)
 };
 
@@ -362,6 +414,59 @@ const spy=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)links.
 
 // выбор курса/тарифа кликом
 document.querySelectorAll('.card').forEach(c=>c.onclick=()=>{document.getElementById('course').value=c.dataset.course;document.getElementById('signup').scrollIntoView()});
+
+// ===== отзывы: показ одобренных и отправка новых (на проверку) =====
+(function(){
+  const U=CONFIG.SUPABASE_URL+'/rest/v1/reviews',H={apikey:CONFIG.SUPABASE_KEY,Authorization:'Bearer '+CONFIG.SUPABASE_KEY};
+  const list=document.getElementById('revList');
+  function card(r){
+    const d=document.createElement('div');d.className='rc rv in';
+    const st=document.createElement('div');st.className='stars';st.setAttribute('aria-label',r.rating+' из 5');
+    for(let i=1;i<=5;i++){const x=document.createElement('i');x.textContent='★';if(i<=r.rating)x.className='on';st.append(x)}
+    const p=document.createElement('p');p.textContent=r.body;
+    const w=document.createElement('div');w.className='who';
+    const av=document.createElement('div');av.className='av';av.textContent=(r.name||'?').trim().charAt(0).toUpperCase();
+    const t=document.createElement('div');t.append(document.createTextNode(r.name));
+    if(r.name_changed){const n=document.createElement('span');n.className='nm';n.textContent=' (имя изменено)';n.style.display='inline';t.append(n)}
+    const ro=document.createElement('span');ro.textContent=r.role||'пользователь сайта';t.append(ro);
+    w.append(av,t);d.append(st,p,w);return d;
+  }
+  fetch(U+'?select=name,role,rating,body,name_changed&status=eq.approved&order=created_at.desc&limit=12',{headers:H})
+    .then(r=>r.ok?r.json():Promise.reject()).then(rows=>{
+      if(!Array.isArray(rows))return;
+      list.replaceChildren(...rows.map(card));
+    }).catch(()=>{/* нет связи — остаются отзывы из страницы */});
+
+  const m=document.getElementById('revModal'),f=document.getElementById('revForm'),msg=document.getElementById('revMsg'),send=document.getElementById('revSend');
+  const open=()=>{m.classList.add('open');document.body.style.overflow='hidden';f.elements.name.focus()};
+  const close=()=>{m.classList.remove('open');document.body.style.overflow=''};
+  document.getElementById('revOpen').onclick=open;document.getElementById('revX').onclick=close;
+  m.addEventListener('mousedown',e=>{if(e.target===m)close()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&m.classList.contains('open'))close()});
+  // звёзды: подсветка выбранных
+  const labs=[...m.querySelectorAll('.rate label')];
+  const paint=v=>labs.forEach(l=>l.classList.toggle('on',+l.getAttribute('for').slice(1)<=v));
+  m.querySelectorAll('.rate input').forEach(i=>i.addEventListener('change',()=>paint(+i.value)));
+  f.elements.body.addEventListener('input',()=>document.getElementById('revCnt').textContent=f.elements.body.value.length);
+  f.addEventListener('submit',async e=>{
+    e.preventDefault();msg.className='msg';msg.textContent='';
+    if(f.elements.website.value)return; // антиспам
+    const name=f.elements.name.value.trim(),body=f.elements.body.value.trim(),rating=+(f.elements.rating.value||0);
+    if(!name){msg.className='msg err';msg.textContent='Напишите имя.';return}
+    if(!rating){msg.className='msg err';msg.textContent='Поставьте оценку звёздами.';return}
+    if(body.length<10){msg.className='msg err';msg.textContent='Отзыв слишком короткий (минимум 10 символов).';return}
+    if(!f.elements.c_pub.checked){msg.className='msg err';msg.textContent='Нужно согласие на публикацию.';return}
+    send.disabled=true;send.textContent='Отправляем…';
+    try{
+      const r=await fetch(U,{method:'POST',headers:{...H,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({name,rating,body,consent:true})});
+      if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.message||('Ошибка '+r.status))}
+      f.reset();paint(0);document.getElementById('revCnt').textContent='0';
+      msg.className='msg';msg.textContent='Спасибо! Отзыв появится на сайте после проверки.';
+      setTimeout(close,2500);
+    }catch(err){msg.className='msg err';msg.textContent='Не удалось отправить'+(err&&err.message?' ('+err.message+')':'')+'. Попробуйте позже.'}
+    send.disabled=false;send.textContent='Отправить отзыв';
+  });
+})();
 
 // отправка заявки
 const form=document.getElementById('form'),msg=document.getElementById('msg'),btn=document.getElementById('send');
