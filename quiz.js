@@ -26,11 +26,17 @@ const Q = (() => {
     V.voice = vs.find(v => /milena|alena|irina|katya|yuri|google|enhanced|premium/i.test(v.name)) || vs[0] || null; };
   if (SS) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice }
   const plain = h => { const d = document.createElement('div'); d.innerHTML = h || ''; return d.textContent.replace(/\s+/g, ' ').trim() };
-  const stopSpeech = () => { if (SS) { try { speechSynthesis.cancel() } catch { } } };
-  function speak(parts) {
-    if (!SS) return; stopSpeech();
-    const list = (Array.isArray(parts) ? parts : [parts]).map(plain).filter(Boolean);
-    setTimeout(() => list.forEach(p => { const u = new SpeechSynthesisUtterance(p); u.lang = 'ru-RU'; if (V.voice) u.voice = V.voice; u.rate = .9; u.pitch = 1.12; speechSynthesis.speak(u) }), 60);
+  let curAudio = null, gen = 0;
+  const stopSpeech = () => { gen++; if (curAudio) { try { curAudio.pause() } catch { } curAudio = null } if (SS) { try { speechSynthesis.cancel() } catch { } } };
+  /* живая озвучка: готовые mp3 из /audio/ (имя = первые 16 символов SHA-1 текста); если файла нет — синтез браузера */
+  const normT = s => s.replace(/[\u{1F000}-\u{1FFFF}\u2600-\u27BF]/gu, '').replace(/\s+/g, ' ').trim();
+  const keyOf = async s => { const b = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('').slice(0, 16) };
+  const clip = (text, my) => new Promise(async res => { try { const a = new Audio('/audio/' + await keyOf(text) + '.mp3'); if (my !== gen) return res(true); curAudio = a; a.onended = () => res(true); a.onerror = () => res(false); await a.play() } catch { res(false) } });
+  const say = text => new Promise(res => { if (!SS) return res(); const u = new SpeechSynthesisUtterance(text); u.lang = 'ru-RU'; if (V.voice) u.voice = V.voice; u.rate = .9; u.onend = u.onerror = () => res(); speechSynthesis.speak(u) });
+  async function speak(parts) {
+    stopSpeech(); const my = gen;
+    const list = (Array.isArray(parts) ? parts : [parts]).map(plain).map(normT).filter(Boolean);
+    for (const t of list) { if (my !== gen) return; const ok = await clip(t, my); if (my !== gen) return; if (!ok) await say(t) }
   }
   function taskParts(t) {
     const type = t.type || 'choice', d = t.data || {}, names = (t.options || []).map(opt).map(o => o.t).filter(Boolean), p = [t.question];
@@ -122,18 +128,73 @@ const Q = (() => {
     }
 
     else if (type === 'draw') {
-      body.innerHTML = `<div class="dw"><div style="position:absolute;inset:0;display:grid;place-items:center;font:800 clamp(150px,42vw,240px)/1 Unbounded,sans-serif;color:#ececec;pointer-events:none;user-select:none">${esc(d.letter || '')}</div><canvas></canvas></div><div class="row" style="justify-content:center"><button type="button" class="btn line sm clr">Стереть</button><button type="button" class="btn chk">Готово</button></div><div class="hint"></div>`;
-      const cv = body.querySelector('canvas'), box = body.querySelector('.dw'); let x, drew = false, down = false, lx = 0, ly = 0;
-      requestAnimationFrame(() => {
-        const r = box.getBoundingClientRect(), k = window.devicePixelRatio || 1; cv.width = r.width * k; cv.height = r.height * k;
-        x = cv.getContext('2d'); x.scale(k, k); x.lineCap = x.lineJoin = 'round'; x.lineWidth = 14; x.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--brown') || '#B07F5E';
-      });
-      const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top] };
-      cv.onpointerdown = e => { if (!x || over) return; down = true; [lx, ly] = pos(e); cv.setPointerCapture(e.pointerId); x.beginPath(); x.moveTo(lx, ly); x.lineTo(lx + .1, ly); x.stroke(); drew = true };
-      cv.onpointermove = e => { if (!down) return; const [px, py] = pos(e); x.beginPath(); x.moveTo(lx, ly); x.lineTo(px, py); x.stroke(); lx = px; ly = py };
+      /* Обводка буквы с проверкой: рисунок сверяется с маской буквы.
+         1) «границы»: штрих вне буквы (с допуском) окрашивается красным и не засчитывается;
+         2) «правильность»: должно быть закрашено не меньше 70% буквы, а доля штриха вне границ — не больше 25%. */
+      const letter = String(d.letter || '').trim().slice(0, 1);
+      body.innerHTML = `<div class="dw"><canvas class="gl"></canvas><canvas class="pen"></canvas></div><div class="row" style="justify-content:center"><button type="button" class="btn line sm clr">Стереть</button><button type="button" class="btn chk">Готово</button></div><div class="hint"></div>`;
+      const box = body.querySelector('.dw'), gl = body.querySelector('.gl'), cv = body.querySelector('.pen'), hint = body.querySelector('.hint');
+      const BRUSH = 14, TOL = 13, HIT = .7, OUT = .25;
+      let W = 0, H = 0, x, letterM, allowM, ink, inkWide, down = false, lx = 0, ly = 0, len = 0, tries = 0, ready = false;
+      const brown = (getComputedStyle(document.documentElement).getPropertyValue('--brown') || '#B07F5E').trim() || '#B07F5E';
+      const font = '800 100px Unbounded, Nunito, sans-serif';
+      const off = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; const t = c.getContext('2d', { willReadFrequently: true }); t.lineCap = t.lineJoin = 'round'; return [c, t] };
+      // рисуем букву по центру и вписываем в поле
+      const putLetter = (t, mode, lw) => {
+        t.font = font; t.textBaseline = 'alphabetic'; t.textAlign = 'left';
+        const m = t.measureText(letter), bw = m.actualBoundingBoxLeft + m.actualBoundingBoxRight, bh = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+        const sc = Math.min(W * .74 / bw, H * .74 / bh), cx = W / 2, cy = H / 2;
+        t.save(); t.translate(cx, cy); t.scale(sc, sc); t.translate(-(bw / 2 - m.actualBoundingBoxLeft), (bh / 2 - m.actualBoundingBoxDescent));
+        t.font = font;
+        if (mode === 'allow') { t.lineWidth = lw / sc; t.strokeText(letter, 0, 0) }
+        t.fillText(letter, 0, 0); t.restore();
+      };
+      const init = async () => {
+        try { await document.fonts.load(font, letter) } catch { }
+        const r = box.getBoundingClientRect(); W = Math.round(r.width); H = Math.round(r.height); if (!W || !H) return;
+        const k = window.devicePixelRatio || 1;
+        for (const c of [gl, cv]) { c.width = W * k; c.height = H * k }
+        const g = gl.getContext('2d'); g.scale(k, k); g.fillStyle = '#e3e3e3'; putLetter(g, 'fill');
+        // маска буквы и «разрешённая зона» (буква + допуск по краям)
+        const [, lt] = off(); lt.fillStyle = '#000'; putLetter(lt, 'fill'); letterM = lt.getImageData(0, 0, W, H).data;
+        const [, at] = off(); at.fillStyle = at.strokeStyle = '#000'; putLetter(at, 'allow', TOL * 2); allowM = at.getImageData(0, 0, W, H).data;
+        let c1, c2; [c1, ink] = off(); [c2, inkWide] = off(); ink.strokeStyle = ink.fillStyle = '#000'; inkWide.strokeStyle = inkWide.fillStyle = '#000';
+        ink.lineWidth = BRUSH; inkWide.lineWidth = BRUSH + TOL * 2;
+        x = cv.getContext('2d'); x.scale(k, k); x.lineCap = x.lineJoin = 'round'; x.lineWidth = BRUSH;
+        ready = true;
+      };
+      init();
+      const inside = (px, py) => { const i = ((py | 0) * W + (px | 0)) * 4 + 3; return px >= 0 && py >= 0 && px < W && py < H && allowM[i] > 40 };
+      const seg = (ax, ay, bx, by) => {
+        x.strokeStyle = inside(bx, by) ? brown : '#d9534f';
+        x.beginPath(); x.moveTo(ax, ay); x.lineTo(bx, by); x.stroke();
+        for (const t of [ink, inkWide]) { t.beginPath(); t.moveTo(ax, ay); t.lineTo(bx, by); t.stroke() }
+        len += Math.hypot(bx - ax, by - ay);
+      };
+      const pos = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height] };
+      cv.onpointerdown = e => { if (!ready || over) return; down = true; [lx, ly] = pos(e); cv.setPointerCapture(e.pointerId); seg(lx, ly, lx + .1, ly); hint.textContent = '' };
+      cv.onpointermove = e => { if (!down) return; const [px, py] = pos(e); seg(lx, ly, px, py); lx = px; ly = py };
       cv.onpointerup = cv.onpointercancel = () => down = false;
-      body.querySelector('.clr').onclick = () => { if (!over && x) { x.clearRect(0, 0, cv.width, cv.height); drew = false } };
-      body.querySelector('.chk').onclick = () => { if (!drew) { body.querySelector('.hint').textContent = 'Нарисуй пальцем или мышкой по серой букве'; return } body.querySelector('.row').remove(); body.querySelector('.hint').textContent = ''; finish(true) };
+      const clear = () => { x.save(); x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, cv.width, cv.height); x.restore(); ink.clearRect(0, 0, W, H); inkWide.clearRect(0, 0, W, H); len = 0 };
+      body.querySelector('.clr').onclick = () => { if (!over && ready) { clear(); hint.textContent = '' } };
+      // оценка рисунка
+      const grade = () => {
+        const a = ink.getImageData(0, 0, W, H).data, w = inkWide.getImageData(0, 0, W, H).data;
+        let lt = 0, lc = 0, it = 0, io = 0;
+        for (let i = 3; i < a.length; i += 4) {
+          if (letterM[i] > 128) { lt++; if (w[i] > 40) lc++ }
+          if (a[i] > 40) { it++; if (allowM[i] <= 40) io++ }
+        }
+        return { cover: lt ? lc / lt : 0, outside: it ? io / it : 1, ink: it };
+      };
+      body.querySelector('.chk').onclick = () => {
+        if (!ready || over) return;
+        if (len < 20) { hint.textContent = 'Обведи пальцем или мышкой серую букву'; return }
+        const g = grade(); tries++;
+        if (g.cover >= HIT && g.outside <= OUT) { body.querySelector('.row').remove(); hint.textContent = ''; return finish(true) }
+        if (tries >= 3) { body.querySelector('.row').remove(); hint.textContent = ''; return finish(false, 'Буква: ' + esc(letter)) }
+        hint.textContent = g.outside > OUT ? 'Рисуй внутри серой буквы — красные линии выходят за её край. Нажми «Стереть» и попробуй ещё.' : 'Обведи всю букву до конца — пока закрашено ' + Math.round(g.cover * 100) + '%.';
+      };
     }
   }
 
