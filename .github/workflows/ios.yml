@@ -1,0 +1,70 @@
+name: Build iOS (unsigned IPA)
+
+on:
+  workflow_dispatch:        # ручной запуск кнопкой «Run workflow» во вкладке Actions
+  push:
+    branches: [main, master]
+
+jobs:
+  ios:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # Если папки ios в репозитории нет, создаём её. Свои файлы lib/, assets/ и pubspec.yaml не трогаются.
+      - name: Create ios folder if missing
+        run: |
+          if [ ! -d ios ]; then
+            flutter create --platforms=ios --org online.umno --project-name umno .
+          fi
+
+      - run: flutter pub get
+
+      # Разрешения и название приложения. Без описаний камеры и фото iOS закроет приложение при выборе аватарки.
+      - name: Patch Info.plist
+        run: |
+          P=ios/Runner/Info.plist
+          B=/usr/libexec/PlistBuddy
+          setkey () { $B -c "Delete :$1" "$P" 2>/dev/null || true; $B -c "Add :$1 $2 $3" "$P"; }
+          setkey CFBundleDisplayName string "УМНО"
+          setkey NSCameraUsageDescription string "Камера нужна, чтобы сделать фото для аватарки ребёнка."
+          setkey NSPhotoLibraryUsageDescription string "Доступ к фото нужен, чтобы выбрать аватарку ребёнка."
+          setkey NSMicrophoneUsageDescription string "Микрофон не используется. Описание требуется системой при выборе медиа."
+          $B -c "Delete :LSApplicationQueriesSchemes" "$P" 2>/dev/null || true
+          $B -c "Add :LSApplicationQueriesSchemes array" "$P"
+          $B -c "Add :LSApplicationQueriesSchemes:0 string mailto" "$P"
+          $B -c "Add :LSApplicationQueriesSchemes:1 string https" "$P"
+          $B -c "Print" "$P" | head -40
+
+      # Минимальная версия iOS 13 нужна плагинам (supabase, video_player).
+      - name: Set iOS deployment target 13.0
+        run: |
+          if grep -q "^platform :ios" ios/Podfile; then
+            sed -i '' "s/^platform :ios.*/platform :ios, '13.0'/" ios/Podfile
+          else
+            sed -i '' "s/^# platform :ios.*/platform :ios, '13.0'/" ios/Podfile
+          fi
+          sed -i '' "s/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 13.0;/g" ios/Runner.xcodeproj/project.pbxproj
+          grep -n "platform :ios" ios/Podfile
+
+      - name: Build iOS (no codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: Pack IPA
+        run: |
+          rm -rf Payload && mkdir Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qry umno-unsigned.ipa Payload
+          ls -lh umno-unsigned.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: umno-ios-unsigned
+          path: umno-unsigned.ipa
+          retention-days: 14
