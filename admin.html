@@ -211,8 +211,9 @@ function bulkModal() {
     grant: `<select class="in" id="b_course">${courses.map(c => `<option value="${c.id}">${esc(c.title)}</option>`).join('')}</select><input class="in" id="b_until" type="date" title="Пусто — бессрочно"><p class="hintx">Пустая дата — без срока.</p>`,
     revoke: `<select class="in" id="b_course">${courses.map(c => `<option value="${c.id}">${esc(c.title)}</option>`).join('')}</select>`,
     promo: '<input class="in" id="b_code" placeholder="Промокод" style="text-transform:uppercase">',
-    block: '<p class="hintx">Владельцы и вы сами не блокируются.</p>', unblock: '',
-    delete: `<p class="hintx" style="color:#c0392b">Аккаунты, дети, прогресс и награды будут удалены безвозвратно. Для подтверждения введите УДАЛИТЬ.</p><input class="in" id="b_ok" placeholder="УДАЛИТЬ" autocomplete="off">`
+    block: '<textarea class="in" id="b_reason" maxlength="300" placeholder="Причина блокировки (обязательно)" style="min-height:70px;resize:vertical"></textarea><p class="hintx">Владельцы и вы сами не блокируются. Причина запишется в журнал по каждому аккаунту.</p>',
+    unblock: '<textarea class="in" id="b_reason" maxlength="300" placeholder="Причина (по желанию)" style="min-height:60px;resize:vertical"></textarea>',
+    delete: `<textarea class="in" id="b_reason" maxlength="300" placeholder="Причина удаления (обязательно)" style="min-height:70px;resize:vertical"></textarea><p class="hintx" style="color:#c0392b">Аккаунты, дети, прогресс и награды будут удалены безвозвратно. Для подтверждения введите УДАЛИТЬ.</p><input class="in" id="b_ok" placeholder="УДАЛИТЬ" autocomplete="off">`
   })[a] };
   $('#ba', m).onchange = draw; draw(); $('#bno', m).onclick = () => m.remove();
   $('#bgo', m).onclick = async () => {
@@ -220,6 +221,8 @@ function bulkModal() {
     if (a === 'extend') arg = { days: +v('b_days') }; if (a === 'plan') arg = { plan: v('b_plan'), until: eod(v('b_until')) };
     if (a === 'grant') arg = { course: v('b_course'), until: eod(v('b_until')) }; if (a === 'revoke') arg = { course: v('b_course') };
     if (a === 'promo') arg = { code: v('b_code') };
+    if (['block', 'unblock', 'delete'].includes(a)) arg = { reason: (v('b_reason') || '').trim() };
+    if (['block', 'delete'].includes(a) && !arg.reason) return say($('#bm', m), 'Укажите причину', 'err');
     if (a === 'extend' && !(arg.days > 0)) return say($('#bm', m), 'Укажите число дней', 'err');
     if (a === 'plan' && arg.plan !== 'none' && !arg.until) return say($('#bm', m), 'Укажите дату окончания', 'err');
     if (a === 'promo' && !(arg.code || '').trim()) return say($('#bm', m), 'Введите промокод', 'err');
@@ -309,7 +312,19 @@ async function openUser(u) {
   $$('#detail [data-grant]').forEach(b => b.onclick = () => { const r = b.closest('.cr'); run(() => rpc('admin_grant_course', { p_user: u.id, p_course: r.dataset.c, p_until: eod(r.querySelector('input').value) }), 'Курс выдан') });
   $$('#detail [data-revoke]').forEach(b => b.onclick = () => run(() => rpc('admin_revoke_course', { p_user: u.id, p_course: b.closest('.cr').dataset.c }), 'Курс забран'));
   $('#pApply')?.addEventListener('click', () => { const code = $('#pcode').value.trim(); if (!code) return toast('Введите код', 1); run(async () => { const m = await rpc('admin_apply_promo', { p_user: u.id, p_code: code }); toast(m || 'Промокод применён') }, '') });
-  $('#block')?.addEventListener('click', () => { if (confirm(u.blocked ? 'Разблокировать аккаунт?' : 'Заблокировать аккаунт ' + u.email + '?')) run(() => rpc('admin_set_blocked', { p_user: u.id, p_blocked: !u.blocked }), u.blocked ? 'Аккаунт разблокирован' : 'Аккаунт заблокирован') });
+  $('#block')?.addEventListener('click', () => {
+    const un = !!u.blocked;
+    const m = modal(`<h3 style="margin-bottom:10px">${un ? 'Разблокировать' : 'Заблокировать'} аккаунт?</h3><p>${esc(u.email)} · ID ${u.public_id}</p>
+     <label style="display:block;margin-top:12px">Причина${un ? ' (по желанию)' : ''}</label><textarea class="in" id="brs" maxlength="300" placeholder="${un ? 'Например: недоразумение выяснено' : 'Например: нарушение правил, спам'}" style="min-height:80px;resize:vertical"></textarea>
+     <p class="hintx">Причина записывается в журнал действий.</p><div id="bmsg" class="msg"></div>
+     <div class="row"><button class="btn ${un ? '' : 'red'}" id="byes">${un ? 'Разблокировать' : 'Заблокировать'}</button><button class="btn line" id="bno2">Отмена</button></div>`);
+    $('#bno2', m).onclick = () => m.remove();
+    $('#byes', m).onclick = async () => {
+      const reason = $('#brs', m).value.trim();
+      if (!un && !reason) return say($('#bmsg', m), 'Укажите причину блокировки', 'err');
+      try { await rpc('admin_set_blocked', { p_user: u.id, p_blocked: !un, p_reason: reason || null }); m.remove(); toast(un ? 'Аккаунт разблокирован' : 'Аккаунт заблокирован'); reload() } catch (e) { }
+    };
+  });
   $('#mail')?.addEventListener('click', async () => { const { error } = await sb.auth.resetPasswordForEmail(u.email, { redirectTo: location.origin + '/cabinet.html' }); error ? toast(error.message, 1) : toast('Письмо отправлено на ' + u.email) });
   $('#setPw')?.addEventListener('click', async () => { const password = $('#pw').value; if (password.length < 8) return toast('Пароль — минимум 8 символов', 1); if (!confirm('Сменить пароль пользователю ' + u.email + '?')) return;
     const { error } = await sb.functions.invoke('admin-password', { body: { user_id: u.id, password } });
@@ -319,10 +334,11 @@ async function openUser(u) {
   $$('#detail [data-ndel]').forEach(b => b.onclick = () => { if (confirm('Удалить заметку?')) run(() => rpc('admin_del_note', { p_note: b.closest('[data-n]').dataset.n }), 'Заметка удалена') });
   // удаление аккаунта
   $('#delUser')?.addEventListener('click', () => {
-    const m = modal(`<h3 style="color:#c0392b;margin-bottom:10px">Удалить аккаунт?</h3><p>${esc(u.email)} · ID ${u.public_id}<br>Будут удалены: аккаунт, ${d.children.length} дет., весь прогресс, награды и доступы.</p><p class="hintx">Это нельзя отменить. Для подтверждения введите УДАЛИТЬ.</p>
+    const m = modal(`<h3 style="color:#c0392b;margin-bottom:10px">Удалить аккаунт?</h3><p>${esc(u.email)} · ID ${u.public_id}<br>Будут удалены: аккаунт, ${d.children.length} дет., весь прогресс, награды и доступы.</p><label style="display:block;margin-top:12px">Причина удаления</label><textarea class="in" id="drs" maxlength="300" placeholder="Например: по просьбе пользователя" style="min-height:70px;resize:vertical"></textarea>
+     <p class="hintx">Причина записывается в журнал действий. Это нельзя отменить. Для подтверждения введите УДАЛИТЬ.</p>
      <input class="in" id="dok" placeholder="УДАЛИТЬ" autocomplete="off" style="margin-top:10px"><div class="row"><button class="btn red" id="dyes">Удалить навсегда</button><button class="btn line" id="dno">Отмена</button></div>`);
     $('#dno', m).onclick = () => m.remove();
-    $('#dyes', m).onclick = async () => { if ($('#dok', m).value !== 'УДАЛИТЬ') return toast('Введите слово УДАЛИТЬ', 1); try { await rpc('admin_delete_user', { p_user: u.id }); m.remove(); toast('Аккаунт удалён'); await afterDelete() } catch (e) { } };
+    $('#dyes', m).onclick = async () => { const reason = $('#drs', m).value.trim(); if (!reason) return toast('Укажите причину удаления', 1); if ($('#dok', m).value !== 'УДАЛИТЬ') return toast('Введите слово УДАЛИТЬ', 1); try { await rpc('admin_delete_user', { p_user: u.id, p_reason: reason }); m.remove(); toast('Аккаунт удалён'); await afterDelete() } catch (e) { } };
   });
 }
 
