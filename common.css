@@ -56,6 +56,7 @@ textarea{border-radius:20px;resize:vertical;min-height:84px}
 .sl{min-width:72px;min-height:56px;border:3px dashed #d6cfc9;border-radius:16px;padding:8px 14px;font:700 18px Manrope;background:#fff;cursor:pointer;display:grid;place-items:center}
 .dw{position:relative;width:min(340px,100%);aspect-ratio:1;margin:0 auto 10px;background:#fff;border-radius:28px;box-shadow:inset 0 0 0 3px #eee;touch-action:none}
 .dw canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.dw canvas.gl{pointer-events:none;cursor:default}
 .hint{margin-top:8px;color:#c0392b;font-weight:700}
 .stars{display:flex;gap:8px;justify-content:center;font-size:56px;color:#ddd;margin:8px 0}
 .stars .on{color:#f5b301;fill:#f5b301;animation:pop .6s both}
