@@ -73,6 +73,8 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
   <div id="tab-users" class="grid"><section class="card"><form class="sf" id="fSearch"><input class="in" id="q" placeholder="ID, @юзернейм, e-mail или имя" autocomplete="off"><button class="btn" type="submit">Найти</button></form><div class="row" id="bulkbar" style="margin:0 0 12px"></div><div id="list"></div></section>
    <section class="card" id="detail"><p class="muted">Выберите аккаунт из списка или найдите его по ID или @юзернейму.</p></section></div>
   <div id="tab-lessons" class="grid hide"><section class="card"><div class="row" style="margin:0 0 14px"><button class="btn sm" id="newCourse">+ Курс</button></div><div id="tree"></div></section><section class="card" id="editor"><p class="muted">Выберите урок слева или нажмите «+ урок» у нужного курса.</p></section></div>
+  <div id="tab-reviews" class="hide" style="padding:26px 0 70px"><div class="card"><div class="row" style="margin:0 0 6px" id="rvf"></div>
+   <p class="hintx" style="margin-bottom:10px">Отзывы с сайта попадают сюда «на проверке» и не видны посетителям, пока вы их не одобрите. Метка «автофильтр» значит, что в тексте найден мат, ссылка или @-имя, такие читайте особенно внимательно.</p><div id="rvl"></div></div></div>
   <div id="tab-stats" class="hide" style="padding:26px 0 70px"><div id="stats"></div></div>
   <div id="tab-promo" class="hide" style="padding:26px 0 70px"><div class="card"><h2 style="font-size:18px;margin-bottom:14px">Новый промокод</h2><form id="fPromo" class="fg">
    <div><label>Код</label><div class="row" style="margin:0;flex-wrap:nowrap"><input class="in" id="pcodeN" placeholder="SPRING2026" style="text-transform:uppercase" maxlength="32" autocomplete="off"><button class="btn line sm" type="button" id="pgen">Случайный</button></div></div>
@@ -129,14 +131,14 @@ const PERMS = {
   profiles: 'Редактировать профили родителей и детей', rewards: 'Выдавать и забирать награды и звёзды', badges_edit: 'Награды и магазин: создавать и менять',
   promo: 'Промокоды', notes: 'Заметки к аккаунтам', journal: 'Смотреть журнал действий', bulk: 'Массовые действия',
   delete_kids: 'Удалять детей', delete_users: 'Удалять аккаунты целиком', content: 'Курсы, уроки и задания', stats: 'Статистика',
-  test_access: 'Тестовый доступ на сайте: все курсы и черновики'
+  test_access: 'Тестовый доступ на сайте: все курсы и черновики', reviews: 'Отзывы на сайте: модерация'
 };
 let ME = { owner: false, perms: [], role: null }, ROLES = [], ALLB = [];
 const can = p => ME.owner || ME.perms.includes(p);
 const TABS = [
   { id: 'users', t: 'Аккаунты', need: () => can('users') }, { id: 'lessons', t: 'Уроки и задания', need: () => can('content') },
   { id: 'promo', t: 'Промокоды', need: () => can('promo') }, { id: 'badges', t: 'Награды', need: () => can('badges_edit') }, { id: 'shop', t: 'Магазин', need: () => can('badges_edit') },
-  { id: 'stats', t: 'Статистика', need: () => can('stats') }, { id: 'journal', t: 'Журнал', need: () => can('journal') }, { id: 'roles', t: 'Роли', need: () => ME.owner }
+  { id: 'reviews', t: 'Отзывы', need: () => can('reviews') }, { id: 'stats', t: 'Статистика', need: () => can('stats') }, { id: 'journal', t: 'Журнал', need: () => can('journal') }, { id: 'roles', t: 'Роли', need: () => ME.owner }
 ];
 let curTab = null, usersLoaded = false;
 async function boot(session) {
@@ -150,6 +152,7 @@ async function boot(session) {
   $$('#tabs [data-tab]').forEach(b => b.onclick = () => openTab(b.dataset.tab));
   show('panel'); usersLoaded = false;
   await loadCat(); await loadBadges(); if (ME.owner) await loadRolesList();
+  if (can('reviews')) sb.from('reviews').select('id', { count: 'exact', head: true }).eq('status', 'pending').then(({ count }) => { const b = document.querySelector('#tabs [data-tab=reviews]'); if (b && count) b.textContent = 'Отзывы · ' + count });
   openTab(tabs[0].id);
 }
 sb.auth.getSession().then(({ data }) => boot(data.session)); sb.auth.onAuthStateChange(ev => { if (ev === 'SIGNED_OUT') show('loginBox') });
@@ -158,7 +161,7 @@ $('#out').onclick = $('#dout').onclick = () => sb.auth.signOut();
 function openTab(id) {
   curTab = id; $$('#tabs [data-tab]').forEach(x => x.classList.toggle('on', x.dataset.tab === id));
   TABS.forEach(t => $('#tab-' + t.id).classList.toggle('hide', t.id !== id));
-  ({ users: () => { if (!usersLoaded) { usersLoaded = true; search('') } }, lessons: tree, stats: loadStats, promo: loadPromo, badges: drawBadges, shop: drawShop, journal: loadLog, roles: drawRoles })[id]();
+  ({ users: () => { if (!usersLoaded) { usersLoaded = true; search('') } }, lessons: tree, stats: loadStats, promo: loadPromo, badges: drawBadges, shop: drawShop, journal: loadLog, roles: drawRoles, reviews: loadReviews })[id]();
 }
 async function loadCat() { courses = (await sb.from('courses').select('*').order('sort')).data || []; lessons = (await sb.from('lessons').select('*').order('sort')).data || [] }
 async function loadBadges() { ALLB = (await sb.from('badges').select('*').order('sort')).data || [] }
@@ -479,6 +482,40 @@ function preview() {
 }
 function modal(html) { const m = document.createElement('div'); m.className = 'modal'; m.innerHTML = '<div>' + html + '</div>'; m.addEventListener('mousedown', e => { if (e.target === m) m.remove() }); document.body.append(m); return m }
 
+// ================= ОТЗЫВЫ =================
+let rvAll = [], rvF = 'pending';
+const RVS = { pending: 'На проверке', approved: 'Одобрены', rejected: 'Отклонены', all: 'Все' };
+const stars = n => '<span style="color:#e3a53a;letter-spacing:2px">' + '★'.repeat(n) + '<span style="color:#d6d3d0">' + '★'.repeat(5 - n) + '</span></span>';
+async function loadReviews() {
+  const { data, error } = await sb.from('reviews').select('*').order('created_at', { ascending: false }).limit(500); if (error) return toast(error.message, 1);
+  rvAll = data || []; drawReviews(); badgeReviews();
+}
+function badgeReviews() { const n = rvAll.filter(r => r.status === 'pending').length, b = document.querySelector('#tabs [data-tab=reviews]'); if (b) b.textContent = 'Отзывы' + (n ? ' · ' + n : '') }
+function drawReviews() {
+  $('#rvf').innerHTML = Object.entries(RVS).map(([k, t]) => `<button class="btn ${rvF === k ? '' : 'line'} sm" data-f="${k}">${t}${k === 'all' ? '' : ' · ' + rvAll.filter(r => r.status === k).length}</button>`).join(' ');
+  $$('#rvf [data-f]').forEach(b => b.onclick = () => { rvF = b.dataset.f; drawReviews() });
+  const list = rvAll.filter(r => rvF === 'all' || r.status === rvF);
+  $('#rvl').innerHTML = list.length ? list.map(r => `<div class="tk" data-id="${r.id}">
+    <div class="row" style="margin:0 0 8px">${stars(r.rating)} <b>${esc(r.name)}</b>${r.name_changed ? ' <span class="muted">(имя изменено)</span>' : ''} <span class="muted">· ${esc(r.role)} · ${dt(r.created_at)}</span>
+     <span style="flex:1"></span>${r.flagged ? '<span class="tag red">автофильтр</span>' : ''}<span class="tag ${r.status === 'approved' ? 'ok' : r.status === 'rejected' ? 'red' : ''}">${RVS[r.status]}</span></div>
+    <p style="white-space:pre-wrap;word-break:break-word">${esc(r.body)}</p>
+    <div class="row" style="margin:12px 0 0">${r.status !== 'approved' ? '<button class="btn sm" data-a="approved">Одобрить</button>' : ''}${r.status !== 'rejected' ? '<button class="btn line sm" data-a="rejected">Отклонить</button>' : ''}${r.status !== 'pending' ? '<button class="btn line sm" data-a="pending">На проверку</button>' : ''}<button class="btn line sm" data-e>Исправить</button><button class="btn red sm" data-d>Удалить</button></div></div>`).join('') : '<p class="muted">В этом разделе отзывов нет.</p>';
+  $$('#rvl .tk').forEach(el => { const id = el.dataset.id, r = rvAll.find(x => x.id === id);
+    el.querySelectorAll('[data-a]').forEach(b => b.onclick = async () => { try { await rpc('admin_review_set', { p_id: id, p_status: b.dataset.a }); toast('Готово'); loadReviews() } catch (e) { } });
+    el.querySelector('[data-d]').onclick = async () => { if (!confirm('Удалить отзыв «' + r.name + '» навсегда?')) return; try { await rpc('admin_review_del', { p_id: id }); toast('Отзыв удалён'); loadReviews() } catch (e) { } };
+    el.querySelector('[data-e]').onclick = () => editReview(r) });
+}
+function editReview(r) {
+  const m = modal(`<h3 style="margin-bottom:12px">Исправить отзыв</h3>
+   <div class="fg"><div><label>Имя</label><input class="in" id="rn" value="${esc(r.name)}" maxlength="40"></div><div><label>Подпись</label><input class="in" id="rr" value="${esc(r.role)}" maxlength="60"></div>
+    <div><label>Оценка</label><select class="in" id="rs">${[5, 4, 3, 2, 1].map(n => `<option value="${n}" ${r.rating === n ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+    <div><label class="ck" style="margin-top:26px"><input type="checkbox" id="rc" ${r.name_changed ? 'checked' : ''}> Имя изменено по просьбе автора</label></div>
+    <div class="full"><label>Текст (только орфография и явные опечатки, смысл не меняем; мат закрашивайте звёздочками или отклоняйте отзыв)</label><textarea class="in" id="rb" maxlength="600" style="min-height:130px;resize:vertical">${esc(r.body)}</textarea></div></div>
+   <div class="row"><button class="btn" id="rsave">Сохранить</button><button class="btn line" id="rno">Отмена</button></div>`);
+  $('#rno', m).onclick = () => m.remove();
+  $('#rsave', m).onclick = async () => { try { await rpc('admin_review_edit', { p_id: r.id, p_name: $('#rn', m).value, p_role: $('#rr', m).value || 'пользователь сайта', p_body: $('#rb', m).value, p_rating: +$('#rs', m).value, p_name_changed: $('#rc', m).checked }); m.remove(); toast('Сохранено'); loadReviews() } catch (e) { } };
+}
+
 // ================= СТАТИСТИКА =================
 async function loadStats() {
   const s = await rpc('admin_stats'), mx = Math.max(1, ...s.days.map(d => d.n));
@@ -490,7 +527,7 @@ async function loadStats() {
 
 // ================= ЖУРНАЛ =================
 const ACT = { plan: 'Изменил подписку', course_give: 'Выдал курс', course_take: 'Забрал курс', block: 'Заблокировал', unblock: 'Разблокировал', role: 'Назначил роль', profile: 'Изменил профиль родителя', child_edit: 'Изменил профиль ребёнка', child_del: 'Удалил ребёнка', user_del: 'Удалил аккаунт',
-  note_add: 'Добавил заметку', note_del: 'Удалил заметку', badge_give: 'Выдал награду', badge_take: 'Забрал награду', stars_give: 'Выдал звёзды', stars_take: 'Забрал звёзды', promo_new: 'Создал промокод', promo_give: 'Применил промокод', promo_on: 'Включил промокод', promo_off: 'Выключил промокод', promo_del: 'Удалил промокод',
+  note_add: 'Добавил заметку', note_del: 'Удалил заметку', badge_give: 'Выдал награду', badge_take: 'Забрал награду', stars_give: 'Выдал звёзды', stars_take: 'Забрал звёзды', promo_new: 'Создал промокод', promo_give: 'Применил промокод', promo_on: 'Включил промокод', promo_off: 'Выключил промокод', promo_del: 'Удалил промокод', review_ok: 'Одобрил отзыв', review_no: 'Отклонил отзыв', review_back: 'Вернул отзыв на проверку', review_edit: 'Изменил отзыв', review_del: 'Удалил отзыв',
   password: 'Сменил пароль', bulk_plan: 'Массово: тариф', bulk_extend: 'Массово: продление', bulk_course_give: 'Массово: выдал курс', bulk_course_take: 'Массово: забрал курс', bulk_block: 'Массово: блокировка', bulk_unblock: 'Массово: разблокировка' };
 const DK = { plan: 'тариф', until: 'до', course: 'курс', code: 'код', child: 'ребёнок', badge: 'награда', delta: 'звёзды', reason: 'причина', total: 'итого', text: 'текст', name: 'имя', username: '@', role: 'роль', days: 'дней', max: 'лимит', children: 'детей', bulk: 'массово' };
 const det = o => Object.entries(o || {}).filter(([, v]) => v !== null && v !== '' && v !== undefined).map(([k, v]) => `${DK[k] || k}: ${k === 'until' ? fd(v) : v}`).join(' · ');
@@ -559,7 +596,7 @@ $('#fBadge').onsubmit = async e => {
 // ================= РОЛИ =================
 async function drawRoles() {
   await loadRolesList();
-  const groups = [['Аккаунты', ['users', 'plans', 'block', 'passwords', 'profiles', 'delete_kids', 'delete_users', 'bulk', 'notes']], ['Награды и промо', ['rewards', 'badges_edit', 'promo']], ['Контент и данные', ['content', 'stats', 'journal']], ['Сайт', ['test_access']]];
+  const groups = [['Аккаунты', ['users', 'plans', 'block', 'passwords', 'profiles', 'delete_kids', 'delete_users', 'bulk', 'notes']], ['Награды и промо', ['rewards', 'badges_edit', 'promo']], ['Контент и данные', ['content', 'stats', 'journal']], ['Сайт', ['test_access', 'reviews']]];
   $('#rlist').innerHTML = `<div class="kb"><b>Владелец</b> <span class="tag ok">вы</span><div class="muted">Полный доступ ко всему, включая роли. Назначается только через базу (is_admin).</div></div>` + ROLES.map(r => `<div class="tk" data-r="${esc(r.id)}">
    <div class="row" style="margin:0 0 10px"><input class="in" data-rt value="${esc(r.title)}" maxlength="40" style="max-width:260px"><span class="muted">${esc(r.id)}</span><span style="flex:1"></span><button class="btn red sm" data-rd>Удалить роль</button></div>
    ${groups.map(([t, ks]) => `<div class="hintx" style="margin-top:10px"><b>${t}</b></div><div class="pg">${ks.map(k => `<label class="ck"><input type="checkbox" data-pk="${k}" ${r.perms.includes(k) ? 'checked' : ''}> ${PERMS[k]}</label>`).join('')}</div>`).join('')}
