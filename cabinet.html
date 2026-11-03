@@ -173,7 +173,7 @@ sb.auth.onAuthStateChange((ev, s) => { if (ev === 'PASSWORD_RECOVERY') { recover
 sb.auth.getSession().then(({ data }) => enter(data.session));
 
 async function enter(session) {
-  if (!session) { user = null; document.body.classList.remove('kid'); show('auth'); if (forms.new.classList.contains('hide')) mode(/[?&]ref=/.test(location.search) ? 'reg' : 'login'); return }
+  if (!session) { user = null; document.body.classList.remove('kid'); show('auth'); if (forms.new.classList.contains('hide')) mode(/[?&](ref|reg)=/.test(location.search) ? 'reg' : 'login'); return }
   if (recovering) { show('auth'); mode('new'); return }
   if (entering || (user && user.id === session.user.id && !$('#app').classList.contains('hide'))) return;
   entering = true; user = session.user;
