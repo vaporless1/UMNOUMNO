@@ -202,3 +202,27 @@ body.kid .qsp[data-v=auto]{display:none}
  body.kid .box{padding:16px 14px;border-radius:24px}
  .kcont{gap:12px;padding:14px}.kplay{width:58px;height:58px;font-size:24px}
 }
+
+/* Мишка: настроения и помощник */
+.mas .m-up{transform-box:fill-box;transform-origin:50% 90%;animation:mup .5s ease-in-out infinite alternate}
+@keyframes mup{from{transform:rotate(-8deg)}to{transform:rotate(10deg)}}
+.mas.b-cheer,.mas.cheer{animation:mjump .6s ease-in-out infinite}
+.mas.b-sad,.mas.b-think{animation:msway 2.4s ease-in-out infinite}
+@keyframes mjump{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes msway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+.buddy{position:fixed;left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom));z-index:30;display:flex;align-items:flex-end;gap:6px;pointer-events:none}
+.buddy[hidden]{display:none}
+.b-bear{pointer-events:auto;width:84px;height:88px;padding:0;border:0;border-radius:50%;background:#fff;box-shadow:0 6px 18px rgba(80,40,10,.22);cursor:pointer;overflow:hidden;flex:none;-webkit-tap-highlight-color:transparent}
+.b-bear svg{width:100%;height:100%;display:block}
+.b-say{pointer-events:none;max-width:min(230px,56vw);background:#fff;border-radius:18px 18px 18px 4px;padding:10px 14px;font:800 15px/1.25 Nunito,Manrope,sans-serif;color:#4a2410;box-shadow:0 6px 18px rgba(80,40,10,.18);opacity:0;transform:translateY(8px) scale(.96);transition:.25s;order:2;margin-bottom:34px}
+.buddy.talk .b-say{opacity:1;transform:none}
+@media(max-width:560px){.b-bear{width:66px;height:70px}}
+@media(prefers-reduced-motion:reduce){.mas .m-up,.mas.b-cheer,.mas.b-sad,.mas.b-think{animation:none!important}}
+
+/* задание дня */
+.kdaily{position:relative;display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:24px;background:linear-gradient(135deg,#fff3c4,#ffe08a);border:2px solid #f4c63a;margin-bottom:14px;animation:up .5s both;overflow:hidden}
+.kdaily .dstar{flex:none;width:58px;height:58px;border-radius:50%;background:#fff;display:grid;place-items:center;font:900 20px Nunito,Manrope;color:#c98a00;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.kdaily .dt{min-width:0;flex:1}.kdaily small{display:block;font:800 12px Nunito;text-transform:uppercase;letter-spacing:.06em;color:#9a6a00}.kdaily b{display:block;font:900 18px/1.2 Nunito,Manrope;color:#4a2410;margin:2px 0}.kdaily span.s{font-size:13px;color:#7a5a20}
+.kdaily.done{background:linear-gradient(135deg,#e3f6e8,#c8eed3);border-color:#7cc995}.kdaily.done small{color:#2e7d4a}
+.kdaily.claimed{background:#f2efea;border-color:#ddd5ca}.kdaily.claimed .dstar{color:#8b8274}
+@media(max-width:560px){.kdaily{flex-wrap:wrap}.kdaily .btn{width:100%;justify-content:center}}
