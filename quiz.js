@@ -212,7 +212,7 @@ const Q = (() => {
       const host = root.querySelector('.qt'), nx = root.querySelector('.nx'), idx = i; wire(tasks[idx]);
       if (V.on) speak(taskParts(tasks[idx]));
       renderTask(tasks[idx], host, ok => {
-        res[idx] = ok; if (ok) score++;
+        res[idx] = ok; if (ok) score++; o.onAnswer && o.onAnswer(ok, idx, tasks.length);
         nx.innerHTML = `<button type="button" class="btn nb">${idx + 1 < tasks.length ? 'Дальше' : 'Готово'}</button>`;
         nx.querySelector('.nb').onclick = () => { i++; step() }; nx.querySelector('.nb').focus();
       });
@@ -224,6 +224,7 @@ const Q = (() => {
       const sv = root.querySelector('.sv'); let info = null;
       if (o.onFinish) { sv.textContent = 'Сохраняем результат…'; try { info = await o.onFinish(score, tasks.length); sv.textContent = '' } catch (e) { sv.innerHTML = `<span class="msg err">Не удалось сохранить: ${esc(e.message || e)}</span>` } }
       if (info && info.badges && info.badges.length) root.querySelector('.nbd').innerHTML = info.badges.map(b => `<div class="fb ok" style="margin:10px 0">${ico(b.icon)} Новая награда: ${esc(b.title)}</div>`).join('');
+      o.onDone && o.onDone(score, tasks.length, st);
       o.actions && o.actions(root.querySelector('.act'), { score, total: tasks.length, stars: st });
     }
     step();
