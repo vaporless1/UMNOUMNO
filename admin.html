@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="common.css?v=11">
+<link rel="stylesheet" href="common.css?v=12">
 <link rel="stylesheet" href="kid.css">
 <style>
 :root{--r:24px}
@@ -248,10 +248,11 @@ function bulkModal() {
 // ---- карточка аккаунта ----
 async function openUser(u) {
   sel = u; if (innerWidth <= 900) setTimeout(() => $('#detail').scrollIntoView({ behavior: 'smooth', block: 'start' }), 250);
-  const [d, notes, log] = await Promise.all([
+  const [d, notes, log, ref] = await Promise.all([
     rpc('admin_user_details', { p_user: u.id }),
     can('notes') ? sb.from('admin_notes').select('*').eq('user_id', u.id).order('created_at', { ascending: false }).then(r => r.data || []) : [],
-    can('journal') ? sb.from('admin_log').select('*').eq('target', u.id).order('at', { ascending: false }).limit(12).then(r => r.data || []) : []]);
+    can('journal') ? sb.from('admin_log').select('*').eq('target', u.id).order('at', { ascending: false }).limit(12).then(r => r.data || []) : [],
+    sb.rpc('admin_referrals', { p_user: u.id }).then(r => r.error ? null : r.data, () => null)]);   // null, если schema12 не запущена
   $$('#list .u').forEach(b => b.classList.toggle('on', b.dataset.id === u.id));
   const g = id => d.grants.find(x => x.course_id === id), P = d.profile || {}, cp = can('profiles'), cr = can('rewards');
   let pAv = P.avatar_url || null;
@@ -275,6 +276,10 @@ async function openUser(u) {
    ${cp ? '<div class="row"><button class="btn sm" id="pSave">Сохранить профиль</button></div>' : ''}</div>
 
   ${ME.owner && !u.is_admin ? `<div class="sec"><h3>Роль в админ-панели</h3><div class="row"><select class="in" id="roleSel"><option value="">Нет (обычный пользователь)</option>${ROLES.map(r => `<option value="${r.id}" ${u.role === r.id ? 'selected' : ''}>${esc(r.title)}</option>`).join('')}</select><button class="btn sm" id="roleSave">Назначить</button></div><p class="hintx">Права ролей настраиваются во вкладке «Роли».</p></div>` : ''}
+
+  ${ref ? `<div class="sec"><h3>Приглашения</h3><div class="muted">Код пользователя: <b>${esc(ref.code || '—')}</b></div>
+   ${ref.by ? `<p class="hintx">Пришёл по приглашению: <b>${esc(ref.by.email || '')}</b> (ID ${esc(ref.by.public_id)}) · бонус ${ref.by.rewarded ? 'выдан' : 'ещё не выдан'}</p>` : ''}
+   ${ref.invited.length ? `<table style="margin-top:8px"><tr><th>Приглашённый</th><th>ID</th><th>Когда</th><th>Бонус</th></tr>${ref.invited.map(x => `<tr><td>${esc(x.email || '')}</td><td>${esc(x.public_id)}</td><td>${fd(x.at)}</td><td>${x.rewarded ? 'выдан' : 'ждём первый урок'}</td></tr>`).join('')}</table>` : '<p class="hintx">Пока никого не пригласил.</p>'}</div>` : ''}
 
   <div class="sec"><h3>Дети и прогресс</h3>${d.children.length ? d.children.map(kid).join('') : '<p class="muted">Детей нет.</p>'}</div>
 
