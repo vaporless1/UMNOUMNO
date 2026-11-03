@@ -18,6 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;700&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="common.css?v=12">
 <link rel="stylesheet" href="kid.css">
+<link rel="stylesheet" href="stories.css">
 <style>
 header{background:#fff;position:sticky;top:0;z-index:20}
 header .wrap{display:flex;align-items:center;justify-content:space-between;height:68px;gap:10px}
@@ -123,6 +124,7 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
 <script src="quiz.js"></script>
 <script src="kid.js"></script>
 <script src="growth.js"></script>
+<script src="stories.js"></script>
 <script src="legal.js" defer></script>
 <script>
 injectIcons();
@@ -329,6 +331,7 @@ function home() {
   main.innerHTML = `${hb ? `<div class="pbanner" style="background-image:url('${esc(bannerSrc)}')"></div>` : ''}
   <div class="phero ${hb ? 'hasb' : ''}">${avEl(me.avatar_url, myName(), null, 'l')}<div class="hello"><h1>Привет, ${esc(myName())}!</h1><p>${k ? `Сейчас занимается: <b>${esc(k.name)}</b>, ${ageT(k.age)}.` : 'Добавьте ребёнка — и мы подготовим для него занятия.'}</p></div></div>
   ${subNotice()}
+  <div id="storyBox"></div>
   <section class="box"><h2>Мои дети</h2><div class="kgrid">${kids.map(kidCard).join('')}<div class="kadd" id="addKid" role="button" tabindex="0"><div><span>+</span><br>Добавить ребёнка</div></div></div></section>
   ${k ? `<section class="box"><div class="cp">${avEl(k.avatar_url, k.name, k.color, 'l')}<div><h2>${esc(k.name)}</h2><div class="muted">${k.username ? '@' + esc(k.username) : 'Юзернейм не задан'}${k.daily_limit ? ' · лимит: ' + k.daily_limit + ' ' + plural(k.daily_limit, 'урок', 'урока', 'уроков') + ' в день' : ''}</div>
    <div class="row"><button class="btn sm" id="goKid2">${ico('baby')} Режим ребёнка</button><button class="btn line sm" id="goRep">${ico('chart')} Отчёт за неделю</button></div></div></div>
@@ -340,6 +343,7 @@ function home() {
   ${k ? `<section class="box"><h2>Грамоты${k ? ': ' + esc(k.name) : ''}</h2><div id="certBox"><p class="muted">Загружаем…</p></div></section>` : ''}
   <section class="box"><h2>Пригласи друга</h2><div id="refBox"></div></section>`;
   if (k) certSection('#certBox', false);
+  mountStories('parents');
   Growth.referralPane($('#refBox'), { sb, toast, plural }).then(ok => { if (!ok) $('#refBox')?.closest('section')?.remove() });
   Growth.iosHint();
   bindCourses(); $$('[data-rl]').forEach(el => el.onclick = () => go('lesson', el.dataset.rl));
@@ -384,6 +388,7 @@ function kidhome() {
   const hello = stop ? 'На сегодня хватит! Приходи завтра.' : lim ? `Сегодня можно ещё ${left} ${plural(left, 'урок', 'урока', 'уроков')}.` : 'Выбери, чем займёмся!';
   main.innerHTML = `<section class="hero">${Kid.sceneSvg(eqArt('bg'), { view: '0 330 1600 570', mascot: eqArt('hat') || '', cls: 'hero-art' })}
     <div class="hero-t">${Kid.avatar(k.avatar_url, k.name, k.color, 'xl', eqArt('frame'))}<div class="bubble"><h1>Привет, ${esc(k.name)}!</h1><p>${hello}</p></div></div></section>
+  <div id="storyBox"></div>
   ${stop && !(daily && daily.done && !daily.claimed) ? '' : dailyCard()}
   ${stop ? '<section class="kp done-today"><h2>Ты сегодня молодец!</h2><p>Отдохни, а завтра мы вместе выучим что-то новое.</p></section>' : `
   ${cont ? `<section class="kp kcont" data-go="${cont.lesson.id}"><div class="kplay">${ico('play')}</div><div class="kct"><small>${cont.kind === 'resume' ? 'Продолжим с того места, где остановился' : 'Следующий урок'}</small><b>${esc(cont.lesson.title)}</b><span>${esc(cont.course.title)}${cont.pos > 5 ? ' · ' + fmtT(cont.pos) : ''}</span></div><span class="btn k-green">${cont.kind === 'resume' ? 'Продолжить' : 'Играть'}</span></section>` : ''}
@@ -392,11 +397,12 @@ function kidhome() {
   <section class="ksec"><h2><i>${ico('trophy')}</i>Мои награды</h2>${badgesHtml()}</section>
   <section class="ksec"><h2><i>${ico('trophy')}</i>Мои грамоты</h2><div id="certBox"><p class="muted">Загружаем…</p></div></section>`;
   bindCourses(); $$('[data-go]').forEach(el => el.onclick = () => go('lesson', el.dataset.go));
-  bindDaily(); certSection('#certBox', true);
+  bindDaily(); certSection('#certBox', true); mountStories('kids');
   Kid.buddy.show(eqArt('hat') || '');
   const dn = daily && !daily.claimed;
   setTimeout(() => stop ? Kid.buddy.say(Kid.buddy.phrase('sleep'), 'sleep') : dn && daily.done ? Kid.buddy.say('Забери 5 звёзд за задание дня!', 'cheer') : dn ? Kid.buddy.say('Сегодня задание дня: ' + daily.stars + ' звёзд за урок!', 'wow', 4500) : Kid.buddy.say(Kid.buddy.phrase('hi'), 'cheer'), 500);
 }
+const mountStories = mode => Stories.mount('#storyBox', { sb, mode, modal, toast, getChild: () => active });
 // карточка «Задание дня»: +5 звёзд за урок, который выбрал Мишка
 function dailyCard() {
   if (!daily) return '';
