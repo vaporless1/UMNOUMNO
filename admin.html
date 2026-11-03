@@ -117,7 +117,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>window.supabase||document.write('<script src="https://fastly.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"><\/script>')</script>
 <script>window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"><\/script>')</script>
-<script src="common.js?v=11"></script>
+<script src="common.js?v=13"></script>
 <script src="quiz.js"></script>
 <script src="kid.js"></script>
 <script src="stories.js"></script>
@@ -164,7 +164,7 @@ async function boot(session) {
 }
 sb.auth.getSession().then(({ data }) => boot(data.session)); sb.auth.onAuthStateChange(ev => { if (ev === 'SIGNED_OUT') show('loginBox') });
 $('#fLogin').onsubmit = async e => { e.preventDefault(); const f = new FormData(e.target), { data, error } = await sb.auth.signInWithPassword({ email: f.get('email').trim(), password: f.get('password') }); error ? $('#lmsg').textContent = 'Неверная почта или пароль.' : (sel = null, boot(data.session)) };
-$('#out').onclick = $('#dout').onclick = () => sb.auth.signOut();
+$('#out').onclick = $('#dout').onclick = logout;
 function openTab(id) {
   curTab = id; $$('#tabs [data-tab]').forEach(x => x.classList.toggle('on', x.dataset.tab === id));
   TABS.forEach(t => $('#tab-' + t.id).classList.toggle('hide', t.id !== id));
