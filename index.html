@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#B07F5E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="УМНО">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>УМНО — мультики, которые учат</title>
 <meta name="description" content="Обучающие мультфильмы для дошкольников: без рекламы, без резких звуков, с заботой о родителях.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -498,6 +504,12 @@ form.addEventListener('submit',async e=>{
   }catch(err){console.error('Отправка не удалась:',err);msg.className='msg err';msg.textContent='Не удалось отправить'+(err&&err.message?' ('+err.message+')':' (нет связи с сервером)')+'. Попробуйте ещё раз или напишите нам в Telegram.'}
   btn.disabled=false;btn.textContent='Записаться на курс';
 });
+</script>
+<script>
+// «Пригласи друга»: запоминаем код из ссылки и передаём его в кабинет
+(function(){try{var r=new URLSearchParams(location.search).get('ref');if(!r||!/^[A-Za-z0-9]{4,12}$/.test(r))return;r=r.toUpperCase();localStorage.setItem('umno_ref',r);
+document.querySelectorAll('a[href^="cabinet.html"]').forEach(function(a){a.href='cabinet.html?ref='+r})}catch(e){}})();
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
 </script>
 </body>
 </html>
