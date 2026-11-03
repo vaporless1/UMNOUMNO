@@ -15,6 +15,13 @@ const _mem = {}, safeStorage = {
   removeItem: k => { try { localStorage.removeItem(k) } catch (e) { delete _mem[k] } }
 };
 const sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY, { auth: { storage: safeStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+// Выход из аккаунта. Если сервер не ответил (плохая связь, блокировка), сессию всё равно стираем на этом устройстве
+async function logout() {
+  try { await Promise.race([sb.auth.signOut({ scope: 'local' }), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 2500))]) } catch (e) { console.warn('signOut:', e && e.message) }
+  try { Object.keys(localStorage).filter(k => /^sb-.*-auth-token/.test(k) || k === 'umno_kid_mode').forEach(k => localStorage.removeItem(k)) } catch (e) { }
+  for (const k of Object.keys(_mem)) if (/^sb-.*-auth-token/.test(k)) delete _mem[k];
+  location.reload();
+}
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const say = (el, t, k) => { el.textContent = t; el.className = 'msg ' + (k || '') };
