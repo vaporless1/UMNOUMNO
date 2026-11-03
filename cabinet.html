@@ -4,10 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Личный кабинет — УМНО</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<meta name="theme-color" content="#B07F5E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="УМНО">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;700&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="common.css?v=11">
+<link rel="stylesheet" href="common.css?v=12">
 <link rel="stylesheet" href="kid.css">
 <style>
 header{background:#fff;position:sticky;top:0;z-index:20}
@@ -84,7 +93,7 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
    <input class="in" name="password" type="password" placeholder="Пароль" required autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
    <button class="link" type="button" id="forgot" style="text-align:left">Забыли пароль?</button>
    <button class="btn" type="submit">Войти</button></form>
-  <form id="fReg" class="hide"><h2>Создайте аккаунт</h2><p class="sub">Это займёт меньше минуты.</p>
+  <form id="fReg" class="hide"><h2>Создайте аккаунт</h2><p class="sub">Это займёт меньше минуты.</p><div id="refBan" class="refban hide"></div>
    <input class="in" name="name" placeholder="Ваше имя" required autocomplete="name">
    <div><input class="in" name="username" placeholder="@юзернейм (необязательно)" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false"><div id="unmsg" class="msg"></div></div>
    <input class="in" name="email" type="email" inputmode="email" placeholder="E-mail" required autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false">
@@ -113,9 +122,11 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
 <script src="common.js?v=11"></script>
 <script src="quiz.js"></script>
 <script src="kid.js"></script>
+<script src="growth.js"></script>
 <script src="legal.js" defer></script>
 <script>
 injectIcons();
+if (Growth.captureRef()) { const b = $('#refBan'); b.classList.remove('hide'); b.innerHTML = '🎁 Вас пригласил друг. Когда ваш ребёнок пройдёт первый урок, вы оба получите <b>+7 дней «Премиум»</b>.' }
 const show = id => ['auth', 'app', 'blocked'].forEach(x => $('#' + x).classList.toggle('hide', x !== id));
 const ERR = { 'Invalid login credentials': 'Неверная почта или пароль.', 'Email not confirmed': 'Подтвердите почту: мы отправили вам письмо.', 'User already registered': 'Этот e-mail уже зарегистрирован. Попробуйте войти.', 'email rate limit exceeded': 'Слишком много писем за короткое время. Подождите около часа и попробуйте снова.' };
 const tr = m => ERR[m] || (/Лимит детей|Расширенное оформление/.test(m) ? m : /duplicate key|занят/i.test(m) ? 'Этот юзернейм уже занят.' : 'Что-то пошло не так: ' + m);
@@ -124,6 +135,7 @@ const plural = (n, a, b, c) => { const m = n % 10, h = n % 100; return h > 10 &&
 const ageT = n => n + ' ' + plural(n, 'год', 'года', 'лет');
 
 let user = null, me = {}, kids = [], active = null, access = null, plans = [], prices = [], bannerSrc = null, allProg = [], courses = [], lessons = [], badgesCat = [], prog = {}, stats = {}, earned = new Map(), shopItems = [], ownedItems = new Set(), views = [], shopTab = 'bg';
+let daily = null, certs = [];
 let entering = false, kidMode = false, recovering = /type=recovery/.test(location.hash), view = ['home'];
 const main = $('#main');
 const forms = { login: $('#fLogin'), reg: $('#fReg'), new: $('#fNew') };
@@ -144,8 +156,9 @@ forms.reg.onsubmit = e => { e.preventDefault(); busy(forms.reg, async () => {
   if (!f.get('c_terms')) return say($('#amsg'), 'Подтвердите, что вам есть 18 лет, и примите Пользовательское соглашение.', 'err');
   if (!f.get('c_pd')) return say($('#amsg'), 'Для регистрации нужно согласие на обработку персональных данных.', 'err');
   const ver = (window.LEGAL && LEGAL.ver) || '2026-10-30', at = new Date().toISOString();
-  const { data, error } = await sb.auth.signUp({ email: f.get('email').trim(), password: f.get('password'), options: { data: { full_name: f.get('name').trim(), username: un || null, consent_terms: { v: ver, at }, consent_pd: { v: ver, at }, consent_ads: f.get('c_ads') ? { v: ver, at } : null }, emailRedirectTo: location.href.split('#')[0] } });
+  const { data, error } = await sb.auth.signUp({ email: f.get('email').trim(), password: f.get('password'), options: { data: { full_name: f.get('name').trim(), username: un || null, ref: Growth.savedRef() || null, consent_terms: { v: ver, at }, consent_pd: { v: ver, at }, consent_ads: f.get('c_ads') ? { v: ver, at } : null }, emailRedirectTo: location.href.split('#')[0] } });
   if (error) return say($('#amsg'), tr(error.message), 'err');
+  Growth.clearRef();
   if (!data.session) { mode('login'); say($('#amsg'), 'Готово! Мы отправили письмо — подтвердите почту и войдите.', 'ok') } }) };
 $('#forgot').onclick = async () => { const email = forms.login.email.value.trim();
   if (!email) return say($('#amsg'), 'Введите e-mail выше, и мы пришлём ссылку для смены пароля.', 'err');
@@ -160,7 +173,7 @@ sb.auth.onAuthStateChange((ev, s) => { if (ev === 'PASSWORD_RECOVERY') { recover
 sb.auth.getSession().then(({ data }) => enter(data.session));
 
 async function enter(session) {
-  if (!session) { user = null; document.body.classList.remove('kid'); show('auth'); if (forms.new.classList.contains('hide')) mode('login'); return }
+  if (!session) { user = null; document.body.classList.remove('kid'); show('auth'); if (forms.new.classList.contains('hide')) mode(/[?&]ref=/.test(location.search) ? 'reg' : 'login'); return }
   if (recovering) { show('auth'); mode('new'); return }
   if (entering || (user && user.id === session.user.id && !$('#app').classList.contains('hide'))) return;
   entering = true; user = session.user;
@@ -202,12 +215,16 @@ async function loadKids() {
   if (!kids.find(k => k.id === active)) { let s = null; try { s = localStorage.getItem('umno_kid') } catch { } active = kids.find(k => k.id === s) ? s : (kids[0] && kids[0].id) || null }
 }
 async function loadChild() {
-  prog = {}; stats = {}; earned = new Map(); ownedItems = new Set(); views = []; if (!active) return;
+  prog = {}; stats = {}; earned = new Map(); ownedItems = new Set(); views = []; daily = null; certs = []; if (!active) return;
   const [p, s, b, o, v] = await Promise.all([sb.from('progress').select('*').eq('child_id', active), sb.rpc('child_stats', { p_child: active }), sb.from('child_badges').select('*').eq('child_id', active),
     sb.from('child_items').select('item_id').eq('child_id', active), sb.from('lesson_views').select('*').eq('child_id', active).order('last_at', { ascending: false }).limit(30)]);
   (p.data || []).forEach(x => prog[x.lesson_id] = x); stats = s.data || {}; (b.data || []).forEach(x => earned.set(x.badge_id, x.earned_at));
   (o.data || []).forEach(x => ownedItems.add(x.item_id)); views = v.data || [];
+  if (kidMode) await loadDaily();
 }
+async function loadDaily() { daily = null; if (!active) return; const d = await sb.rpc('daily_task', { p_child: active }); daily = d.error ? null : d.data }   // null, если schema12 ещё не запущена
+async function loadCerts() { certs = []; if (!active) return certs; const r = await sb.rpc('my_certificates', { p_child: active }); certs = r.error ? [] : (r.data || []); return certs }
+const certSection = (host, kid) => loadCerts().then(l => { const el = $(host); if (!el || (!l.length && !kid && !kids.length)) return; el.innerHTML = Growth.certsHtml(l, kid); $$('[data-cert]', el).forEach(b => b.onclick = () => Growth.showCert(l[+b.dataset.cert], { modal, toast, hat: eqArt('hat') || '' })) });
 function canAccess(cid) {
   if (me.is_admin || me.tester) return true;
   if (access) return !!(access.all || (access.courses || []).includes(cid));
@@ -247,6 +264,7 @@ async function touchLesson(id, pos) {
 
 function header() {
   document.body.classList.toggle('kid', kidMode);
+  if (!kidMode) Kid.buddy.hide();
   const k = curKid();
   if (kidMode && k) Kid.applyScene(eqArt('bg')); else Kid.clearScene();
   $('#hdr').innerHTML = `<a class="logo" href="${kidMode ? '#' : 'index.html'}">УМ<b>НО</b>${kidMode ? '<small>детям</small>' : ''}</a><div class="hr">` + (kidMode
@@ -318,7 +336,12 @@ function home() {
    ${(() => { const r = recentLessons(4); return r.length ? `<h3 style="margin:20px 0 10px;font-size:15px">Недавно смотрел</h3>` + r.map(({ l, c, v, p }) => `<div class="lrow ${p?.completed ? 'done' : ''}" data-rl="${l.id}"><div class="n">${ico(c.icon)}</div><div><b>${esc(l.title)}</b><span>${esc(c.title)} · ${fd(v.last_at)}</span></div>${p?.completed ? `<em>${'★'.repeat(p.stars || 1)}${'☆'.repeat(3 - (p.stars || 1))}</em>` : '<em>не закончен</em>'}</div>`).join('') : '' })()}
    ${stats.spent ? `<p class="muted" style="margin-top:12px">В магазине потрачено: ${stats.spent} ★. На счёте сейчас: ${balance()} ★.</p>` : ''}
    ${badgesHtml()}</section>` : ''}
-  <section class="box"><h2>Курсы</h2><div class="courses">${coursesHtml()}</div></section>`;
+  <section class="box"><h2>Курсы</h2><div class="courses">${coursesHtml()}</div></section>
+  ${k ? `<section class="box"><h2>Грамоты${k ? ': ' + esc(k.name) : ''}</h2><div id="certBox"><p class="muted">Загружаем…</p></div></section>` : ''}
+  <section class="box"><h2>Пригласи друга</h2><div id="refBox"></div></section>`;
+  if (k) certSection('#certBox', false);
+  Growth.referralPane($('#refBox'), { sb, toast, plural }).then(ok => { if (!ok) $('#refBox')?.closest('section')?.remove() });
+  Growth.iosHint();
   bindCourses(); $$('[data-rl]').forEach(el => el.onclick = () => go('lesson', el.dataset.rl));
   $$('.kcd').forEach(el => el.onclick = async e => { if (e.target.closest('[data-edit]')) return; if (el.classList.contains('fz')) return upsell('child'); active = el.dataset.k; try { localStorage.setItem('umno_kid', active) } catch { } await loadChild(); home() });
   $$('[data-edit]').forEach(b => b.onclick = e => { e.stopPropagation(); kidEditor(kids.find(c => c.id === b.dataset.edit)) });
@@ -361,12 +384,33 @@ function kidhome() {
   const hello = stop ? 'На сегодня хватит! Приходи завтра.' : lim ? `Сегодня можно ещё ${left} ${plural(left, 'урок', 'урока', 'уроков')}.` : 'Выбери, чем займёмся!';
   main.innerHTML = `<section class="hero">${Kid.sceneSvg(eqArt('bg'), { view: '0 330 1600 570', mascot: eqArt('hat') || '', cls: 'hero-art' })}
     <div class="hero-t">${Kid.avatar(k.avatar_url, k.name, k.color, 'xl', eqArt('frame'))}<div class="bubble"><h1>Привет, ${esc(k.name)}!</h1><p>${hello}</p></div></div></section>
+  ${stop && !(daily && daily.done && !daily.claimed) ? '' : dailyCard()}
   ${stop ? '<section class="kp done-today"><h2>Ты сегодня молодец!</h2><p>Отдохни, а завтра мы вместе выучим что-то новое.</p></section>' : `
   ${cont ? `<section class="kp kcont" data-go="${cont.lesson.id}"><div class="kplay">${ico('play')}</div><div class="kct"><small>${cont.kind === 'resume' ? 'Продолжим с того места, где остановился' : 'Следующий урок'}</small><b>${esc(cont.lesson.title)}</b><span>${esc(cont.course.title)}${cont.pos > 5 ? ' · ' + fmtT(cont.pos) : ''}</span></div><span class="btn k-green">${cont.kind === 'resume' ? 'Продолжить' : 'Играть'}</span></section>` : ''}
   ${rec.length ? `<section class="ksec"><h2><i>${ico('clock')}</i>Недавно смотрели</h2><div class="krow">${rec.map(({ l, c, p }, i) => `<div class="kr" data-go="${l.id}" style="--kc:${KCOL[(courses.indexOf(c)) % KCOL.length]};animation:up .4s ${i * 60}ms both"><div class="kri">${ico(c.icon)}<span class="kplay s">${ico('play')}</span></div><b>${esc(l.title)}</b><small>${esc(c.title)}</small>${p?.completed ? starsTxt(p.stars || 1) : '<span class="kcont-tag">не закончен</span>'}</div>`).join('')}</div></section>` : ''}
   <section class="ksec"><h2><i>${ico('book')}</i>Курсы</h2><div class="kcs">${kidCourses()}</div></section>`}
-  <section class="ksec"><h2><i>${ico('trophy')}</i>Мои награды</h2>${badgesHtml()}</section>`;
+  <section class="ksec"><h2><i>${ico('trophy')}</i>Мои награды</h2>${badgesHtml()}</section>
+  <section class="ksec"><h2><i>${ico('trophy')}</i>Мои грамоты</h2><div id="certBox"><p class="muted">Загружаем…</p></div></section>`;
   bindCourses(); $$('[data-go]').forEach(el => el.onclick = () => go('lesson', el.dataset.go));
+  bindDaily(); certSection('#certBox', true);
+  Kid.buddy.show(eqArt('hat') || '');
+  const dn = daily && !daily.claimed;
+  setTimeout(() => stop ? Kid.buddy.say(Kid.buddy.phrase('sleep'), 'sleep') : dn && daily.done ? Kid.buddy.say('Забери 5 звёзд за задание дня!', 'cheer') : dn ? Kid.buddy.say('Сегодня задание дня: ' + daily.stars + ' звёзд за урок!', 'wow', 4500) : Kid.buddy.say(Kid.buddy.phrase('hi'), 'cheer'), 500);
+}
+// карточка «Задание дня»: +5 звёзд за урок, который выбрал Мишка
+function dailyCard() {
+  if (!daily) return '';
+  const d = daily, cls = d.claimed ? 'claimed' : d.done ? 'done' : '';
+  return `<section class="kdaily ${cls}"><div class="dstar">+${d.stars}★</div><div class="dt"><small>Задание дня</small><b>${esc(d.title)}</b><span class="s">${esc(d.course_title)}</span></div>`
+    + (d.claimed ? '<span class="btn line sm" style="pointer-events:none">Выполнено</span>' : d.done ? `<button class="btn k-yellow" id="dClaim">Забрать ${d.stars} ★</button>` : `<button class="btn k-green" id="dGo" data-go="${d.lesson_id}">Играть</button>`) + '</section>';
+}
+async function claimDaily(quiet) {
+  const { data, error } = await sb.rpc('claim_daily', { p_child: active });
+  if (error) { if (!quiet) toast(error.message, 1); return false }
+  await loadChild(); header(); Kid.confetti(); toast(`+${data.stars} ★ за задание дня!`); Kid.buddy.say('Ура! +' + data.stars + ' звёзд за задание дня!', 'cheer', 4500); return true;
+}
+function bindDaily() {
+  $('#dClaim')?.addEventListener('click', async e => { e.target.disabled = true; if (await claimDaily()) kidhome(); else e.target.disabled = false });
 }
 
 // ---------- магазин (детский режим) ----------
@@ -424,10 +468,13 @@ async function openLesson(id) {
     vid.addEventListener('pause', savePos); vid.addEventListener('ended', () => touchLesson(id, 0));
   }
   const save = async (score, total) => { const { error } = await sb.from('progress').upsert({ child_id: active, lesson_id: id, completed: true, score, total }, { onConflict: 'child_id,lesson_id' }); if (error) throw error;
-    const r = await sb.rpc('refresh_badges', { p_child: active }); await loadChild(); header(); return { badges: r.data || [] } };
+    const r = await sb.rpc('refresh_badges', { p_child: active }); const wasDaily = kidMode && daily && !daily.claimed && daily.lesson_id === id; await loadChild(); header();
+    if (wasDaily && daily && daily.done && !daily.claimed) await claimDaily(true);
+    return { badges: r.data || [] } };
   const actions = (el, r) => { if (kidMode && r && r.stars === 3) Kid.confetti(); el.innerHTML = `<button class="btn line" id="again">${T.length ? 'Пройти ещё раз' : 'К курсу'}</button>${next ? '<button class="btn" id="nx">Следующий урок</button>' : '<button class="btn" id="toC">К курсу</button>'}`;
     $('#again').onclick = () => T.length ? go('lesson', id) : go('course', c.id); $('#nx')?.addEventListener('click', () => go('lesson', next.id)); $('#toC')?.addEventListener('click', () => go('course', c.id)) };
-  $('#startQ')?.addEventListener('click', () => { if (voicePref() && Q.voice.supported && !Q.voice.ru()) toast('На этом устройстве не нашлось русского голоса — озвучка может не работать.', 1); Q.run($('#quiz'), T, { onFinish: save, actions, voice: voicePref(), onVoice: setVoicePref }) });
+  if (kidMode) { Kid.buddy.show(eqArt('hat') || ''); Kid.buddy.paint('think') }
+  $('#startQ')?.addEventListener('click', () => { if (voicePref() && Q.voice.supported && !Q.voice.ru()) toast('На этом устройстве не нашлось русского голоса — озвучка может не работать.', 1); Q.run($('#quiz'), T, { onFinish: save, actions, voice: voicePref(), onVoice: setVoicePref, onAnswer: ok => kidMode && Kid.buddy.say(Kid.buddy.phrase(ok ? 'ok' : 'no'), ok ? 'cheer' : 'sad', 2400), onDone: (sc, tot, st) => kidMode && Kid.buddy.say(st >= 3 ? 'Ура! Все три звезды!' : Kid.buddy.phrase('win'), 'cheer', 4500) }) });
   $('#markQ')?.addEventListener('click', async e => { e.target.disabled = true; try { await save(null, null); $('#quiz').innerHTML = '<div class="qz"><h2 class="qq">Урок пройден!</h2><div class="qa act row" style="justify-content:center"></div></div>'; actions($('#quiz .act')) } catch (er) { toast(er.message, 1); e.target.disabled = false } });
 }
 
