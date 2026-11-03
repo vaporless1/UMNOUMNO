@@ -120,7 +120,7 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>window.supabase||document.write('<script src="https://fastly.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"><\/script>')</script>
 <script>window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"><\/script>')</script>
-<script src="common.js?v=11"></script>
+<script src="common.js?v=13"></script>
 <script src="quiz.js"></script>
 <script src="kid.js"></script>
 <script src="growth.js"></script>
@@ -170,7 +170,7 @@ forms.new.onsubmit = e => { e.preventDefault(); busy(forms.new, async () => {
   const { error } = await sb.auth.updateUser({ password: forms.new.password.value });
   if (error) return say($('#amsg'), tr(error.message), 'err');
   recovering = false; history.replaceState(null, '', location.pathname); enter((await sb.auth.getSession()).data.session) }) };
-$('#bout').onclick = () => sb.auth.signOut();
+$('#bout').onclick = logout;
 sb.auth.onAuthStateChange((ev, s) => { if (ev === 'PASSWORD_RECOVERY') { recovering = true; show('auth'); mode('new'); return } setTimeout(() => enter(s), 0) });
 sb.auth.getSession().then(({ data }) => enter(data.session));
 
@@ -584,7 +584,7 @@ function settings(a) {
   const m = (t, k) => say($('#pmsg'), t, k);
   if (a === 'subs') setTimeout(() => $('#subs')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
   $('#seeSubs')?.addEventListener('click', () => $('#subs').scrollIntoView({ behavior: 'smooth' }));
-  $('[data-back]').onclick = () => go('home'); $('#logout').onclick = () => sb.auth.signOut();
+  $('[data-back]').onclick = () => go('home'); $('#logout').onclick = logout;
   $('#delAcc').onclick = e => { e.preventDefault(); const to = (window.LEGAL && LEGAL.op_email) || ''; if (!to || to[0] === '[') return toast('Адрес для обращений пока не указан. Напишите в поддержку.');
     location.href = 'mailto:' + to + '?subject=' + encodeURIComponent('Удаление аккаунта') + '&body=' + encodeURIComponent('Прошу удалить мой аккаунт и все связанные персональные данные, включая профили детей.\nE-mail аккаунта: ' + user.email + '\nID: ' + (me.public_id || '')) };
   $('#cpid').onclick = () => { navigator.clipboard?.writeText(String(me.public_id || '')); toast('ID скопирован') };
