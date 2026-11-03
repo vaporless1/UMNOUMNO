@@ -20,12 +20,26 @@ const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const say = (el, t, k) => { el.textContent = t; el.className = 'msg ' + (k || '') };
 const uid = () => crypto.randomUUID();
 const UNAME = /^[a-z0-9_]{3,20}$/;
-const PLAN = { none: 'Нет подписки', trial: 'Пробный период', family: 'Семейный', year: 'Годовой' };
-const fd = d => d ? new Date(d).toLocaleDateString('ru') : '—';
+const PLAN = { none: 'Нет подписки', trial: 'Пробная', course: 'Курсовая', premium: 'Премиум', family: 'Премиум', year: 'Премиум' };
+const UNLIM = d => !!d && new Date(d).getFullYear() >= 2100;               // 2100-01-01 в базе = бессрочно
+const fd = d => d ? (UNLIM(d) ? 'бессрочно' : new Date(d).toLocaleDateString('ru')) : '—';
+const untilT = d => !d ? '—' : UNLIM(d) ? 'бессрочно' : 'до ' + fd(d);
 let _tt; function toast(m, err) { let t = $('#toast'); if (!t) { t = document.createElement('div'); t.id = 'toast'; document.body.append(t) } t.textContent = m; t.className = (err ? 'err ' : '') + 'on'; clearTimeout(_tt); _tt = setTimeout(() => t.className = '', 3400) }
 
 const THEMES = { brown: ['#B07F5E', '#8f6246'], blue: ['#4f8ef7', '#2f6fd6'], pink: ['#e0709a', '#c2527c'], green: ['#4caf7d', '#2e8f5e'], purple: ['#8a63d2', '#6b45b8'], orange: ['#e8873a', '#c96a1f'] };
-function applyTheme(k) { const t = THEMES[k] || THEMES.brown, r = document.documentElement.style; r.setProperty('--brown', t[0]); r.setProperty('--brown-d', t[1]) }
+// Свой цвет (подписка «Премиум»): подгоняем яркость, чтобы белый текст на кнопках оставался читаемым
+function hexToHsl(h) { const r = parseInt(h.slice(1, 3), 16) / 255, g = parseInt(h.slice(3, 5), 16) / 255, b = parseInt(h.slice(5, 7), 16) / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2; let hh = 0, s = 0;
+  if (mx !== mn) { const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn); hh = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; hh /= 6 } return [hh, s, l] }
+function hslToHex(h, s, l) { const f = (p, q, t) => { if (t < 0) t += 1; if (t > 1) t -= 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < 1 / 2 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p };
+  let r, g, b; if (s === 0) r = g = b = l; else { const q = l < .5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q; r = f(p, q, h + 1 / 3); g = f(p, q, h); b = f(p, q, h - 1 / 3) }
+  return '#' + [r, g, b].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join('') }
+function lum(hex) { const c = [1, 3, 5].map(i => { const v = parseInt(hex.slice(i, i + 2), 16) / 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4) }); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2] }
+function fitAccent(hex) { if (!/^#[0-9a-f]{6}$/i.test(hex || '')) return null; const [h, s, l0] = hexToHsl(hex); let l = Math.max(.2, l0), out = hslToHex(h, s, l);
+  while (1.05 / (lum(out) + .05) < 4.5 && l > .12) { l -= .02; out = hslToHex(h, s, l) } return out }   // белый текст на кнопках: контраст не ниже 4.5
+function shadeHex(hex, d) { const [h, s, l] = hexToHsl(hex); return hslToHex(h, s, Math.min(.9, Math.max(.05, l + d))) }
+function applyTheme(k, accent) { const r = document.documentElement.style, a = fitAccent(accent);
+  if (a) { r.setProperty('--brown', a); r.setProperty('--brown-d', shadeHex(a, -.1)); return }
+  const t = THEMES[k] || THEMES.brown; r.setProperty('--brown', t[0]); r.setProperty('--brown-d', t[1]) }
 
 async function sha(s) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('umno:' + s)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('') }
 
@@ -35,6 +49,13 @@ async function resizeImg(file, max = 800, square = false) {
   else { const k = Math.min(1, max / Math.max(w, h)); w = Math.round(w * k); h = Math.round(h * k) }
   const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
   x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(im, sx, sy, sw, sh, 0, 0, w, h);
+  return new Promise(r => c.toBlob(r, 'image/jpeg', .86));
+}
+// Обрезка по центру до нужного размера (баннер)
+async function coverImg(file, w, h) {
+  const im = await createImageBitmap(file), k = Math.max(w / im.width, h / im.height), sw = w / k, sh = h / k;
+  const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(im, (im.width - sw) / 2, (im.height - sh) / 2, sw, sh, 0, 0, w, h);
   return new Promise(r => c.toBlob(r, 'image/jpeg', .86));
 }
 async function uploadPublic(bucket, path, blob, type) {
