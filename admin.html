@@ -24,6 +24,8 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
 .u{display:block;width:100%;text-align:left;border:2px solid transparent;background:var(--soft);border-radius:18px;padding:12px 16px;margin-bottom:8px;cursor:pointer;font:inherit;transition:.2s}
 .u:hover{transform:translateX(4px)}.u.on{border-color:var(--brown);background:var(--cream)}.u b{display:block}.u small{color:var(--grey);display:block}
 .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;background:#fff;margin-right:4px}.tag.red{background:#c0392b;color:#fff}.tag.ok{background:#2e7d4f;color:#fff}.tag.dk{background:var(--ink);color:#fff}
+#plansBox .kb .in{background:#fff}
+.sr{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f1eeea}.sr small{color:var(--grey);display:block}.sr.off{opacity:.55}.pl-h{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.pt td{padding:6px 8px 6px 0}.pt .in{padding:9px 14px;width:130px}
 .sec{border-top:1px solid #eee;padding:20px 0}.sec h3{font-size:14px;margin-bottom:12px}
 .row>.in,.row>select{flex:1;min-width:140px}
 .cr{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 0}.cr b{min-width:140px}.cr .st{font-size:12px;color:var(--grey);min-width:120px}.cr .in{width:160px;padding:9px 14px}
@@ -78,15 +80,16 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
   <div id="tab-stats" class="hide" style="padding:26px 0 70px"><div id="stats"></div></div>
   <div id="tab-promo" class="hide" style="padding:26px 0 70px"><div class="card"><h2 style="font-size:18px;margin-bottom:14px">Новый промокод</h2><form id="fPromo" class="fg">
    <div><label>Код</label><div class="row" style="margin:0;flex-wrap:nowrap"><input class="in" id="pcodeN" placeholder="SPRING2026" style="text-transform:uppercase" maxlength="32" autocomplete="off"><button class="btn line sm" type="button" id="pgen">Случайный</button></div></div>
-   <div><label>Подписка</label><select class="in" id="pplan"><option value="">— без подписки —</option><option value="trial">Пробный</option><option value="family">Семейный</option><option value="year">Годовой</option></select></div>
+   <div><label>Подписка</label><select class="in" id="pplan"><option value="">— без подписки (только курс) —</option><option value="trial">Пробная</option><option value="course">Курсовая (выберите курс)</option><option value="premium">Премиум</option></select></div>
    <div><label>Дней (для подписки и для курса; у курса пусто — бессрочно)</label><input class="in" id="pdays" type="number" min="1" max="3650" value="30"></div>
-   <div><label>Курс в подарок</label><select class="in" id="pcourse"></select></div>
+   <div><label>Курс (для «Курсовой» или отдельный подарок)</label><select class="in" id="pcourse"></select></div>
    <div><label>Сколько раз можно использовать</label><input class="in" id="pmax" type="number" min="1" placeholder="без ограничений"></div>
    <div><label>Действует до</label><input class="in" id="puntil" type="date"></div>
    <div class="full"><label>Заметка для себя</label><input class="in" id="pnote" maxlength="120" placeholder="Например: акция в Telegram"></div>
    <div class="full"><button class="btn" type="submit">Создать промокод</button></div></form>
    <p class="hintx">Родитель вводит код в кабинете: Профиль → «Промокод». Один код можно применить к аккаунту только один раз.</p></div>
    <div class="card" style="margin-top:22px;overflow:auto"><div id="plist"></div></div></div>
+  <div id="tab-plans" class="hide" style="padding:26px 0 70px"><div class="card" id="plansBox"></div></div>
   <div id="tab-badges" class="grid hide"><section class="card"><div id="blist"></div></section>
    <section class="card"><h3 id="bfh" style="margin-bottom:12px">Новая награда</h3><form id="fBadge" style="display:grid;gap:10px">
     <input class="in" name="bt" placeholder="Название" maxlength="40"><input class="in" name="bd" placeholder="Описание (за что дают)" maxlength="100">
@@ -137,7 +140,7 @@ let ME = { owner: false, perms: [], role: null }, ROLES = [], ALLB = [];
 const can = p => ME.owner || ME.perms.includes(p);
 const TABS = [
   { id: 'users', t: 'Аккаунты', need: () => can('users') }, { id: 'lessons', t: 'Уроки и задания', need: () => can('content') },
-  { id: 'promo', t: 'Промокоды', need: () => can('promo') }, { id: 'badges', t: 'Награды', need: () => can('badges_edit') }, { id: 'shop', t: 'Магазин', need: () => can('badges_edit') },
+  { id: 'plans', t: 'Подписки', need: () => can('plans') }, { id: 'promo', t: 'Промокоды', need: () => can('promo') }, { id: 'badges', t: 'Награды', need: () => can('badges_edit') }, { id: 'shop', t: 'Магазин', need: () => can('badges_edit') },
   { id: 'reviews', t: 'Отзывы', need: () => can('reviews') }, { id: 'stats', t: 'Статистика', need: () => can('stats') }, { id: 'journal', t: 'Журнал', need: () => can('journal') }, { id: 'roles', t: 'Роли', need: () => ME.owner }
 ];
 let curTab = null, usersLoaded = false;
@@ -151,7 +154,7 @@ async function boot(session) {
   $('#tabs').innerHTML = tabs.map(t => `<button data-tab="${t.id}">${t.t}</button>`).join('');
   $$('#tabs [data-tab]').forEach(b => b.onclick = () => openTab(b.dataset.tab));
   show('panel'); usersLoaded = false;
-  await loadCat(); await loadBadges(); if (ME.owner) await loadRolesList();
+  await loadCat(); await loadPlans(); await loadBadges(); if (ME.owner) await loadRolesList();
   if (can('reviews')) sb.from('reviews').select('id', { count: 'exact', head: true }).eq('status', 'pending').then(({ count }) => { const b = document.querySelector('#tabs [data-tab=reviews]'); if (b && count) b.textContent = 'Отзывы · ' + count });
   openTab(tabs[0].id);
 }
@@ -161,9 +164,15 @@ $('#out').onclick = $('#dout').onclick = () => sb.auth.signOut();
 function openTab(id) {
   curTab = id; $$('#tabs [data-tab]').forEach(x => x.classList.toggle('on', x.dataset.tab === id));
   TABS.forEach(t => $('#tab-' + t.id).classList.toggle('hide', t.id !== id));
-  ({ users: () => { if (!usersLoaded) { usersLoaded = true; search('') } }, lessons: tree, stats: loadStats, promo: loadPromo, badges: drawBadges, shop: drawShop, journal: loadLog, roles: drawRoles, reviews: loadReviews })[id]();
+  ({ users: () => { if (!usersLoaded) { usersLoaded = true; search('') } }, lessons: tree, stats: loadStats, promo: loadPromo, plans: drawPlans, badges: drawBadges, shop: drawShop, journal: loadLog, roles: drawRoles, reviews: loadReviews })[id]();
 }
 async function loadCat() { courses = (await sb.from('courses').select('*').order('sort')).data || []; lessons = (await sb.from('lessons').select('*').order('sort')).data || [] }
+let PL = [], PP = [];
+async function loadPlans() { const [a, b] = await Promise.all([sb.from('plans').select('*').order('sort'), sb.from('plan_prices').select('*').order('days')]); PL = a.data || []; PP = b.data || [] }
+const plTitle = id => (PL.find(p => p.id === id) || {}).title || PLAN[id] || id;
+const planOpts = (none, sel) => (none ? `<option value="none">Нет подписки (всё закрыто)</option>` : '') + (PL.length ? PL : [{ id: 'trial', title: 'Пробная' }, { id: 'course', title: 'Курсовая' }, { id: 'premium', title: 'Премиум' }]).map(p => `<option value="${p.id}" ${sel === p.id ? 'selected' : ''}>${esc(p.title)}</option>`).join('');
+const courseOpts = () => courses.map(c => `<option value="${c.id}">${esc(c.title)}</option>`).join('');
+const SRCA = { trial: 'при регистрации', promo: 'промокод', admin: 'выдана командой', payment: 'оплата', migration: 'перенесена из старой модели' };
 async function loadBadges() { ALLB = (await sb.from('badges').select('*').order('sort')).data || [] }
 async function loadRolesList() { ROLES = (await sb.from('admin_roles').select('*').order('created_at')).data || [] }
 const avEl = (url, name, color, cls = '') => `<span class="av ${cls}" style="${color ? `background:${color}` : ''}">${url ? `<img src="${esc(url)}" alt="">` : esc((name || '?')[0].toUpperCase())}</span>`;
@@ -198,7 +207,7 @@ const afterDelete = async () => { sel = null; $('#detail').innerHTML = '<p class
 // ---- массовые действия ----
 function bulkModal() {
   const ids = [...checked], A = [];
-  if (can('plans')) A.push(['extend', 'Продлить подписку на N дней'], ['plan', 'Установить тариф и дату'], ['grant', 'Выдать курс'], ['revoke', 'Забрать курс']);
+  if (can('plans')) A.push(['extend', 'Продлить подписку на N дней'], ['plan', 'Установить подписку и дату окончания'], ['grant', 'Выдать курс'], ['revoke', 'Забрать курс']);
   if (can('promo')) A.push(['promo', 'Применить промокод']);
   if (can('block')) A.push(['block', 'Заблокировать'], ['unblock', 'Разблокировать']);
   if (can('delete_users')) A.push(['delete', 'Удалить аккаунты']);
@@ -206,8 +215,8 @@ function bulkModal() {
    <select class="in" id="ba">${A.map(([k, t]) => `<option value="${k}">${t}</option>`).join('')}</select><div id="bf" style="display:grid;gap:10px;margin-top:12px"></div>
    <div id="bm" class="msg" style="margin-top:10px"></div><div class="row"><button class="btn" id="bgo">Выполнить</button><button class="btn line" id="bno">Отмена</button></div>`);
   const draw = () => { const a = $('#ba', m).value; $('#bf', m).innerHTML = ({
-    extend: '<input class="in" id="b_days" type="number" min="1" max="3650" value="30" placeholder="Дней"><p class="hintx">Если подписки не было — включится «Семейный» на это число дней.</p>',
-    plan: `<select class="in" id="b_plan">${Object.entries(PLAN).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select><input class="in" id="b_until" type="date">`,
+    extend: `<select class="in" id="b_plan">${planOpts(false, 'premium')}</select><select class="in" id="b_course"><option value="">Курс (только для «Курсовой»)</option>${courseOpts()}</select><input class="in" id="b_days" type="number" min="1" max="3650" value="30" placeholder="Дней"><p class="hintx">Новая подписка начнётся после окончания текущей такого же вида: дни не сгорают.</p>`,
+    plan: `<select class="in" id="b_plan">${planOpts(true, 'premium')}</select><select class="in" id="b_course"><option value="">Курс (только для «Курсовой»)</option>${courseOpts()}</select><input class="in" id="b_until" type="date"><p class="hintx">Все действующие подписки будут заменены выбранной.</p>`,
     grant: `<select class="in" id="b_course">${courses.map(c => `<option value="${c.id}">${esc(c.title)}</option>`).join('')}</select><input class="in" id="b_until" type="date" title="Пусто — бессрочно"><p class="hintx">Пустая дата — без срока.</p>`,
     revoke: `<select class="in" id="b_course">${courses.map(c => `<option value="${c.id}">${esc(c.title)}</option>`).join('')}</select>`,
     promo: '<input class="in" id="b_code" placeholder="Промокод" style="text-transform:uppercase">',
@@ -218,7 +227,8 @@ function bulkModal() {
   $('#ba', m).onchange = draw; draw(); $('#bno', m).onclick = () => m.remove();
   $('#bgo', m).onclick = async () => {
     const a = $('#ba', m).value, v = id => $('#' + id, m)?.value; let arg = {};
-    if (a === 'extend') arg = { days: +v('b_days') }; if (a === 'plan') arg = { plan: v('b_plan'), until: eod(v('b_until')) };
+    if (a === 'extend') arg = { days: +v('b_days'), plan: v('b_plan'), course: v('b_course') }; if (a === 'plan') arg = { plan: v('b_plan'), until: eod(v('b_until')), course: v('b_course') };
+    if (['extend', 'plan'].includes(a) && arg.plan === 'course' && !arg.course) return say($('#bm', m), 'Для «Курсовой» выберите курс', 'err');
     if (a === 'grant') arg = { course: v('b_course'), until: eod(v('b_until')) }; if (a === 'revoke') arg = { course: v('b_course') };
     if (a === 'promo') arg = { code: v('b_code') };
     if (['block', 'unblock', 'delete'].includes(a)) arg = { reason: (v('b_reason') || '').trim() };
@@ -268,10 +278,14 @@ async function openUser(u) {
 
   <div class="sec"><h3>Дети и прогресс</h3>${d.children.length ? d.children.map(kid).join('') : '<p class="muted">Детей нет.</p>'}</div>
 
-  ${can('plans') ? `<div class="sec"><h3>Подписка</h3><div class="row"><select id="plan">${Object.entries(PLAN).map(([k, v]) => `<option value="${k}" ${u.plan === k ? 'selected' : ''}>${v}</option>`).join('')}</select><input class="in" type="date" id="until" value="${toIn(u.plan_until)}"></div>
-   <div class="row"><button class="btn line sm" data-add="d7">+7 дней</button><button class="btn line sm" data-add="m1">+1 месяц</button><button class="btn line sm" data-add="m3">+3 месяца</button><button class="btn line sm" data-add="y1">+1 год</button><button class="btn sm" id="savePlan">Сохранить подписку</button></div>
-   <p class="hintx">«Пробный», «Семейный» и «Годовой» открывают все курсы до указанной даты.</p></div>
-  <div class="sec"><h3>Отдельные курсы</h3>${courses.map(c => { const x = g(c.id); return `<div class="cr" data-c="${c.id}"><b>${esc(c.title)}</b><span class="st">${x ? (x.expires_at ? 'выдан до ' + fd(x.expires_at) : 'выдан бессрочно') : 'не выдан'}</span><input class="in" type="date" value="${x ? toIn(x.expires_at) : ''}" title="Пусто — бессрочно"><button class="btn sm" data-grant>${x ? 'Изменить' : 'Выдать'}</button>${x ? '<button class="btn line sm" data-revoke>Забрать</button>' : ''}</div>` }).join('')}<p class="hintx">Пустая дата — доступ без срока.</p></div>` : ''}
+  ${can('plans') ? `<div class="sec"><h3>Подписки</h3>
+   ${d.subs.length ? d.subs.map(x => `<div class="sr ${x.live ? '' : 'off'}" data-s="${x.id}"><div><b>${esc(x.title)}</b>${x.course_id ? ' · ' + esc((courses.find(c => c.id === x.course_id) || { title: x.course_id }).title) : ''}<small>${fd(x.starts_at)} — ${fd(x.ends_at)} · ${x.status === 'canceled' ? 'отменена' + (x.cancel_reason ? ': ' + esc(x.cancel_reason) : '') : x.live ? 'действует' : new Date(x.starts_at) > new Date() ? 'ещё не началась' : 'закончилась'} · ${esc(SRCA[x.source] || x.source)}${x.note ? ' · ' + esc(x.note) : ''}</small></div>${x.live || (x.status === 'active' && new Date(x.starts_at) > new Date()) ? '<button class="btn red sm" data-scancel>Отменить</button>' : ''}</div>`).join('') : '<p class="muted">Подписок не было.</p>'}
+   <h3 style="margin-top:18px">Выдать подписку</h3>
+   <div class="fg"><div><label>Подписка</label><select class="in" id="gPlan">${planOpts(false, 'premium')}</select></div><div id="gCbox" class="hide"><label>Курс</label><select class="in" id="gCourse">${courseOpts()}</select></div>
+    <div><label>На сколько дней</label><input class="in" id="gDays" type="number" min="1" max="3650" value="30"></div>
+    <div class="full"><label>Причина (обязательно, попадёт в журнал)</label><input class="in" id="gNote" maxlength="200" placeholder="Например: компенсация, подарок, тестирование"></div></div>
+   <div class="row"><button class="btn line sm" data-gd="7">7 дней</button><button class="btn line sm" data-gd="30">30 дней</button><button class="btn line sm" data-gd="90">90 дней</button><button class="btn line sm" data-gd="365">год</button><button class="btn sm" id="gGo">Выдать</button></div>
+   <p class="hintx">Новая подписка того же вида начинается после окончания текущей, дни не сгорают. «Курсовая» открывает только выбранный курс, один из них можно выдать нескольким курсам по очереди.</p></div>` : ''}
 
   ${can('promo') ? `<div class="sec"><h3>Промокод</h3><div class="row"><input class="in" id="pcode" placeholder="Код промокода" style="text-transform:uppercase"><button class="btn sm" id="pApply">Выдать промокод</button></div>
    ${d.promos.length ? `<p class="hintx">Использованные: ${d.promos.map(p => `<b>${esc(p.code)}</b> (${fd(p.at)}${p.by_admin ? ', выдан админом' : ''})`).join(', ')}</p>` : ''}</div>` : ''}
@@ -305,12 +319,15 @@ async function openUser(u) {
     q('[data-sadd]')?.addEventListener('click', () => stars(1)); q('[data-stake]')?.addEventListener('click', () => stars(-1));
   });
   // подписка и курсы
-  $$('#detail [data-add]').forEach(b => b.onclick = () => { const cur = $('#until').value ? new Date($('#until').value + 'T00:00:00') : new Date(), base = cur > new Date() ? cur : new Date(), k = b.dataset.add;
-    if (k === 'd7') base.setDate(base.getDate() + 7); if (k === 'm1') base.setMonth(base.getMonth() + 1); if (k === 'm3') base.setMonth(base.getMonth() + 3); if (k === 'y1') base.setFullYear(base.getFullYear() + 1);
-    $('#until').value = base.toISOString().slice(0, 10); if ($('#plan').value === 'none') $('#plan').value = 'family' });
-  $('#savePlan')?.addEventListener('click', () => run(() => rpc('admin_set_plan', { p_user: u.id, p_plan: $('#plan').value, p_until: eod($('#until').value) }), 'Подписка сохранена'));
-  $$('#detail [data-grant]').forEach(b => b.onclick = () => { const r = b.closest('.cr'); run(() => rpc('admin_grant_course', { p_user: u.id, p_course: r.dataset.c, p_until: eod(r.querySelector('input').value) }), 'Курс выдан') });
-  $$('#detail [data-revoke]').forEach(b => b.onclick = () => run(() => rpc('admin_revoke_course', { p_user: u.id, p_course: b.closest('.cr').dataset.c }), 'Курс забран'));
+  const gSync = () => $('#gCbox')?.classList.toggle('hide', $('#gPlan').value !== 'course'); $('#gPlan')?.addEventListener('change', gSync); gSync();
+  $$('#detail [data-gd]').forEach(b => b.onclick = () => $('#gDays').value = b.dataset.gd);
+  $('#gGo')?.addEventListener('click', () => { const note = $('#gNote').value.trim(), days = parseInt($('#gDays').value, 10), plan = $('#gPlan').value;
+    if (!(days >= 1)) return toast('Укажите число дней', 1); if (!note) return toast('Укажите причину', 1);
+    run(() => rpc('admin_give_sub', { p_user: u.id, p_plan: plan, p_course: plan === 'course' ? $('#gCourse').value : null, p_days: days, p_note: note }), 'Подписка выдана') });
+  $$('#detail [data-scancel]').forEach(b => b.onclick = () => { const sid = b.closest('[data-s]').dataset.s;
+    const m = modal(`<h3 style="margin-bottom:10px">Отменить подписку?</h3><p class="hintx">Доступ закроется сразу. Причина запишется в журнал.</p><textarea class="in" id="crs" maxlength="300" placeholder="Причина (обязательно)" style="min-height:80px;resize:vertical;margin-top:10px"></textarea><div id="cmsg" class="msg"></div><div class="row"><button class="btn red" id="cyes">Отменить подписку</button><button class="btn line" id="cno">Не отменять</button></div>`);
+    $('#cno', m).onclick = () => m.remove();
+    $('#cyes', m).onclick = async () => { const r = $('#crs', m).value.trim(); if (!r) return say($('#cmsg', m), 'Укажите причину', 'err'); try { await rpc('admin_cancel_sub', { p_sub: sid, p_reason: r }); m.remove(); toast('Подписка отменена'); reload() } catch (e) { } } });
   $('#pApply')?.addEventListener('click', () => { const code = $('#pcode').value.trim(); if (!code) return toast('Введите код', 1); run(async () => { const m = await rpc('admin_apply_promo', { p_user: u.id, p_code: code }); toast(m || 'Промокод применён') }, '') });
   $('#block')?.addEventListener('click', () => {
     const un = !!u.blocked;
@@ -543,10 +560,10 @@ async function loadStats() {
 
 // ================= ЖУРНАЛ =================
 const ACT = { plan: 'Изменил подписку', course_give: 'Выдал курс', course_take: 'Забрал курс', block: 'Заблокировал', unblock: 'Разблокировал', role: 'Назначил роль', profile: 'Изменил профиль родителя', child_edit: 'Изменил профиль ребёнка', child_del: 'Удалил ребёнка', user_del: 'Удалил аккаунт',
-  note_add: 'Добавил заметку', note_del: 'Удалил заметку', badge_give: 'Выдал награду', badge_take: 'Забрал награду', stars_give: 'Выдал звёзды', stars_take: 'Забрал звёзды', promo_new: 'Создал промокод', promo_give: 'Применил промокод', promo_on: 'Включил промокод', promo_off: 'Выключил промокод', promo_del: 'Удалил промокод', review_ok: 'Одобрил отзыв', review_no: 'Отклонил отзыв', review_back: 'Вернул отзыв на проверку', review_edit: 'Изменил отзыв', review_del: 'Удалил отзыв',
-  password: 'Сменил пароль', bulk_plan: 'Массово: тариф', bulk_extend: 'Массово: продление', bulk_course_give: 'Массово: выдал курс', bulk_course_take: 'Массово: забрал курс', bulk_block: 'Массово: блокировка', bulk_unblock: 'Массово: разблокировка' };
-const DK = { plan: 'тариф', until: 'до', course: 'курс', code: 'код', child: 'ребёнок', badge: 'награда', delta: 'звёзды', reason: 'причина', total: 'итого', text: 'текст', name: 'имя', username: '@', role: 'роль', days: 'дней', max: 'лимит', children: 'детей', bulk: 'массово' };
-const det = o => Object.entries(o || {}).filter(([, v]) => v !== null && v !== '' && v !== undefined).map(([k, v]) => `${DK[k] || k}: ${k === 'until' ? fd(v) : v}`).join(' · ');
+  note_add: 'Добавил заметку', note_del: 'Удалил заметку', badge_give: 'Выдал награду', badge_take: 'Забрал награду', stars_give: 'Выдал звёзды', stars_take: 'Забрал звёзды', sub_give: 'Выдал подписку', sub_cancel: 'Отменил подписку', plan_edit: 'Изменил настройки подписки', price_edit: 'Изменил цену или срок подписки', promo_new: 'Создал промокод', promo_give: 'Применил промокод', promo_on: 'Включил промокод', promo_off: 'Выключил промокод', promo_del: 'Удалил промокод', review_ok: 'Одобрил отзыв', review_no: 'Отклонил отзыв', review_back: 'Вернул отзыв на проверку', review_edit: 'Изменил отзыв', review_del: 'Удалил отзыв',
+  password: 'Сменил пароль', bulk_plan: 'Массово: подписка', bulk_extend: 'Массово: продление', bulk_course_give: 'Массово: выдал курс', bulk_course_take: 'Массово: забрал курс', bulk_block: 'Массово: блокировка', bulk_unblock: 'Массово: разблокировка' };
+const DK = { plan: 'подписка', until: 'до', course: 'курс', code: 'код', child: 'ребёнок', badge: 'награда', delta: 'звёзды', reason: 'причина', total: 'итого', text: 'текст', name: 'имя', username: '@', role: 'роль', days: 'дней', max: 'лимит', children: 'детей', bulk: 'массово' };
+const det = o => Object.entries(o || {}).filter(([, v]) => v !== null && v !== '' && v !== undefined).map(([k, v]) => `${DK[k] || k}: ${k === 'until' ? fd(v) : k === 'plan' ? (PLAN[v] || v) : v}`).join(' · ');
 let logRows = [];
 async function loadLog() {
   $('#logbox').innerHTML = '<p class="muted">Загрузка…</p>';
@@ -561,6 +578,34 @@ $('#logq').oninput = drawLog; $('#logre').onclick = loadLog;
 $('#logcsv').onclick = () => csvDown('umno_journal.csv', [['Когда', 'Кто', 'Действие', 'Аккаунт', 'Детали'], ...logRows.map(l => [dt(l.at), l.actor_email, ACT[l.action] || l.action, l.target_label, det(l.details)])]);
 
 // ================= ПРОМОКОДЫ =================
+async function drawPlans() {
+  await loadPlans();
+  const rub = k => k == null ? '' : (k / 100);
+  $('#plansBox').innerHTML = `<h2 style="font-size:18px;margin-bottom:6px">Подписки</h2>
+   <p class="hintx" style="margin-bottom:12px">Здесь настраивается, что входит в каждую подписку и сколько она стоит. Покупка на сайте пока закрыта: подписки выдаются автоматически («Пробная» при регистрации), по промокоду или вручную. Пустая цена — «цена ещё не задана». Изменения действуют сразу на всех.</p>`
+   + PL.map(p => `<div class="kb" data-plan="${p.id}"><div class="pl-h"><h3 style="font-size:16px">${esc(p.title)}</h3><span class="tag">${p.scope === 'all' ? 'все курсы' : 'один курс при выдаче'}</span>${p.active ? '' : '<span class="tag red">скрыта</span>'}</div>
+    <div class="fg" style="margin-top:10px"><div><label>Название</label><input class="in" data-f="title" value="${esc(p.title)}" maxlength="40"></div>
+     <div><label>Лимит детей (пусто — без ограничений)</label><input class="in" data-f="max" type="number" min="1" max="50" value="${p.max_children ?? ''}"></div>
+     <div><label>Детский режим</label><select class="in" data-f="kid"><option value="1" ${p.kid_mode ? 'selected' : ''}>Есть</option><option value="0" ${p.kid_mode ? '' : 'selected'}>Нет</option></select></div>
+     <div><label>Оформление профиля</label><select class="in" data-f="deco"><option value="basic" ${p.deco === 'basic' ? 'selected' : ''}>Базовое (без баннера и своей палитры)</option><option value="full" ${p.deco === 'full' ? 'selected' : ''}>Полное</option></select></div>
+     <div class="full"><label>Описание для сайта</label><input class="in" data-f="desc" maxlength="200" value="${esc(p.description || '')}"></div>
+     <div><label>Показывать на сайте</label><select class="in" data-f="active"><option value="1" ${p.active ? 'selected' : ''}>Да</option><option value="0" ${p.active ? '' : 'selected'}>Нет</option></select></div>
+     <div><label>Порядок</label><input class="in" data-f="sort" type="number" value="${p.sort}"></div></div>
+    <div class="row" style="margin-top:10px"><button class="btn sm" data-save>Сохранить подписку</button></div>
+    <h3 style="font-size:13px;margin:14px 0 6px">Цены и сроки</h3>
+    <table class="pt">${PP.filter(x => x.plan_id === p.id).map(x => `<tr data-d="${x.days}"><td><b>${x.days}</b> дн.</td><td><input class="in" data-pr type="number" min="0" step="1" placeholder="цена, ₽" value="${rub(x.price_kop)}"></td><td><label class="ck"><input type="checkbox" data-pa ${x.active ? 'checked' : ''}> показывать</label></td><td><button class="btn line sm" data-psave>Сохранить</button> <button class="link" data-pdel>удалить</button></td></tr>`).join('') || '<tr><td class="muted">Сроков нет.</td></tr>'}
+     <tr class="np"><td><input class="in" data-nd type="number" min="1" max="3650" placeholder="дней" style="width:90px"></td><td><input class="in" data-npr type="number" min="0" placeholder="цена, ₽"></td><td></td><td><button class="btn line sm" data-padd>Добавить срок</button></td></tr></table></div>`).join('');
+  $$('#plansBox [data-plan]').forEach(box => {
+    const id = box.dataset.plan, q = s => box.querySelector(s), f = k => q(`[data-f=${k}]`).value, again = async m => { toast(m); drawPlans() };
+    q('[data-save]').onclick = async () => { try { await rpc('admin_save_plan', { p_id: id, p_title: f('title'), p_description: f('desc'), p_max_children: f('max') ? +f('max') : null, p_kid_mode: f('kid') === '1', p_deco: f('deco'), p_active: f('active') === '1', p_sort: +f('sort') || 0 }); again('Подписка сохранена') } catch (e) { } };
+    const kop = v => v === '' || v == null ? null : Math.round(parseFloat(v) * 100);
+    box.querySelectorAll('tr[data-d]').forEach(tr => {
+      tr.querySelector('[data-psave]').onclick = async () => { try { await rpc('admin_save_price', { p_plan: id, p_days: +tr.dataset.d, p_price_kop: kop(tr.querySelector('[data-pr]').value), p_active: tr.querySelector('[data-pa]').checked }); again('Цена сохранена') } catch (e) { } };
+      tr.querySelector('[data-pdel]').onclick = async () => { if (!confirm('Удалить срок ' + tr.dataset.d + ' дн.?')) return; try { await rpc('admin_del_price', { p_plan: id, p_days: +tr.dataset.d }); again('Срок удалён') } catch (e) { } };
+    });
+    q('[data-padd]').onclick = async () => { const d = parseInt(q('[data-nd]').value, 10); if (!(d >= 1)) return toast('Укажите число дней', 1); try { await rpc('admin_save_price', { p_plan: id, p_days: d, p_price_kop: kop(q('[data-npr]').value), p_active: true }); again('Срок добавлен') } catch (e) { } };
+  });
+}
 async function loadPromo() {
   const { data, error } = await sb.from('promo_codes').select('*').order('created_at', { ascending: false }); if (error) return toast(error.message, 1);
   $('#pcourse').innerHTML = '<option value="">— без курса —</option>' + courses.map(c => `<option value="${c.id}">${esc(c.title)}</option>`).join('');
@@ -579,6 +624,7 @@ $('#fPromo').onsubmit = async e => {
   e.preventDefault(); const code = $('#pcodeN').value.trim().toUpperCase(), plan = $('#pplan').value, course = $('#pcourse').value, days = parseInt($('#pdays').value, 10), max = parseInt($('#pmax').value, 10);
   if (!/^[A-Z0-9_-]{3,32}$/.test(code)) return toast('Код: 3–32 символа, латиница, цифры, - и _', 1);
   if (!plan && !course) return toast('Выберите, что даёт промокод: подписку и/или курс', 1);
+  if (plan === 'course' && !course) return toast('Для «Курсовой» выберите курс', 1);
   if (plan && !(days >= 1)) return toast('Укажите число дней подписки', 1);
   try { await rpc('admin_save_promo', { p_code: code, p_plan: plan, p_course: course, p_days: days >= 1 ? days : null, p_max: max >= 1 ? max : null, p_until: eod($('#puntil').value), p_note: $('#pnote').value }); toast('Промокод создан: ' + code); e.target.reset(); $('#pdays').value = 30; loadPromo() } catch (er) { }
 };
