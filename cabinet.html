@@ -21,6 +21,29 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
 .kids .kid:hover{transform:translateY(-2px)}.kids .kid.on{border-color:var(--brown);background:var(--cream)}
 .kids .kid b{display:block;font-size:15px;line-height:1.1}.kids .kid small{font-size:12px;color:var(--grey)}
 .kids .kid button{border:0;background:none;cursor:pointer;color:var(--grey);font-size:16px;padding:6px 8px;border-radius:50%}.kids .kid button:hover{background:#fff;color:var(--ink)}
+.pbanner{height:clamp(110px,19vw,190px);border-radius:var(--r);background:linear-gradient(120deg,var(--soft),var(--cream)) center/cover no-repeat;animation:up .5s both}
+.pbanner.sm{height:110px;border-radius:20px;display:grid;place-items:center;color:var(--grey);font:700 13px Manrope;margin-bottom:10px}.pbanner.lock{opacity:.75;border:2px dashed #d8d2cb;background:transparent}
+.hello:first-child,main>.pbanner:first-child{margin-top:24px}main>.phero:first-child{margin-top:24px}.phero{display:flex;align-items:center;gap:18px;animation:up .5s both}.phero.hasb{margin-top:-42px;padding-left:22px;position:relative}.phero .av{box-shadow:0 0 0 5px var(--cream)}
+.phero .hello{min-width:0}.phero.hasb .hello{margin-top:42px}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.kcd{--c:#B07F5E;position:relative;display:flex;flex-direction:column;gap:8px;min-height:176px;padding:16px 18px 14px;border-radius:24px;cursor:pointer;background:var(--soft);border:2px solid transparent;transition:transform .25s,box-shadow .25s,border-color .25s;animation:up .4s both}
+@supports(background:color-mix(in srgb,red 10%,white)){.kcd{background:linear-gradient(150deg,color-mix(in srgb,var(--c) 20%,#fff),color-mix(in srgb,var(--c) 5%,#fff));border-color:color-mix(in srgb,var(--c) 25%,#fff)}}
+.kcd:hover{transform:translateY(-3px)}.kcd.on{border-color:var(--c);box-shadow:0 16px 28px -18px var(--c)}
+.kcd .kt{display:flex;justify-content:space-between;align-items:flex-start}.kcd .kt .av{width:62px;height:62px;font-size:26px;box-shadow:0 0 0 4px #fff}
+.kcd .kt button{border:0;background:rgba(255,255,255,.75);cursor:pointer;color:var(--grey);font-size:16px;padding:7px 9px;border-radius:50%}.kcd .kt button:hover{background:#fff;color:var(--ink)}
+.kcd .kn b{display:block;font:800 18px Manrope;line-height:1.15}.kcd .kn small{color:var(--grey);font-size:12px}
+.kcd .kn i{font:800 10px Manrope;font-style:normal;text-transform:uppercase;letter-spacing:.06em;background:var(--c);color:#fff;border-radius:99px;padding:2px 8px;margin-left:6px;vertical-align:middle}
+.kpb{position:relative;height:10px;border-radius:9px;background:rgba(255,255,255,.85);margin-top:auto}.kpb i{display:block;height:100%;border-radius:9px;background:var(--c);transition:width .8s}.kpb u{position:absolute;right:-3px;top:-9px;text-decoration:none;font-size:20px;color:#f5a623}
+.kcd .kb{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;color:var(--grey)}
+.kcd .kb em{font:800 12px Manrope;font-style:normal;background:#fff;color:var(--ink);padding:5px 13px;border-radius:99px}
+.kcd.fz{filter:grayscale(1);opacity:.65}.kcd.fz .kb span{color:var(--ink);font-weight:700}
+.kadd{display:grid;place-items:center;text-align:center;gap:6px;min-height:176px;border-radius:24px;border:2px dashed #d8d2cb;background:transparent;color:var(--grey);font:700 14px Manrope;cursor:pointer;transition:.25s;animation:up .4s both}.kadd:hover{border-color:var(--brown);color:var(--brown-d)}.kadd span{font-size:30px;line-height:1}
+.pal{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}.pal input[type=color]{-webkit-appearance:none;appearance:none;width:46px;height:46px;border:3px solid #fff;box-shadow:0 0 0 2px var(--ink);padding:0;border-radius:50%;background:none;cursor:pointer;overflow:hidden}.pal input[type=color]::-webkit-color-swatch-wrapper{padding:0}.pal input[type=color]::-webkit-color-swatch{border:0;border-radius:50%}.pal input[type=color]::-moz-color-swatch{border:0;border-radius:50%}.pal .in{max-width:130px;padding:11px 16px}
+.lockrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;color:var(--grey);font-size:13.5px}
+.exp{background:#fff6e5;border:2px solid #f5d9a1;border-radius:20px;padding:14px 18px;margin-top:18px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-weight:600;font-size:14px}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}
+.plc{background:var(--soft);border-radius:22px;padding:18px;border:2px solid transparent}.plc.cur{border-color:var(--brown);background:var(--cream)}.plc b{font:800 17px Manrope}.plc p{color:var(--grey);font-size:13px;margin:6px 0 10px}.plc ul{list-style:none;padding:0;margin:0 0 10px;display:grid;gap:4px;font-size:13.5px}.plc ul li::before{content:"✓ ";color:var(--brown)}.plc ul li.no::before{content:"– ";color:var(--grey)}.plc ul li.no{color:var(--grey)}.plc .pr{font-weight:800;font-size:13.5px}
+.hist{margin-top:10px;font-size:13.5px}.hist summary{cursor:pointer;font-weight:700}.hist div.hr2{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--soft);flex-wrap:wrap}
 .cp{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
 .cp h2{margin:0}.cp .row{margin:0}
 /* вход */
@@ -37,6 +60,7 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
 #blocked{max-width:520px;margin:80px auto;background:#fff;border-radius:28px;padding:36px;text-align:center}
 /* режим ребёнка */
 
+@media(max-width:560px){.kgrid{grid-template-columns:1fr}.phero{gap:12px}.phero .av.l{width:64px;height:64px;font-size:26px}.phero.hasb{padding-left:12px;margin-top:-34px}.phero.hasb .hello{margin-top:34px}}
 @media(max-width:820px){#auth{grid-template-columns:1fr;grid-template-rows:auto 1fr}.side{padding:18px 20px 22px;border-radius:0 0 26px 26px}.side svg.bear,.side p{display:none}.side h1{font-size:24px;margin-top:10px}.formbox{padding:18px 14px 30px;align-items:start}.card{padding:22px 18px}.tabs{margin-bottom:18px}.card h2{font-size:21px}.card .sub{margin-bottom:12px}
  main{padding:20px 14px 70px}header .wrap{height:60px;padding:0 14px}.me .nm{display:none}.cp{gap:10px}.kids .kid{max-width:100%}}
 @media(max-width:380px){.logo small{display:none}}
@@ -94,12 +118,12 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
 injectIcons();
 const show = id => ['auth', 'app', 'blocked'].forEach(x => $('#' + x).classList.toggle('hide', x !== id));
 const ERR = { 'Invalid login credentials': 'Неверная почта или пароль.', 'Email not confirmed': 'Подтвердите почту: мы отправили вам письмо.', 'User already registered': 'Этот e-mail уже зарегистрирован. Попробуйте войти.', 'email rate limit exceeded': 'Слишком много писем за короткое время. Подождите около часа и попробуйте снова.' };
-const tr = m => ERR[m] || (/duplicate key|занят/i.test(m) ? 'Этот юзернейм уже занят.' : 'Что-то пошло не так: ' + m);
+const tr = m => ERR[m] || (/Лимит детей|Расширенное оформление/.test(m) ? m : /duplicate key|занят/i.test(m) ? 'Этот юзернейм уже занят.' : 'Что-то пошло не так: ' + m);
 const avEl = (url, name, color, cls = '') => `<span class="av ${cls}" style="${color ? `background:${color}` : ''}">${url ? `<img src="${esc(url)}" alt="">` : esc((name || '?')[0].toUpperCase())}</span>`;
 const plural = (n, a, b, c) => { const m = n % 10, h = n % 100; return h > 10 && h < 15 ? c : m === 1 ? a : m > 1 && m < 5 ? b : c };
 const ageT = n => n + ' ' + plural(n, 'год', 'года', 'лет');
 
-let user = null, me = {}, kids = [], active = null, grants = [], courses = [], lessons = [], badgesCat = [], prog = {}, stats = {}, earned = new Map(), shopItems = [], ownedItems = new Set(), views = [], shopTab = 'bg';
+let user = null, me = {}, kids = [], active = null, access = null, plans = [], prices = [], bannerSrc = null, allProg = [], courses = [], lessons = [], badgesCat = [], prog = {}, stats = {}, earned = new Map(), shopItems = [], ownedItems = new Set(), views = [], shopTab = 'bg';
 let entering = false, kidMode = false, recovering = /type=recovery/.test(location.hash), view = ['home'];
 const main = $('#main');
 const forms = { login: $('#fLogin'), reg: $('#fReg'), new: $('#fNew') };
@@ -143,10 +167,10 @@ async function enter(session) {
   try {
     await loadMe();
     if (me.blocked) { $('#bid').textContent = me.public_id || ''; show('blocked'); return }
-    applyTheme(me.theme); show('app'); main.innerHTML = '<p class="muted">Загружаем…</p>';
+    applyTheme(me.theme, deco() ? me.accent : null); show('app'); main.innerHTML = '<p class="muted">Загружаем…</p>';
     await Promise.all([loadCatalog(), loadKids()]);
     let saved = null; try { saved = localStorage.getItem('umno_kid_mode') } catch { }
-    kidMode = !!(saved && kids.find(k => k.id === saved)); if (kidMode) active = saved;
+    kidMode = !!(saved && kids.find(k => k.id === saved) && canKid()); if (kidMode) active = saved;
     await loadChild(); go('home');
   } finally { entering = false }
 }
@@ -156,8 +180,16 @@ const myName = () => me.full_name || (user.user_metadata && user.user_metadata.f
 const curKid = () => kids.find(k => k.id === active);
 async function loadMe() {
   const { data } = await sb.from('profiles').select('*').eq('id', user.id).single(); me = data || {}; if (me.role) { const r = await sb.rpc('my_perms'); me.tester = !!(r.data && (r.data.perms || []).includes('test_access')) }
-  const g = await sb.from('course_access').select('course_id,expires_at'); grants = g.data || [];
+  const [ac, pl, pr] = await Promise.all([sb.rpc('my_access'), sb.from('plans').select('*').order('sort'), sb.from('plan_prices').select('*').order('days')]);
+  access = ac.error ? null : ac.data; plans = pl.data || []; prices = pr.data || [];   // access = null, если schema11 ещё не запущена
+  bannerSrc = null;
+  if (me.banner_url && deco()) { const u = await sb.storage.from('banners').createSignedUrl(me.banner_url, 3600); bannerSrc = u.data?.signedUrl || null }
 }
+// что разрешает текущая подписка
+const deco = () => !!(me.is_admin || (access && access.deco === 'full'));
+const canKid = () => !!(me.is_admin || !access || access.kid_mode);
+const maxKids = () => me.is_admin || !access ? null : access.max_children;
+const frozenIdx = i => { const m = maxKids(); return m != null && i >= m };
 async function loadCatalog() {
   const [c, l, b, sh] = await Promise.all([sb.from('courses').select('*').order('sort'), sb.from('lessons').select('*').order('sort'), sb.from('badges').select('*').order('sort'), sb.from('shop_items').select('*').order('sort')]);
   shopItems = sh.data || [];
@@ -165,7 +197,8 @@ async function loadCatalog() {
   courses = c.data || []; lessons = l.data || []; badgesCat = b.data || [];
 }
 async function loadKids() {
-  const { data } = await sb.from('children').select('*').order('created_at'); kids = data || [];
+  const [{ data }, pr] = await Promise.all([sb.from('children').select('*').order('created_at'), sb.from('progress').select('child_id,lesson_id,completed').eq('completed', true).limit(5000)]);
+  kids = data || []; allProg = pr.data || [];
   if (!kids.find(k => k.id === active)) { let s = null; try { s = localStorage.getItem('umno_kid') } catch { } active = kids.find(k => k.id === s) ? s : (kids[0] && kids[0].id) || null }
 }
 async function loadChild() {
@@ -176,9 +209,9 @@ async function loadChild() {
   (o.data || []).forEach(x => ownedItems.add(x.item_id)); views = v.data || [];
 }
 function canAccess(cid) {
-  if (me.is_admin || me.tester) return true; const now = new Date();
-  if (['trial', 'family', 'year'].includes(me.plan) && me.plan_until && new Date(me.plan_until) > now) return true;
-  return grants.some(g => g.course_id === cid && (!g.expires_at || new Date(g.expires_at) > now));
+  if (me.is_admin || me.tester) return true;
+  if (access) return !!(access.all || (access.courses || []).includes(cid));
+  return ['trial', 'premium', 'family', 'year'].includes(me.plan) && me.plan_until && new Date(me.plan_until) > new Date();   // запасной вариант до запуска schema11
 }
 const ofCourse = id => lessons.filter(l => l.course_id === id);
 const visibleCourses = () => kidMode ? courses.filter(c => !(curKid()?.hidden_courses || []).includes(c.id)) : courses;
@@ -231,23 +264,54 @@ const back = (to, label) => `<button class="back" data-back>${label || '← На
 function coursesHtml() {
   return visibleCourses().map((c, i) => {
     const ls = ofCourse(c.id), done = ls.filter(l => prog[l.id]?.completed).length, pct = ls.length ? Math.round(done / ls.length * 100) : 0, lock = !canAccess(c.id);
-    return `<div class="c ${lock ? 'lk' : ''}" data-c="${esc(c.id)}" style="animation:up .5s ${i * 70}ms both">${lock ? '<span class="soon">закрыто</span>' : ''}<i>${ico(c.icon)}</i><h3>${esc(c.title)}</h3><p>${esc(c.description || '')}</p><div class="bar"><i style="width:${active ? pct : 0}%"></i></div><div class="cnt">${lock ? 'Откроется после оформления подписки' : ls.length ? (active ? done + ' из ' + ls.length + ' ' + plural(ls.length, 'урока', 'уроков', 'уроков') : ls.length + ' уроков') : 'Уроки скоро появятся'}</div></div>`
+    return `<div class="c ${lock ? 'lk' : ''}" data-c="${esc(c.id)}" style="animation:up .5s ${i * 70}ms both">${lock ? '<span class="soon">закрыто</span>' : ''}<i>${ico(c.icon)}</i><h3>${esc(c.title)}</h3><p>${esc(c.description || '')}</p><div class="bar"><i style="width:${active ? pct : 0}%"></i></div><div class="cnt">${lock ? (access && access.active ? 'Не входит в вашу подписку' : 'Откроется после оформления подписки') : ls.length ? (active ? done + ' из ' + ls.length + ' ' + plural(ls.length, 'урока', 'уроков', 'уроков') : ls.length + ' уроков') : 'Уроки скоро появятся'}</div></div>`
   }).join('') || '<p class="muted">Курсов пока нет.</p>';
 }
 function bindCourses() {
   $$('.c[data-c],.kc[data-c]').forEach(el => el.onclick = () => {
     if (!active) return toast('Сначала добавьте ребёнка — прогресс сохраняется для него.', 1);
-    if (el.classList.contains('lk')) return toast('Этот курс пока закрыт. Напишите нам, чтобы открыть доступ.', 1);
+    if (el.classList.contains('lk')) return upsell('course');
     go('course', el.dataset.c) });
 }
 function badgesHtml() {
   return `<div class="badges">${badgesCat.map(b => { const on = earned.has(b.id); return `<div class="bd ${on ? '' : 'off'}" title="${esc(b.description || '')}"><i>${ico(b.icon)}</i><b>${esc(b.title)}</b><small>${on ? fd(earned.get(b.id)) : esc(b.description || '')}</small></div>` }).join('')}</div>`;
 }
+function kidCard(c, i) {
+  const fz = frozenIdx(i), total = lessons.length,
+    done = c.id === active ? lessons.filter(l => prog[l.id]?.completed).length : allProg.filter(x => x.child_id === c.id).length,
+    pct = total ? Math.min(100, Math.round(done / total * 100)) : 0;
+  return `<div class="kcd ${c.id === active ? 'on' : ''} ${fz ? 'fz' : ''}" data-k="${c.id}" style="--c:${esc(c.color || '#B07F5E')};animation-delay:${i * 60}ms">
+   <div class="kt">${avEl(c.avatar_url, c.name, c.color, 'l')}<button data-edit="${c.id}" title="Редактировать">${ico('edit')}</button></div>
+   <div class="kn"><b>${esc(c.name)}${c.id === active && !fz ? '<i>сейчас</i>' : ''}</b>${c.username ? `<small>@${esc(c.username)}</small>` : ''}</div>
+   <div class="kpb"><i style="width:${pct}%"></i>${pct >= 100 ? '<u>★</u>' : ''}</div>
+   <div class="kb"><span>${fz ? `${ico('lock')} Откроется в «Премиум»` : total ? `${done} из ${total} ${plural(total, 'урока', 'уроков', 'уроков')}` : 'Уроков пока нет'}</span><em>${ageT(c.age)}</em></div></div>`;
+}
+// плашка у подписки: скоро заканчивается / уже закончилась
+function subNotice() {
+  if (!access || me.is_admin) return '';
+  const hasHist = (access.subs || []).length > 0;
+  if (!access.active) return hasHist ? `<div class="exp"><span>Подписка закончилась. Дети и их прогресс сохранены, уроки откроются с новой подпиской.</span><button class="btn sm" id="goSubs">О подписках</button></div>` : '';
+  if (UNLIM(access.ends_at)) return '';
+  const d = Math.ceil((new Date(access.ends_at) - Date.now()) / 864e5);
+  return d <= 3 ? `<div class="exp"><span>Подписка заканчивается ${d <= 0 ? 'сегодня' : 'через ' + d + ' ' + plural(d, 'день', 'дня', 'дней')}.</span><button class="btn sm" id="goSubs">О подписках</button></div>` : '';
+}
+const UPS = {
+  kid: ['Детский режим', 'Детский режим с наградами и магазином доступен в подписке «Премиум».'],
+  child: ['Больше детей', 'В вашей подписке можно заниматься только с одним ребёнком. Чтобы заниматься с несколькими, нужна подписка «Премиум».'],
+  course: ['Курс не входит в подписку', 'Этот курс не входит в вашу подписку. Все курсы открыты в подписке «Премиум».'],
+  deco: ['Оформление профиля', 'Баннер и своя палитра доступны в подписке «Премиум».']
+};
+function upsell(kind) {
+  const [t, p] = UPS[kind], m = modal(`<h2 style="font-family:Unbounded;font-size:20px;margin-bottom:8px">${t}</h2><p class="muted">${p}</p><p class="cnt" style="margin:10px 0 16px">Покупка подписок откроется позже. Пока их выдаёт команда проекта, а промокод можно ввести в настройках.</p><div class="row"><button class="btn" id="uOk">О подписках</button><button class="btn line" id="uNo">Закрыть</button></div>`);
+  $('#uOk', m).onclick = () => { m.remove(); go('settings', 'subs') }; $('#uNo', m).onclick = () => m.remove();
+}
 function home() {
   const k = curKid();
-  main.innerHTML = `<div class="hello"><h1>Привет, ${esc(myName())}!</h1><p>${k ? `Сейчас занимается: <b>${esc(k.name)}</b>, ${ageT(k.age)}.` : 'Добавьте ребёнка — и мы подготовим для него занятия.'}</p></div>
-  <section class="box"><h2>Мои дети</h2><div class="kids">${kids.map((c, i) => `<div class="kid ${c.id === active ? 'on' : ''}" data-k="${c.id}" style="animation-delay:${i * 60}ms">${avEl(c.avatar_url, c.name, c.color)}<div><b>${esc(c.name)}</b><small>${c.username ? '@' + esc(c.username) + ' · ' : ''}${ageT(c.age)}</small></div><button data-edit="${c.id}" title="Редактировать">${ico('edit')}</button></div>`).join('') || '<p class="muted">Пока никого нет.</p>'}</div>
-   <button class="btn" id="addKid">${ico('plus')} Добавить ребёнка</button></section>
+  const hb = deco() && bannerSrc;
+  main.innerHTML = `${hb ? `<div class="pbanner" style="background-image:url('${esc(bannerSrc)}')"></div>` : ''}
+  <div class="phero ${hb ? 'hasb' : ''}">${avEl(me.avatar_url, myName(), null, 'l')}<div class="hello"><h1>Привет, ${esc(myName())}!</h1><p>${k ? `Сейчас занимается: <b>${esc(k.name)}</b>, ${ageT(k.age)}.` : 'Добавьте ребёнка — и мы подготовим для него занятия.'}</p></div></div>
+  ${subNotice()}
+  <section class="box"><h2>Мои дети</h2><div class="kgrid">${kids.map(kidCard).join('')}<div class="kadd" id="addKid" role="button" tabindex="0"><div><span>+</span><br>Добавить ребёнка</div></div></div></section>
   ${k ? `<section class="box"><div class="cp">${avEl(k.avatar_url, k.name, k.color, 'l')}<div><h2>${esc(k.name)}</h2><div class="muted">${k.username ? '@' + esc(k.username) : 'Юзернейм не задан'}${k.daily_limit ? ' · лимит: ' + k.daily_limit + ' ' + plural(k.daily_limit, 'урок', 'урока', 'уроков') + ' в день' : ''}</div>
    <div class="row"><button class="btn sm" id="goKid2">${ico('baby')} Режим ребёнка</button><button class="btn line sm" id="goRep">${ico('chart')} Отчёт за неделю</button></div></div></div>
    <div class="tiles"><div class="tile">${ico('star')}<b>${stats.stars || 0}</b><span>звёзд</span></div><div class="tile">${ico('book')}<b>${stats.lessons || 0}</b><span>уроков пройдено</span></div><div class="tile">${ico('flame')}<b>${stats.streak || 0}</b><span>${plural(stats.streak || 0, 'день', 'дня', 'дней')} подряд</span></div><div class="tile">${ico('trophy')}<b>${earned.size}</b><span>наград из ${badgesCat.length}</span></div></div>
@@ -256,9 +320,10 @@ function home() {
    ${badgesHtml()}</section>` : ''}
   <section class="box"><h2>Курсы</h2><div class="courses">${coursesHtml()}</div></section>`;
   bindCourses(); $$('[data-rl]').forEach(el => el.onclick = () => go('lesson', el.dataset.rl));
-  $$('.kid').forEach(el => el.onclick = async e => { if (e.target.closest('[data-edit]')) return; active = el.dataset.k; try { localStorage.setItem('umno_kid', active) } catch { } await loadChild(); home() });
+  $$('.kcd').forEach(el => el.onclick = async e => { if (e.target.closest('[data-edit]')) return; if (el.classList.contains('fz')) return upsell('child'); active = el.dataset.k; try { localStorage.setItem('umno_kid', active) } catch { } await loadChild(); home() });
   $$('[data-edit]').forEach(b => b.onclick = e => { e.stopPropagation(); kidEditor(kids.find(c => c.id === b.dataset.edit)) });
-  $('#addKid').onclick = () => kidEditor(null);
+  $('#addKid').onclick = () => { if (maxKids() != null && kids.length >= maxKids()) return upsell('child'); kidEditor(null) };
+  $('#goSubs')?.addEventListener('click', () => go('settings', 'subs'));
   $('#goKid2')?.addEventListener('click', startKid); $('#goRep')?.addEventListener('click', () => go('report'));
 }
 
@@ -266,6 +331,8 @@ function home() {
 function modal(html) { const m = document.createElement('div'); m.className = 'modal'; m.innerHTML = '<div>' + html + '</div>'; m.addEventListener('mousedown', e => { if (e.target === m) m.remove() }); document.body.append(m); return m }
 function startKid() {
   if (!curKid()) return toast('Сначала добавьте ребёнка', 1);
+  if (!canKid()) return upsell('kid');
+  if (frozenIdx(kids.findIndex(x => x.id === active))) return upsell('child');
   const begin = async () => { kidMode = true; try { localStorage.setItem('umno_kid_mode', active) } catch { } await loadChild(); go('home') };
   if (me.pin_hash) return begin();
   const m = modal(`<h2 style="font-family:Unbounded;font-size:20px;margin-bottom:8px">Родительский PIN</h2><p class="muted">Придумайте 4 цифры. Без них ребёнок не сможет выйти из детского режима в ваши настройки.</p>
@@ -403,20 +470,50 @@ function kidEditor(k) {
 }
 
 // ---------- профиль родителя ----------
-function settings() {
-  const n = myName(), live = me.plan && me.plan !== 'none' && me.plan_until && new Date(me.plan_until) > new Date();
-  const sub = live ? `${PLAN[me.plan]} · до ${fd(me.plan_until)}` : me.plan === 'none' || !me.plan ? PLAN.none : `${PLAN[me.plan]} · истекла ${fd(me.plan_until)}`;
-  const gl = grants.filter(g => !g.expires_at || new Date(g.expires_at) > new Date()).map(g => (courses.find(c => c.id === g.course_id) || { title: g.course_id }).title);
+const RUB = k => (k / 100).toLocaleString('ru') + ' ₽';
+const dayT = n => n === 30 ? 'месяц' : n === 365 ? 'год' : n + ' ' + plural(n, 'день', 'дня', 'дней');
+const SRC = { trial: 'при регистрации', promo: 'по промокоду', admin: 'выдана командой', payment: 'оплата', migration: 'перенесена' };
+function featLines(a) {
+  const cs = (a.courses || []).map(id => (courses.find(c => c.id === id) || { title: id }).title);
+  return [[a.all ? 'Все курсы' : cs.length ? 'Курс: ' + cs.join(', ') : 'Курсы не открыты', a.all || cs.length],
+    ['Детей: ' + (a.max_children == null ? 'без ограничений' : 'до ' + a.max_children), 1],
+    ['Детский режим', a.kid_mode], ['Свободная палитра и баннер', a.deco === 'full']];
+}
+const liHtml = ls => ls.map(([t, on]) => `<li class="${on ? '' : 'no'}">${esc(t)}</li>`).join('');
+function subsHtml() {
+  if (!access) return `<div class="pane">Подписка: <b>${esc(PLAN[me.plan] || PLAN.none)}</b>${me.plan_until ? ' · ' + untilT(me.plan_until) : ''}</div>`;
+  const a = access, t = (plans.find(x => x.id === a.plan) || {}).title;
+  const days = a.active && !UNLIM(a.ends_at) ? Math.max(0, Math.ceil((new Date(a.ends_at) - Date.now()) / 864e5)) : null;
+  const cur = a.active
+    ? `<b>${esc(me.is_admin ? 'Владелец: всё открыто' : t || 'Подписка')}</b>${me.is_admin ? '' : ` · ${esc(untilT(a.ends_at))}${days != null ? `, осталось ${days} ${plural(days, 'день', 'дня', 'дней')}` : ''}`}<div class="plc" style="padding:0;background:none;margin:8px 0 0"><ul>${liHtml(featLines(a))}</ul></div>`
+    : `<b>Нет действующей подписки</b><div class="cnt">Дети и прогресс сохранены. Уроки откроются, когда появится подписка.</div>`;
+  const cards = plans.map(p => {
+    const ps = prices.filter(x => x.plan_id === p.id).map(x => x.price_kop === 0 ? `${dayT(x.days)} бесплатно` : x.price_kop > 0 ? `${RUB(x.price_kop)} за ${dayT(x.days)}` : '').filter(Boolean);
+    return `<div class="plc ${a.plan === p.id && a.active ? 'cur' : ''}"><b>${esc(p.title)}</b><p>${esc(p.description || '')}</p><ul>${liHtml(featLines({ all: p.scope === 'all', courses: p.scope === 'one' ? ['__one'] : [], max_children: p.max_children, kid_mode: p.kid_mode, deco: p.deco }).map(([x, on], i) => [i === 0 && p.scope === 'one' ? 'Один выбранный курс' : x, on]))}</ul><div class="pr">${ps.length ? ps.map(esc).join('<br>') : 'Покупка откроется позже'}</div></div>`
+  }).join('');
+  const hist = (a.subs || []).length ? `<details class="hist"><summary>История подписок</summary>${a.subs.map(x => { const live = x.status === 'active' && new Date(x.starts_at) <= new Date() && new Date(x.ends_at) > new Date(); return `<div class="hr2"><span><b>${esc(x.title)}</b>${x.course_id ? ' · ' + esc((courses.find(c => c.id === x.course_id) || { title: x.course_id }).title) : ''}</span><span>${fd(x.starts_at)} — ${fd(x.ends_at)} · ${x.status === 'canceled' ? 'отменена' : live ? 'действует' : new Date(x.starts_at) > new Date() ? 'ещё не началась' : 'закончилась'} · ${SRC[x.source] || ''}</span></div>` }).join('')}</details>` : '';
+  return `<div class="pane">${cur}<div class="cnt" style="margin-top:8px">Покупка подписок пока недоступна. Пока идёт тестирование, их выдаёт команда проекта; промокод можно ввести ниже.</div></div><div class="plans">${cards}</div>${hist}`;
+}
+function settings(a) {
+  const n = myName(), dec = deco(); let acc = dec ? me.accent : null;
+  const presetOn = k => !acc && (me.theme || 'brown') === k;
+  const bannerBlock = dec
+    ? `<div class="f"><label>Баннер на главной</label><div class="pbanner sm" id="bprev" style="${bannerSrc ? `background-image:url('${esc(bannerSrc)}')` : ''}">${bannerSrc ? '' : 'Баннер не выбран'}</div><div class="row"><button class="btn line sm" id="bup" type="button">Загрузить баннер</button>${bannerSrc ? '<button class="link" id="brm" type="button">убрать</button>' : ''}</div><div class="cnt">Подойдёт широкая картинка. Баннер видите только вы.</div></div>`
+    : `<div class="f"><label>Баннер на главной</label><div class="pbanner sm lock">${ico('lock')}&nbsp;Баннер доступен в подписке «Премиум»</div></div>`;
   main.innerHTML = `<section class="box">${back('', '← Назад')}<h2>Профиль родителя</h2>
    <div class="cp"><div id="pav">${avEl(me.avatar_url, n, null, 'xl')}</div><div><button class="btn line sm" id="upl">Загрузить фото</button> ${me.avatar_url ? '<button class="link" id="rmav">убрать</button>' : ''}<div class="cnt">Фото сожмётся автоматически</div></div></div>
+   ${bannerBlock}
    <form id="fPro" style="max-width:460px"><div class="f"><label>Ваше имя</label><input class="in" name="name" value="${esc(n)}" maxlength="60" required></div>
     <div class="f"><label>@юзернейм</label><input class="in" name="un" value="${esc(me.username ? '@' + me.username : '')}" maxlength="21" autocapitalize="off" placeholder="@username"><div id="um" class="msg"></div></div>
     <div class="f"><label>О себе</label><textarea name="about" maxlength="300">${esc(me.about || '')}</textarea></div>
-    <div class="f"><label>Цвет оформления</label><div class="colors">${Object.entries(THEMES).map(([k, v]) => `<label><input type="radio" name="theme" value="${k}" ${(me.theme || 'brown') === k ? 'checked' : ''}><i style="background:${v[0]}"></i></label>`).join('')}</div></div>
+    <div class="f"><label>Цвет оформления</label><div class="colors">${Object.entries(THEMES).map(([k, v]) => `<label><input type="radio" name="theme" value="${k}" ${presetOn(k) ? 'checked' : ''}><i style="background:${v[0]}"></i></label>`).join('')}</div>
+     ${dec ? `<div class="pal"><input type="color" id="accIn" value="${acc || (THEMES[me.theme] || THEMES.brown)[0]}" aria-label="Свой цвет"><input class="in" id="accHex" maxlength="7" placeholder="#B07F5E" value="${acc || ''}" autocapitalize="off" spellcheck="false"><button class="link" type="button" id="accReset">сбросить</button></div><div class="cnt">Любой цвет. Слишком светлые оттенки мы немного затемняем, чтобы текст на кнопках читался.</div>`
+       : `<div class="lockrow">${ico('lock')} Свободная палитра — в подписке «Премиум». <button class="link" type="button" id="seeSubs">Подробнее</button></div>`}</div>
     <div class="f"><label class="ck"><input type="checkbox" name="rep" ${me.report_weekly !== false ? 'checked' : ''}> Присылать недельный отчёт на ${esc(user.email)}</label></div>
     <div class="row"><button class="btn" type="submit">Сохранить</button></div></form>
    <div class="pane">Ваш ID: <b>${esc(me.public_id || '—')}</b> <button class="link" id="cpid" type="button">скопировать</button><div class="cnt">Назовите ID в поддержке, чтобы мы быстро нашли ваш аккаунт.</div></div>
-   <div class="pane">Подписка: <b>${esc(sub)}</b>${gl.length ? `<div class="cnt">Открытые курсы: ${esc(gl.join(', '))}</div>` : ''}</div>
+   <h2 id="subs" style="margin-top:26px;font-size:17px">Моя подписка</h2>
+   ${subsHtml()}
    <h2 style="margin-top:26px;font-size:17px">Промокод</h2>
    <div class="pane">Есть промокод? Введите его, чтобы получить подписку или курс.
     <div class="row"><input class="in" id="promo" placeholder="Например, SPRING2026" maxlength="32" autocomplete="off" style="max-width:260px;text-transform:uppercase"><button class="btn sm" id="promoGo" type="button">Применить</button></div><div id="promoMsg" class="msg" role="status"></div></div>
@@ -432,6 +529,8 @@ function settings() {
     <div class="row"><a class="btn line sm" id="delAcc" href="#">Запросить удаление аккаунта и данных</a></div></div>
    <div class="row"><button class="btn line" id="logout">${ico('out')} Выйти из аккаунта</button></div><div id="pmsg" class="msg" role="status"></div></section>`;
   const m = (t, k) => say($('#pmsg'), t, k);
+  if (a === 'subs') setTimeout(() => $('#subs')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+  $('#seeSubs')?.addEventListener('click', () => $('#subs').scrollIntoView({ behavior: 'smooth' }));
   $('[data-back]').onclick = () => go('home'); $('#logout').onclick = () => sb.auth.signOut();
   $('#delAcc').onclick = e => { e.preventDefault(); const to = (window.LEGAL && LEGAL.op_email) || ''; if (!to || to[0] === '[') return toast('Адрес для обращений пока не указан. Напишите в поддержку.');
     location.href = 'mailto:' + to + '?subject=' + encodeURIComponent('Удаление аккаунта') + '&body=' + encodeURIComponent('Прошу удалить мой аккаунт и все связанные персональные данные, включая профили детей.\nE-mail аккаунта: ' + user.email + '\nID: ' + (me.public_id || '')) };
@@ -439,8 +538,18 @@ function settings() {
   $('#promoGo').onclick = async () => { const code = $('#promo').value.trim(); if (!code) return say($('#promoMsg'), 'Введите промокод', 'err'); $('#promoGo').disabled = true; say($('#promoMsg'), 'Проверяем…');
     const { data, error } = await sb.rpc('redeem_promo', { p_code: code }); $('#promoGo').disabled = false;
     if (error) return say($('#promoMsg'), error.message, 'err');
-    toast(data || 'Промокод применён'); await loadMe(); settings() };
-  $$('[name=theme]').forEach(r => r.onchange = () => applyTheme(r.value));
+    toast(data || 'Промокод применён'); await loadMe(); settings('subs') };
+  const setAcc = v => { const f = fitAccent(v); if (!f) return; acc = f; $('#accIn').value = f; $('#accHex').value = f; $$('[name=theme]').forEach(r => r.checked = false); applyTheme(me.theme, f) };
+  $$('[name=theme]').forEach(r => r.onchange = () => { acc = null; if (dec) { $('#accHex').value = ''; } applyTheme(r.value, null) });
+  if (dec) {
+    $('#accIn').oninput = e => setAcc(e.target.value);
+    $('#accHex').oninput = e => { const v = e.target.value.trim(); if (/^#[0-9a-f]{6}$/i.test(v)) setAcc(v) };
+    $('#accReset').onclick = () => { acc = null; $('#accHex').value = ''; const th = me.theme || 'brown'; $$('[name=theme]').forEach(r => r.checked = r.value === th); applyTheme(th, null) };
+    $('#bup').onclick = async () => { const f = await pickFile('image/*'); if (!f) return; m('Загружаем баннер…');
+      try { const path = `${user.id}/banner.jpg`, up = await sb.storage.from('banners').upload(path, await coverImg(f, 1600, 400), { upsert: true, contentType: 'image/jpeg' }); if (up.error) throw up.error;
+        const { error } = await sb.from('profiles').update({ banner_url: path }).eq('id', user.id); if (error) throw error; me.banner_url = path; await loadMe(); toast('Баннер обновлён'); settings() } catch (e) { m('Не удалось загрузить баннер: ' + tr(e.message), 'err') } };
+    $('#brm')?.addEventListener('click', async () => { await sb.storage.from('banners').remove([`${user.id}/banner.jpg`]); await sb.from('profiles').update({ banner_url: null }).eq('id', user.id); me.banner_url = null; bannerSrc = null; settings() });
+  }
   let t; $('[name=un]').oninput = e => { clearTimeout(t); const v = e.target.value.trim().replace(/^@/, '').toLowerCase(), mm = $('#um'); if (!v || v === me.username) return say(mm, '');
     if (!UNAME.test(v)) return say(mm, '3–20 символов: латиница, цифры, _', 'err');
     t = setTimeout(async () => { const { data } = await sb.rpc('username_free', { u: v }); say(mm, data ? '@' + v + ' свободен' : '@' + v + ' уже занят', data ? 'ok' : 'err') }, 350) };
@@ -449,8 +558,9 @@ function settings() {
   $('#rmav')?.addEventListener('click', async () => { await sb.from('profiles').update({ avatar_url: null }).eq('id', user.id); me.avatar_url = null; header(); settings() });
   $('#fPro').onsubmit = async e => { e.preventDefault(); const f = new FormData(e.target), un = f.get('un').trim().replace(/^@/, '').toLowerCase();
     if (un && !UNAME.test(un)) return m('Юзернейм: 3–20 символов, латиница, цифры и _', 'err');
-    const row = { full_name: f.get('name').trim(), username: un || null, about: f.get('about').trim() || null, theme: f.get('theme'), report_weekly: f.get('rep') === 'on' };
-    const { error } = await sb.from('profiles').update(row).eq('id', user.id); if (error) return m(tr(error.message), 'err'); Object.assign(me, row); applyTheme(me.theme); header(); m('Сохранено!', 'ok') };
+    const row = { full_name: f.get('name').trim(), username: un || null, about: f.get('about').trim() || null, theme: f.get('theme') || me.theme || 'brown', report_weekly: f.get('rep') === 'on' };
+    if (dec) row.accent = acc || null;
+    const { error } = await sb.from('profiles').update(row).eq('id', user.id); if (error) return m(tr(error.message), 'err'); Object.assign(me, row); applyTheme(me.theme, dec ? me.accent : null); header(); m('Сохранено!', 'ok') };
   $('#pinSet').onclick = async () => { const v = $('#pin').value; if (!/^\d{4}$/.test(v)) return m('PIN — ровно 4 цифры', 'err'); const h = await sha(v), { error } = await sb.from('profiles').update({ pin_hash: h }).eq('id', user.id); if (error) return m(error.message, 'err'); me.pin_hash = h; settings(); toast('PIN сохранён') };
   $('#pinDel')?.addEventListener('click', async () => { await sb.from('profiles').update({ pin_hash: null }).eq('id', user.id); me.pin_hash = null; settings(); toast('PIN удалён') });
   $('#fPass').onsubmit = async e => { e.preventDefault(); const { error } = await sb.auth.updateUser({ password: e.target.p.value }); error ? m(tr(error.message), 'err') : (m('Пароль изменён.', 'ok'), e.target.reset()) };
