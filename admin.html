@@ -8,15 +8,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="common.css?v=11">
 <link rel="stylesheet" href="kid.css">
 <style>
 :root{--r:24px}
 header{background:#fff;position:sticky;top:0;z-index:20}
-header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px;flex-wrap:wrap}
+header .wrap{display:flex;align-items:center;justify-content:space-between;min-height:64px;padding-top:10px;padding-bottom:10px;gap:8px 14px;flex-wrap:wrap}
 .logo small{font:700 11px Manrope;background:var(--ink);color:#fff;padding:3px 9px;border-radius:99px;margin-left:8px;vertical-align:middle}
-.tabs{display:flex;gap:6px}.tabs button{border:0;background:none;padding:9px 16px;border-radius:999px;font:700 13px Manrope;cursor:pointer;color:var(--grey)}.tabs button.on{background:var(--ink);color:#fff}
-.hr{display:flex;gap:10px;align-items:center;font-size:13px;font-weight:700}
+.tabs{display:flex;gap:4px 6px;flex-wrap:wrap;order:3;width:100%}.tabs button{border:0;background:none;padding:9px 16px;border-radius:999px;font:700 13px Manrope;cursor:pointer;color:var(--grey)}.tabs button.on{background:var(--ink);color:#fff}
+.hr{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;font-size:13px;font-weight:700;margin-left:auto;min-width:0}.hr #me{overflow-wrap:anywhere}
 .center{max-width:420px;margin:90px auto;background:#fff;border-radius:var(--r);padding:34px;animation:up .5s}.center h2{font-size:22px;margin-bottom:16px}.center form{display:grid;gap:12px}
 .grid{display:grid;grid-template-columns:380px 1fr;gap:22px;padding:26px 0 70px;align-items:start}
 .card{background:#fff;border-radius:var(--r);padding:24px;animation:up .4s}
@@ -115,7 +115,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>window.supabase||document.write('<script src="https://fastly.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"><\/script>')</script>
 <script>window.supabase||document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"><\/script>')</script>
-<script src="common.js"></script>
+<script src="common.js?v=11"></script>
 <script src="quiz.js"></script>
 <script src="kid.js"></script>
 <script>
