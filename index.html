@@ -212,7 +212,6 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
    <a href="#top" class="on">О нас</a><a href="#why">Почему родители выбирают нас?</a><a href="#courses">Курсы</a><a href="#app">Приложение</a><a href="#reviews">Отзывы</a>
   </nav>
   <div class="hbtns">
-   <a href="#signup" class="btn hsign">Записаться</a>
    <a href="cabinet.html" class="btn line hcab" aria-label="Личный кабинет"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg><span>Личный кабинет</span></a>
   </div>
  </div>
@@ -224,7 +223,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
   <div>
    <h1 id="h1">Обучение, которое <span class="acc">нравится детям</span> – и спокойно родителям</h1>
    <p>Обучающие видеоролики в стиле мультика, которые точно понравятся вашим детям. Без рекламы, без резких звуков – всё для спокойствия родителей и развития ребёнка.</p>
-   <a href="#signup" class="btn">Записаться на курс</a>
+   <a href="cabinet.html?reg=1" class="btn">Зарегистрироваться</a>
   </div>
   <div class="stage">
    <div class="blob"></div>
@@ -286,8 +285,8 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
   <div class="appbox">
    <div class="tile dark rv">
     <div class="big"><em>7 дней</em> бесплатно</div>
-    <p>Пока идёт тестирование приложения, 7 дней будут бесплатными. Оставьте заявку — мы откроем доступ.</p>
-    <a href="#signup" class="btn">Попробовать бесплатно</a>
+    <p>Пока идёт тестирование приложения, 7 дней будут бесплатными. Зарегистрируйтесь — доступ откроется сразу.</p>
+    <a href="cabinet.html?reg=1" class="btn">Попробовать бесплатно</a>
    </div>
    <div class="tile light rv">
     <div class="ico"><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg></div>
@@ -349,23 +348,12 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 <section id="signup" class="signup" style="background:var(--cream)">
  <div class="wrap">
   <div>
-   <h2 class="rv">Запишитесь на курс прямо <span class="acc">сейчас!</span></h2>
-   <p class="lead rv" style="margin-bottom:26px">Оставьте имя и почту — мы напишем в течение дня и откроем бесплатную неделю.</p>
-   <form id="form" novalidate class="rv">
-    <div class="f"><input name="name" placeholder="Ваше имя" required autocomplete="name"></div>
-    <div class="f"><input name="email" type="email" placeholder="E-Mail" required autocomplete="email"></div>
-    <div class="f"><select name="course" id="course" aria-label="Курс">
-     <option value="Все курсы">Курс: все курсы</option><option>Азбука</option><option>Окружающий мир</option><option>Логика</option><option>Развитие речи</option></select></div>
-    <input type="hidden" name="plan" value="Бесплатные 7 дней (тест)">
-    <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-    <div class="cons">
-     <label><input type="checkbox" name="c_pd" required> <span>Даю <a href="consent.html" target="_blank" rel="noopener">согласие на обработку персональных данных</a> и ознакомлен(а) с <a href="privacy.html" target="_blank" rel="noopener">Политикой конфиденциальности</a></span></label>
-     <label><input type="checkbox" name="c_ads"> <span>Хочу получать новости и акции (<a href="consent-ads.html" target="_blank" rel="noopener">согласие на рассылки</a>, необязательно)</span></label>
-    </div>
-    <button class="btn" id="send" type="submit">Записаться на курс</button>
-    <div class="msg" id="msg" role="status"></div>
-   </form>
-   <div class="ok"><div class="big"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></div><h3 style="margin:10px 0">Заявка отправлена!</h3><p style="color:var(--grey)">Мишка уже бежит к вам. Мы напишем вам на почту в течение дня.</p></div>
+   <h2 class="rv">Зарегистрируйтесь и начинайте обучение прямо <span class="acc">сейчас!</span></h2>
+   <p class="lead rv" style="margin-bottom:26px">Создайте аккаунт за минуту — первые 7 дней бесплатно, уроки откроются сразу.</p>
+   <div class="rv" style="display:flex;gap:12px;flex-wrap:wrap">
+    <a href="cabinet.html?reg=1" class="btn">Зарегистрироваться</a>
+    <a href="cabinet.html" class="btn line">Войти в личный кабинет</a>
+   </div>
   </div>
   <svg class="sbear rv" viewBox="0 0 400 400"><circle cx="105" cy="105" r="48" fill="#a8582a"/><circle cx="295" cy="105" r="48" fill="#a8582a"/><ellipse cx="200" cy="205" rx="130" ry="115" fill="#b9652f"/><g class="eye"><ellipse cx="150" cy="190" rx="20" ry="26" fill="#fff"/><circle cx="156" cy="194" r="13" fill="#3a1d0e"/></g><g class="eye"><ellipse cx="250" cy="190" rx="20" ry="26" fill="#fff"/><circle cx="256" cy="194" r="13" fill="#3a1d0e"/></g><ellipse cx="200" cy="248" rx="62" ry="48" fill="#f3c9a0"/><ellipse cx="200" cy="228" rx="20" ry="14" fill="#4a2410"/><path d="M170 262q30 28 60 0" stroke="#4a2410" stroke-width="6" fill="none" stroke-linecap="round"/><g transform="translate(285 15) scale(4)" fill="none" stroke="#2aa7e0" stroke-width="2" stroke-linecap="round"><path d="M9 9a3 3 0 116 0c0 2-3 2.5-3 5M12 18v.5"/></g></svg>
  </div>
@@ -419,7 +407,7 @@ const spy=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)links.
 ['top','why','courses','app','reviews'].forEach(id=>spy.observe(document.getElementById(id)));
 
 // выбор курса/тарифа кликом
-document.querySelectorAll('.card').forEach(c=>c.onclick=()=>{document.getElementById('course').value=c.dataset.course;document.getElementById('signup').scrollIntoView()});
+document.querySelectorAll('.card').forEach(c=>c.onclick=()=>{document.getElementById('signup').scrollIntoView()});
 
 // ===== отзывы: показ одобренных и отправка новых (на проверку) =====
 (function(){
@@ -474,41 +462,11 @@ document.querySelectorAll('.card').forEach(c=>c.onclick=()=>{document.getElement
   });
 })();
 
-// отправка заявки
-const form=document.getElementById('form'),msg=document.getElementById('msg'),btn=document.getElementById('send');
-form.addEventListener('submit',async e=>{
-  e.preventDefault();msg.className='msg';msg.textContent='';
-  const d=Object.fromEntries(new FormData(form));
-  if(d.website)return; // антиспам
-  if(!d.c_pd){msg.className='msg err';msg.textContent='Отметьте согласие на обработку персональных данных.';return}
-  d.consent_pd='Да, '+new Date().toISOString()+', редакция '+(window.LEGAL?LEGAL.ver:'2026-10-30');d.consent_ads=d.c_ads?'Да':'Нет';delete d.c_pd;delete d.c_ads;
-  if(!d.name.trim()||!/^\S+@\S+\.\S+$/.test(d.email)){msg.className='msg err';msg.textContent='Заполните имя и корректный e-mail.';return}
-  delete d.website;
-  btn.disabled=true;btn.textContent='Отправляем…';
-  try{
-    const subject=`Новая заявка: ${d.course} (${d.plan})`;
-    if(CONFIG.WEB3FORMS_KEY){
-      const r=await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({access_key:CONFIG.WEB3FORMS_KEY,subject,from_name:'Сайт УМНО',name:d.name,email:d.email,course:d.course,plan:d.plan,consent_pd:d.consent_pd,consent_ads:d.consent_ads})});
-      const j=await r.json().catch(()=>({}));
-      if(!r.ok||j.success===false)throw new Error(j.message||('Ошибка сервера '+r.status));
-    }else if(CONFIG.FORMSPREE_URL){
-      const r=await fetch(CONFIG.FORMSPREE_URL,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({...d,_subject:subject})});
-      if(!r.ok)throw new Error('Ошибка сервера '+r.status);
-    }else if(CONFIG.FALLBACK_EMAIL){
-      const body=`Имя: ${d.name}\nE-mail: ${d.email}\nКурс: ${d.course}\nТариф: ${d.plan}\nСогласие на обработку ПДн: ${d.consent_pd}\nРассылки: ${d.consent_ads}`;
-      location.href=`mailto:${CONFIG.FALLBACK_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    }else{
-      console.warn('Заявки не настроены: заполните CONFIG в index.html');throw new Error('Не заполнен CONFIG в index.html');
-    }
-    form.classList.add('done');form.reset();
-  }catch(err){console.error('Отправка не удалась:',err);msg.className='msg err';msg.textContent='Не удалось отправить'+(err&&err.message?' ('+err.message+')':' (нет связи с сервером)')+'. Попробуйте ещё раз или напишите нам в Telegram.'}
-  btn.disabled=false;btn.textContent='Записаться на курс';
-});
 </script>
 <script>
 // «Пригласи друга»: запоминаем код из ссылки и передаём его в кабинет
 (function(){try{var r=new URLSearchParams(location.search).get('ref');if(!r||!/^[A-Za-z0-9]{4,12}$/.test(r))return;r=r.toUpperCase();localStorage.setItem('umno_ref',r);
-document.querySelectorAll('a[href^="cabinet.html"]').forEach(function(a){a.href='cabinet.html?ref='+r})}catch(e){}})();
+document.querySelectorAll('a[href^="cabinet.html"]').forEach(function(a){var h=a.getAttribute('href');a.href=h+(h.indexOf('?')<0?'?':'&')+'ref='+r})}catch(e){}})();
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
 </script>
 </body>
