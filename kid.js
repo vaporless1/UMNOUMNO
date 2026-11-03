@@ -13,21 +13,39 @@ const Kid = (() => {
     astro: '<circle cx="150" cy="120" r="110" fill="rgba(186,230,253,.3)" stroke="#e5e7eb" stroke-width="9"/><path d="M92 54q24-26 62-28" stroke="#fff" stroke-width="8" fill="none" stroke-linecap="round" opacity=".75"/><path d="M150 10v-30" stroke="#e5e7eb" stroke-width="6"/><circle cx="150" cy="-24" r="9" fill="#ef4444"/>',
     crown: '<path d="M96 52L102-4 128 26 150-16 172 26 198-4 204 52z" fill="#fbbf24" stroke="#d99a06" stroke-width="5" stroke-linejoin="round"/><circle cx="102" cy="-4" r="6" fill="#ef4444"/><circle cx="150" cy="-16" r="7" fill="#3b82f6"/><circle cx="198" cy="-4" r="6" fill="#22c55e"/>'
   };
+  // настроения Мишки: default, wow, cheer (радуется), think (думает), sad (грустит), sleep (спит)
+  const MOUTH = {
+    wow: '<path d="M130 158q20 36 40 0z" fill="#7a2a1a"/><path d="M142 174q8 6 16 0" fill="#ff7a8a"/>',
+    cheer: '<path d="M124 156q26 40 52 0z" fill="#7a2a1a"/><path d="M138 172q12 9 24 0" fill="#ff7a8a"/>',
+    think: '<path d="M150 148v8M136 168q14-6 28 2" stroke="#4a2410" stroke-width="5" fill="none" stroke-linecap="round"/>',
+    sad: '<path d="M150 148v8M130 176q20-18 40 0" stroke="#4a2410" stroke-width="5" fill="none" stroke-linecap="round"/>',
+    sleep: '<path d="M150 148v8M136 164q14 10 28 0" stroke="#4a2410" stroke-width="5" fill="none" stroke-linecap="round"/>',
+    def: '<path d="M150 148v10M128 160q22 22 44 0" stroke="#4a2410" stroke-width="5" fill="none" stroke-linecap="round"/>'
+  };
+  const arc = (x, up) => `<path d="M${x - 17} ${up ? 116 : 104}q17 ${up ? -26 : 26} 34 0" stroke="#3a1d0e" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+  function eyes(mood) {
+    if (mood === 'cheer') return arc(116, 1) + arc(184, 1);
+    if (mood === 'sleep') return arc(116, 0) + arc(184, 0) + '<text x="206" y="40" font-size="34" font-weight="900" fill="#7aa7ff" font-family="Nunito,sans-serif">z</text><text x="234" y="14" font-size="26" font-weight="900" fill="#7aa7ff" font-family="Nunito,sans-serif">z</text>';
+    const dy = mood === 'think' ? -6 : mood === 'sad' ? 4 : 0, dx = mood === 'think' ? 6 : 0;
+    const eye = x => `<g class="m-eye"><ellipse cx="${x}" cy="108" rx="17" ry="23" fill="#fff"/><circle cx="${x + 4 + dx}" cy="${112 + dy}" r="12" fill="#3a1d0e"/><circle cx="${x + 8 + dx}" cy="${106 + dy}" r="4" fill="#fff"/></g>`;
+    let e = eye(116) + eye(184);
+    if (mood === 'sad') e += '<path d="M96 84l36 8M204 84l-36 8" stroke="#4a2410" stroke-width="6" stroke-linecap="round"/><ellipse cx="96" cy="140" rx="6" ry="10" fill="#7fc4ff"/>';
+    if (mood === 'think') e += '<path d="M168 82q16-10 32-2" stroke="#4a2410" stroke-width="6" fill="none" stroke-linecap="round"/><text x="216" y="40" font-size="40" font-weight="900" fill="#fbbf24" font-family="Nunito,sans-serif">?</text>';
+    return e;
+  }
   function mascotG(hat, o = {}) {
-    const mouth = o.mood === 'wow'
-      ? '<path d="M130 158q20 36 40 0z" fill="#7a2a1a"/><path d="M142 174q8 6 16 0" fill="#ff7a8a"/>'
-      : '<path d="M150 148v10M128 160q22 22 44 0" stroke="#4a2410" stroke-width="5" fill="none" stroke-linecap="round"/>';
+    const mood = o.mood || 'def', mouth = MOUTH[mood] || MOUTH.def;
+    const arm = mood === 'cheer' ? '<ellipse class="m-up" cx="254" cy="150" rx="26" ry="52" transform="rotate(-38 254 150)" fill="#a8582a"/><ellipse class="m-up" cx="46" cy="150" rx="26" ry="52" transform="rotate(38 46 150)" fill="#a8582a"/>'
+      : `<ellipse cx="62" cy="250" rx="26" ry="52" transform="rotate(22 62 250)" fill="#a8582a"/><ellipse class="${mood === 'def' || mood === 'wow' ? 'm-wave' : ''}" cx="254" cy="170" rx="26" ry="52" transform="rotate(-24 254 170)" fill="#a8582a"/>`;
     return `<ellipse cx="150" cy="352" rx="104" ry="14" fill="rgba(0,0,0,.15)"/>
     <ellipse cx="100" cy="334" rx="46" ry="28" fill="#a8582a"/><ellipse cx="200" cy="334" rx="46" ry="28" fill="#a8582a"/>
     <ellipse cx="104" cy="338" rx="22" ry="13" fill="#f3c9a0"/><ellipse cx="196" cy="338" rx="22" ry="13" fill="#f3c9a0"/>
     <ellipse cx="150" cy="250" rx="94" ry="100" fill="#b9652f"/><ellipse cx="150" cy="268" rx="58" ry="70" fill="#f3c9a0"/>
-    <ellipse cx="62" cy="250" rx="26" ry="52" transform="rotate(22 62 250)" fill="#a8582a"/>
-    <ellipse class="m-wave" cx="254" cy="170" rx="26" ry="52" transform="rotate(-24 254 170)" fill="#a8582a"/>
+    ${arm}
     <circle cx="84" cy="54" r="36" fill="#a8582a"/><circle cx="84" cy="54" r="20" fill="#f3c9a0"/><circle cx="216" cy="54" r="36" fill="#a8582a"/><circle cx="216" cy="54" r="20" fill="#f3c9a0"/>
     <circle cx="150" cy="120" r="94" fill="#b9652f"/>
     <circle cx="88" cy="154" r="16" fill="#ff8aa1" opacity=".55"/><circle cx="212" cy="154" r="16" fill="#ff8aa1" opacity=".55"/>
-    <g class="m-eye"><ellipse cx="116" cy="108" rx="17" ry="23" fill="#fff"/><circle cx="120" cy="112" r="12" fill="#3a1d0e"/><circle cx="124" cy="106" r="4" fill="#fff"/></g>
-    <g class="m-eye"><ellipse cx="184" cy="108" rx="17" ry="23" fill="#fff"/><circle cx="188" cy="112" r="12" fill="#3a1d0e"/><circle cx="192" cy="106" r="4" fill="#fff"/></g>
+    ${eyes(mood)}
     <ellipse cx="150" cy="152" rx="46" ry="36" fill="#f3c9a0"/><ellipse cx="150" cy="138" rx="16" ry="11" fill="#4a2410"/>${mouth}${HATS[hat] || ''}`;
   }
   const mascotSvg = (hat, o = {}) => `<svg class="mas ${o.cls || ''}" viewBox="${o.view || '0 -50 300 420'}" aria-hidden="true">${mascotG(hat, o)}</svg>`;
@@ -169,5 +187,34 @@ const Kid = (() => {
     for (let i = 0; i < n; i++) { const p = document.createElement('i'); p.style.cssText = `left:${Math.random() * 100}%;background:${['#ff6b9d', '#ffd23f', '#51cf66', '#4dabf7', '#9775fa', '#ff922b'][i % 6]};animation-delay:${Math.random() * .5}s;animation-duration:${1.6 + Math.random() * 1.2}s;transform:rotate(${Math.random() * 360}deg);border-radius:${i % 3 ? '2px' : '50%'}`; box.append(p) }
     document.body.append(box); setTimeout(() => box.remove(), 3200);
   }
-  return { mascotSvg, mascotG, sceneSvg, applyScene, clearScene, avatar, thumb, confetti, ART };
+
+  // Мишка-помощник: маленький талисман в углу экрана с репликами
+  const SAY = {
+    hi: ['Привет! Я Мишка. Давай заниматься!', 'Ура, ты пришёл! Выбирай урок.', 'Я скучал! Поиграем?'],
+    ok: ['Молодец!', 'Верно! Так держать!', 'Отлично получается!', 'Умничка!'],
+    no: ['Ничего, попробуем ещё!', 'Почти! Подумай ещё чуть-чуть.', 'Ошибаться не страшно!'],
+    win: ['Урок пройден! Горжусь тобой!', 'Ура! Ты справился!'],
+    tap: ['Хочешь, выберем урок?', 'Я люблю, когда ты учишься!', 'Звёзды ждут тебя!', 'Давай выполним задание дня!'],
+    sleep: ['Давай отдохнём…']
+  };
+  const rnd = a => a[Math.floor(Math.random() * a.length)];
+  const buddy = (() => {
+    let el, hatArt = '', t1, t2, mood = 'def';
+    const paint = m => { mood = m; if (el) el.querySelector('.b-bear').innerHTML = mascotSvg(hatArt, { mood: m, view: '20 -64 260 270', cls: 'b-' + m }) };
+    function say(text, m = 'cheer', ms = 3800) {
+      if (!el) return; clearTimeout(t1); clearTimeout(t2);
+      const b = el.querySelector('.b-say'); b.textContent = text; el.classList.add('talk'); paint(m);
+      t1 = setTimeout(() => el.classList.remove('talk'), ms); t2 = setTimeout(() => paint('def'), ms + 600);
+    }
+    function show(hat) {
+      hatArt = hat || '';
+      if (!el) { el = document.createElement('div'); el.className = 'buddy'; el.setAttribute('aria-live', 'polite');
+        el.innerHTML = '<div class="b-say"></div><button class="b-bear" aria-label="Мишка"></button>';
+        el.querySelector('.b-bear').onclick = () => say(rnd(SAY.tap), 'wow'); document.body.append(el) }
+      el.hidden = false; paint(mood);
+    }
+    const hide = () => { clearTimeout(t1); clearTimeout(t2); if (el) { el.hidden = true; el.classList.remove('talk') } };
+    return { show, hide, say, paint, phrase: k => rnd(SAY[k] || SAY.tap), on: () => !!el && !el.hidden };
+  })();
+  return { buddy, mascotSvg, mascotG, sceneSvg, applyScene, clearScene, avatar, thumb, confetti, ART };
 })();
