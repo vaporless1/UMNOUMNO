@@ -1,5 +1,5 @@
 // УМНО: service worker. Сеть в приоритете (чтобы обновления сайта доходили сразу), кэш — на случай плохой связи.
-const V = 'umno-v13', SHELL = ['cabinet.html', 'common.css', 'common.js', 'kid.css', 'kid.js', 'quiz.js', 'growth.js', 'stories.js', 'stories.css', 'legal.js', 'icons/icon-192.png'];
+const V = 'umno-v14', SHELL = ['cabinet.html', 'common.css', 'common.js', 'kid.css', 'kid.js', 'quiz.js', 'growth.js', 'stories.js', 'stories.css', 'legal.js', 'icons/icon-192.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(V).then(c => Promise.all(SHELL.map(u => c.add(u).catch(() => { })))).then(() => self.skipWaiting())) });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== V).map(x => caches.delete(x)))).then(() => self.clients.claim())) });
 self.addEventListener('fetch', e => {
