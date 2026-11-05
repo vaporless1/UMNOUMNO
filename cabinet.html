@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;700&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="common.css?v=12">
+<link rel="stylesheet" href="common.css?v=14">
 <link rel="stylesheet" href="kid.css">
 <link rel="stylesheet" href="stories.css">
 <style>
@@ -270,14 +270,31 @@ function header() {
   const k = curKid();
   if (kidMode && k) Kid.applyScene(eqArt('bg')); else Kid.clearScene();
   $('#hdr').innerHTML = `<a class="logo" href="${kidMode ? '#' : 'index.html'}">УМ<b>НО</b>${kidMode ? '<small>детям</small>' : ''}</a><div class="hr">` + (kidMode
-    ? `<span class="chip" title="Звёзды на счёте">${ico('star')} ${balance()}</span><span class="chip fire" title="Дней подряд">${ico('flame')} ${stats.streak || 0}</span><button class="btn k-yellow sm" id="goShop">${ico('shop')} <span>Магазин</span></button>${Q.voice.supported ? `<button class="kbtn" id="vtog" title="Озвучка заданий" aria-label="Озвучка заданий">${ico(voicePref() ? 'sound' : 'mute')}</button>` : ''}<button class="btn line sm" id="exitKid">${ico('lock')} <span>Выйти</span></button>`
+    ? `<span class="chip" title="Звёзды на счёте">${ico('star')} ${balance()}</span><span class="chip fire" title="Дней подряд">${ico('flame')} ${stats.streak || 0}</span>${Q.voice.supported ? `<button class="kbtn" id="vtog" title="Озвучка заданий" aria-label="Озвучка заданий">${ico(voicePref() ? 'sound' : 'mute')}</button>` : ''}<button class="btn line sm" id="exitKid">${ico('lock')} <span>Выйти</span></button>`
     : `${kids.length ? `<button class="btn sm" id="goKid">${ico('baby')} Режим ребёнка</button>` : ''}${me.is_admin || me.role ? '<a class="btn line sm" href="admin.html">Админ-панель</a>' : ''}<button class="me" id="me" title="Профиль и настройки">${avEl(me.avatar_url, myName(), null)}<span class="nm">${esc(myName())}</span></button>`) + '</div>';
   if (kidMode) {
-    $('#exitKid').onclick = exitKid; $('#goShop').onclick = () => go('shop');
+    $('#exitKid').onclick = exitKid;
     $('#vtog')?.addEventListener('click', () => { const on = !voicePref(); setVoicePref(on); Q.voice.set(on); header() });
   } else { $('#me')?.addEventListener('click', () => go('settings')); $('#goKid')?.addEventListener('click', startKid) }
+  bnav();
 }
-function go(v, a) { if (v === 'shop' && !kidMode) v = 'home'; Q.stop(); view = [v, a]; header(); ({ home, kidhome, course: openCourse, lesson: openLesson, settings, report: reportView, shop: shopView })[v === 'home' && kidMode ? 'kidhome' : v](a); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+// ---------- разделы и нижняя панель ----------
+const NAV_P = [['home', 'home', 'Главная'], ['learn', 'book', 'Обучение'], ['ach', 'trophy', 'Достижения'], ['kids', 'baby', 'Дети'], ['settings', 'user', 'Профиль']];
+const NAV_K = [['home', 'play', 'Играть'], ['kawards', 'trophy', 'Награды'], ['shop', 'shop', 'Магазин']];
+const PARENT_V = new Set(['learn', 'ach', 'kids', 'settings', 'report']), KID_V = new Set(['kawards', 'shop']);
+const tabOf = v => ({ course: 'learn', lesson: kidMode ? 'home' : 'learn', report: 'kids' })[v] || v;
+function bnav() {
+  let n = $('#bnav'); if (!n) { n = document.createElement('nav'); n.id = 'bnav'; n.className = 'bnav'; n.setAttribute('aria-label', 'Разделы'); $('#app').append(n) }
+  const cur = tabOf(view[0]);
+  n.innerHTML = (kidMode ? NAV_K : NAV_P).map(([id, ic, t]) => `<button type="button" data-nav="${id}" class="${id === cur ? 'on' : ''}" ${id === cur ? 'aria-current="page"' : ''}>${ico(ic)}<span>${t}</span></button>`).join('');
+  $$('[data-nav]', n).forEach(b => b.onclick = () => go(b.dataset.nav));
+}
+function go(v, a) {
+  if (kidMode && PARENT_V.has(v)) v = 'home'; if (!kidMode && KID_V.has(v)) v = 'home';
+  Q.stop(); view = [v, a]; header();
+  ({ home: kidMode ? kidhome : home, learn, ach, kids: kidsPage, kawards, course: openCourse, lesson: openLesson, settings, report: reportView, shop: shopView })[v](a);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 const back = (to, label) => `<button class="back" data-back>${label || '← Назад'}</button>`;
 
 // ---------- родительский дашборд ----------
@@ -325,33 +342,98 @@ function upsell(kind) {
   const [t, p] = UPS[kind], m = modal(`<h2 style="font-family:Unbounded;font-size:20px;margin-bottom:8px">${t}</h2><p class="muted">${p}</p><p class="cnt" style="margin:10px 0 16px">Покупка подписок откроется позже. Пока их выдаёт команда проекта, а промокод можно ввести в настройках.</p><div class="row"><button class="btn" id="uOk">О подписках</button><button class="btn line" id="uNo">Закрыть</button></div>`);
   $('#uOk', m).onclick = () => { m.remove(); go('settings', 'subs') }; $('#uNo', m).onclick = () => m.remove();
 }
+const tilesHtml = () => `<div class="tiles"><div class="tile">${ico('star')}<b>${stats.stars || 0}</b><span>звёзд</span></div><div class="tile">${ico('book')}<b>${stats.lessons || 0}</b><span>уроков пройдено</span></div><div class="tile">${ico('flame')}<b>${stats.streak || 0}</b><span>${plural(stats.streak || 0, 'день', 'дня', 'дней')} подряд</span></div><div class="tile">${ico('trophy')}<b>${earned.size}</b><span>наград из ${badgesCat.length}</span></div></div>`;
+const noKidBox = () => `<section class="box"><h2>Добавьте ребёнка</h2><p class="muted" style="margin:6px 0 14px">Прогресс, звёзды и награды сохраняются для каждого ребёнка отдельно.</p><button class="btn" id="addKid0">+ Добавить ребёнка</button></section>`;
+const recentHtml = n => { const r = recentLessons(n); return r.length ? `<section class="box"><h2>Недавно смотрели</h2>` + r.map(({ l, c, v, p }) => `<div class="lrow ${p?.completed ? 'done' : ''}" data-start="${l.id}"><div class="n">${ico(c.icon)}</div><div><b>${esc(l.title)}</b><span>${esc(c.title)} · ${fd(v.last_at)}</span></div>${p?.completed ? `<em>${'★'.repeat(p.stars || 1)}${'☆'.repeat(3 - (p.stars || 1))}</em>` : '<em>не закончен</em>'}</div>`).join('') + '</section>' : '' };
+// выбор ребёнка (чипы)
+function kidChips() {
+  return kids.length ? `<div class="kids chips">${kids.map((c, i) => { const fz = frozenIdx(i); return `<button type="button" class="kid ${c.id === active ? 'on' : ''} ${fz ? 'fz' : ''}" data-chip="${c.id}">${avEl(c.avatar_url, c.name, c.color)}<span><b>${esc(c.name)}</b><small>${fz ? 'в «Премиум»' : ageT(c.age)}</small></span></button>` }).join('')}</div>` : '';
+}
+function bindChips(rerender) {
+  $$('[data-chip]').forEach(b => b.onclick = async () => { const i = kids.findIndex(c => c.id === b.dataset.chip); if (frozenIdx(i)) return upsell('child');
+    active = b.dataset.chip; try { localStorage.setItem('umno_kid', active) } catch { } await loadChild(); rerender() });
+  $('#addKid0')?.addEventListener('click', () => kidEditor(null));
+  $$('[data-start]').forEach(el => el.onclick = () => startLesson(el.dataset.start));
+}
+// окно «Кто будет заниматься?»
+function pickChild(onPick, title, sub) {
+  const m = modal(`<h2 style="font-family:Unbounded;font-size:20px;margin-bottom:6px">${esc(title || 'Кто будет заниматься?')}</h2>${sub ? `<p class="muted" style="margin-bottom:14px">${esc(sub)}</p>` : '<div style="height:10px"></div>'}
+    <div class="pick">${kids.map((c, i) => { const fz = frozenIdx(i); return `<button type="button" class="pk ${c.id === active ? 'on' : ''} ${fz ? 'fz' : ''}" data-pk="${c.id}">${avEl(c.avatar_url, c.name, c.color, 'l')}<span><b>${esc(c.name)}</b><small>${ageT(c.age)}${c.id === active ? ' · занимался последним' : ''}${fz ? ' · откроется в «Премиум»' : ''}</small></span></button>` }).join('')}</div>
+    <div class="row"><button class="btn line" id="pkX">Отмена</button></div>`);
+  $('#pkX', m).onclick = () => m.remove();
+  $$('[data-pk]', m).forEach(b => b.onclick = async () => { const i = kids.findIndex(c => c.id === b.dataset.pk); if (frozenIdx(i)) { m.remove(); return upsell('child') } m.remove(); await onPick(b.dataset.pk) });
+}
+async function switchKid(id) { if (id === active) return; active = id; try { localStorage.setItem('umno_kid', id) } catch { } await loadChild(); header() }
+// перед уроком (родитель): спрашиваем, какой ребёнок будет заниматься
+async function startLesson(id) {
+  const l = lessons.find(x => x.id === id); if (!l) return;
+  if (kidMode) return go('lesson', id);
+  if (!kids.length) return toast('Сначала добавьте ребёнка — прогресс сохраняется для него.', 1);
+  if (kids.length === 1) return go('lesson', id);   // один ребёнок — спрашивать нечего
+  pickChild(async kid => { await switchKid(kid); go('lesson', id) }, 'Кто будет заниматься?', `Урок «${l.title}»`);
+}
+// карточки событий на главной
+const evCard = e => { const ext = e.link && /^https:/i.test(e.link), when = e.starts_at ? new Date(e.starts_at).toLocaleString('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : '';
+  return `<article class="evc ${e.pinned ? 'pin' : ''}">${e.image_url ? `<img class="evi" src="${esc(e.image_url)}" alt="" loading="lazy">` : ''}<div class="evb">${e.pinned ? '<span class="evp">Закреплено</span>' : ''}<h3>${esc(e.title)}</h3>
+   ${when || e.place ? `<div class="evd">${when ? `📅 ${esc(when)}` : ''}${when && e.place ? ' · ' : ''}${e.place ? esc(e.place) : ''}</div>` : ''}${e.body ? `<p>${esc(e.body)}</p>` : ''}
+   ${e.link ? `<a class="btn sm" href="${esc(e.link)}" ${ext ? 'target="_blank" rel="noopener"' : ''}>${esc(e.label || 'Подробнее')}</a>` : ''}</div></article>` };
+async function mountEvents() {
+  const host = $('#evBox'); if (!host) return;
+  const { data, error } = await sb.rpc('events_feed'); if (!host.isConnected) return;
+  if (error || !data || !data.length) return host.remove();
+  host.innerHTML = `<h2>События</h2><div class="evgrid">${data.map(evCard).join('')}</div>`;
+}
+
+// Главная
 function home() {
-  const k = curKid();
-  const hb = deco() && bannerSrc;
+  const k = curKid(), hb = deco() && bannerSrc, cont = k && continueTarget();
   main.innerHTML = `${hb ? `<div class="pbanner" style="background-image:url('${esc(bannerSrc)}')"></div>` : ''}
   <div class="phero ${hb ? 'hasb' : ''}">${avEl(me.avatar_url, myName(), null, 'l')}<div class="hello"><h1>Привет, ${esc(myName())}!</h1><p>${k ? `Сейчас занимается: <b>${esc(k.name)}</b>, ${ageT(k.age)}.` : 'Добавьте ребёнка — и мы подготовим для него занятия.'}</p></div></div>
   ${subNotice()}
   <div id="storyBox"></div>
-  <section class="box"><h2>Мои дети</h2><div class="kgrid">${kids.map(kidCard).join('')}<div class="kadd" id="addKid" role="button" tabindex="0"><div><span>+</span><br>Добавить ребёнка</div></div></div></section>
-  ${k ? `<section class="box"><div class="cp">${avEl(k.avatar_url, k.name, k.color, 'l')}<div><h2>${esc(k.name)}</h2><div class="muted">${k.username ? '@' + esc(k.username) : 'Юзернейм не задан'}${k.daily_limit ? ' · лимит: ' + k.daily_limit + ' ' + plural(k.daily_limit, 'урок', 'урока', 'уроков') + ' в день' : ''}</div>
-   <div class="row"><button class="btn sm" id="goKid2">${ico('baby')} Режим ребёнка</button><button class="btn line sm" id="goRep">${ico('chart')} Отчёт за неделю</button></div></div></div>
-   <div class="tiles"><div class="tile">${ico('star')}<b>${stats.stars || 0}</b><span>звёзд</span></div><div class="tile">${ico('book')}<b>${stats.lessons || 0}</b><span>уроков пройдено</span></div><div class="tile">${ico('flame')}<b>${stats.streak || 0}</b><span>${plural(stats.streak || 0, 'день', 'дня', 'дней')} подряд</span></div><div class="tile">${ico('trophy')}<b>${earned.size}</b><span>наград из ${badgesCat.length}</span></div></div>
-   ${(() => { const r = recentLessons(4); return r.length ? `<h3 style="margin:20px 0 10px;font-size:15px">Недавно смотрел</h3>` + r.map(({ l, c, v, p }) => `<div class="lrow ${p?.completed ? 'done' : ''}" data-rl="${l.id}"><div class="n">${ico(c.icon)}</div><div><b>${esc(l.title)}</b><span>${esc(c.title)} · ${fd(v.last_at)}</span></div>${p?.completed ? `<em>${'★'.repeat(p.stars || 1)}${'☆'.repeat(3 - (p.stars || 1))}</em>` : '<em>не закончен</em>'}</div>`).join('') : '' })()}
-   ${stats.spent ? `<p class="muted" style="margin-top:12px">В магазине потрачено: ${stats.spent} ★. На счёте сейчас: ${balance()} ★.</p>` : ''}
-   ${badgesHtml()}</section>` : ''}
-  <section class="box"><h2>Курсы</h2><div class="courses">${coursesHtml()}</div></section>
-  ${k ? `<section class="box"><h2>Грамоты${k ? ': ' + esc(k.name) : ''}</h2><div id="certBox"><p class="muted">Загружаем…</p></div></section>` : ''}
-  <section class="box"><h2>Пригласи друга</h2><div id="refBox"></div></section>`;
-  if (k) certSection('#certBox', false);
-  mountStories('parents');
-  Growth.referralPane($('#refBox'), { sb, toast, plural }).then(ok => { if (!ok) $('#refBox')?.closest('section')?.remove() });
+  <section class="box" id="evBox"></section>
+  ${k ? `<section class="box"><div class="cp">${avEl(k.avatar_url, k.name, k.color, 'l')}<div><h2>${esc(k.name)}</h2><div class="muted">${k.username ? '@' + esc(k.username) : ageT(k.age)}${k.daily_limit ? ' · лимит: ' + k.daily_limit + ' ' + plural(k.daily_limit, 'урок', 'урока', 'уроков') + ' в день' : ''}</div>
+   <div class="row"><button class="btn sm" id="goKid2">${ico('baby')} Режим ребёнка</button>${kids.length > 1 ? '<button class="btn line sm" id="chKid">Сменить ребёнка</button>' : ''}</div></div></div>
+   ${cont ? `<div class="lrow next" data-start="${cont.lesson.id}" style="margin-top:14px"><div class="n">${ico('play')}</div><div><b>${cont.kind === 'resume' ? 'Продолжить' : 'Следующий урок'}: ${esc(cont.lesson.title)}</b><span>${esc(cont.course.title)}</span></div><em class="here">${ico('play')} Начать</em></div>` : ''}
+   ${tilesHtml()}</section>` : noKidBox()}`;
+  mountStories('parents'); mountEvents(); bindChips(home);
+  $('#chKid')?.addEventListener('click', () => pickChild(async id => { await switchKid(id); home() }, 'Кто сейчас занимается?'));
+  $('#goSubs')?.addEventListener('click', () => go('settings', 'subs'));
+  $('#goKid2')?.addEventListener('click', startKid);
   Growth.iosHint();
-  bindCourses(); $$('[data-rl]').forEach(el => el.onclick = () => go('lesson', el.dataset.rl));
-  $$('.kcd').forEach(el => el.onclick = async e => { if (e.target.closest('[data-edit]')) return; if (el.classList.contains('fz')) return upsell('child'); active = el.dataset.k; try { localStorage.setItem('umno_kid', active) } catch { } await loadChild(); home() });
+}
+// Обучение
+function learn() {
+  main.innerHTML = `<section class="box"><h2>Обучение</h2>${kids.length ? `<p class="muted" style="margin:4px 0 10px">Выберите, кто занимается:</p>${kidChips()}` : '<p class="muted">Сначала добавьте ребёнка — прогресс сохраняется для него.</p>'}</section>
+  ${kids.length ? '' : noKidBox()}
+  <section class="box"><h2>Курсы</h2><div class="courses">${coursesHtml()}</div></section>${recentHtml(6)}`;
+  bindCourses(); bindChips(learn);
+}
+// Достижения
+function ach() {
+  const k = curKid();
+  main.innerHTML = `<section class="box"><h2>Достижения</h2>${kids.length ? kidChips() : ''}${k ? tilesHtml() : '<p class="muted">Добавьте ребёнка, и здесь появятся его звёзды и награды.</p>'}</section>
+  ${k ? `<section class="box"><h2>Награды</h2>${badgesHtml()}${stats.spent ? `<p class="muted" style="margin-top:12px">В магазине потрачено: ${stats.spent} ★. На счёте сейчас: ${balance()} ★. Магазин открывается в режиме ребёнка.</p>` : ''}</section>
+  <section class="box"><h2>Грамоты</h2><div id="certBox"><p class="muted">Загружаем…</p></div></section>` : noKidBox()}`;
+  bindChips(ach); if (k) certSection('#certBox', false);
+}
+// Дети
+function kidsPage() {
+  const k = curKid();
+  main.innerHTML = `<section class="box"><h2>Мои дети</h2><div class="kgrid">${kids.map(kidCard).join('')}<div class="kadd" id="addKid" role="button" tabindex="0"><div><span>+</span><br>Добавить ребёнка</div></div></div></section>
+  ${k ? `<section class="box"><div class="cp">${avEl(k.avatar_url, k.name, k.color, 'l')}<div><h2>${esc(k.name)}</h2><div class="muted">${k.username ? '@' + esc(k.username) : 'Юзернейм не задан'}${k.daily_limit ? ' · лимит: ' + k.daily_limit + ' ' + plural(k.daily_limit, 'урок', 'урока', 'уроков') + ' в день' : ''}</div>
+   <div class="row"><button class="btn sm" id="goKid2">${ico('baby')} Режим ребёнка</button><button class="btn line sm" id="goRep">${ico('chart')} Отчёт за неделю</button><button class="btn line sm" id="edKid">${ico('edit')} Профиль ребёнка</button></div></div></div></section>` : ''}`;
+  $$('.kcd').forEach(el => el.onclick = async e => { if (e.target.closest('[data-edit]')) return; if (el.classList.contains('fz')) return upsell('child'); active = el.dataset.k; try { localStorage.setItem('umno_kid', active) } catch { } await loadChild(); kidsPage() });
   $$('[data-edit]').forEach(b => b.onclick = e => { e.stopPropagation(); kidEditor(kids.find(c => c.id === b.dataset.edit)) });
   $('#addKid').onclick = () => { if (maxKids() != null && kids.length >= maxKids()) return upsell('child'); kidEditor(null) };
-  $('#goSubs')?.addEventListener('click', () => go('settings', 'subs'));
-  $('#goKid2')?.addEventListener('click', startKid); $('#goRep')?.addEventListener('click', () => go('report'));
+  $('#goKid2')?.addEventListener('click', startKid); $('#goRep')?.addEventListener('click', () => go('report')); $('#edKid')?.addEventListener('click', () => kidEditor(k));
+}
+// Награды (детский режим)
+function kawards() {
+  const k = curKid();
+  main.innerHTML = `<section class="ksec"><h2><i>${ico('trophy')}</i>Мои награды</h2>${badgesHtml()}</section>
+  <section class="ksec"><h2><i>${ico('trophy')}</i>Мои грамоты</h2><div id="certBox"><p class="muted">Загружаем…</p></div></section>`;
+  certSection('#certBox', true); Kid.buddy.show(eqArt('hat') || ''); setTimeout(() => Kid.buddy.say(earned.size ? 'Смотри, сколько у тебя наград!' : 'Проходи уроки — и получишь награды!', earned.size ? 'cheer' : 'wow'), 400);
 }
 
 // ---------- режим ребёнка ----------
@@ -394,10 +476,9 @@ function kidhome() {
   ${cont ? `<section class="kp kcont" data-go="${cont.lesson.id}"><div class="kplay">${ico('play')}</div><div class="kct"><small>${cont.kind === 'resume' ? 'Продолжим с того места, где остановился' : 'Следующий урок'}</small><b>${esc(cont.lesson.title)}</b><span>${esc(cont.course.title)}${cont.pos > 5 ? ' · ' + fmtT(cont.pos) : ''}</span></div><span class="btn k-green">${cont.kind === 'resume' ? 'Продолжить' : 'Играть'}</span></section>` : ''}
   ${rec.length ? `<section class="ksec"><h2><i>${ico('clock')}</i>Недавно смотрели</h2><div class="krow">${rec.map(({ l, c, p }, i) => `<div class="kr" data-go="${l.id}" style="--kc:${KCOL[(courses.indexOf(c)) % KCOL.length]};animation:up .4s ${i * 60}ms both"><div class="kri">${ico(c.icon)}<span class="kplay s">${ico('play')}</span></div><b>${esc(l.title)}</b><small>${esc(c.title)}</small>${p?.completed ? starsTxt(p.stars || 1) : '<span class="kcont-tag">не закончен</span>'}</div>`).join('')}</div></section>` : ''}
   <section class="ksec"><h2><i>${ico('book')}</i>Курсы</h2><div class="kcs">${kidCourses()}</div></section>`}
-  <section class="ksec"><h2><i>${ico('trophy')}</i>Мои награды</h2>${badgesHtml()}</section>
-  <section class="ksec"><h2><i>${ico('trophy')}</i>Мои грамоты</h2><div id="certBox"><p class="muted">Загружаем…</p></div></section>`;
+`;
   bindCourses(); $$('[data-go]').forEach(el => el.onclick = () => go('lesson', el.dataset.go));
-  bindDaily(); certSection('#certBox', true); mountStories('kids');
+  bindDaily(); mountStories('kids');
   Kid.buddy.show(eqArt('hat') || '');
   const dn = daily && !daily.claimed;
   setTimeout(() => stop ? Kid.buddy.say(Kid.buddy.phrase('sleep'), 'sleep') : dn && daily.done ? Kid.buddy.say('Забери 5 звёзд за задание дня!', 'cheer') : dn ? Kid.buddy.say('Сегодня задание дня: ' + daily.stars + ' звёзд за урок!', 'wow', 4500) : Kid.buddy.say(Kid.buddy.phrase('hi'), 'cheer'), 500);
@@ -450,7 +531,7 @@ function openCourse(id) {
   if (limitReached()) return go('home');
   const c = courses.find(x => x.id === id), ls = ofCourse(id);
   main.innerHTML = `<section class="box">${back()}<h2>${esc(c.title)}</h2>` + (ls.length ? ls.map((l, i) => { const p = prog[l.id], nx = kidMode && l === ls.find(q => !prog[q.id]?.completed); return `<div class="lrow ${p?.completed ? 'done' : ''} ${nx ? 'next' : ''}" data-l="${l.id}" style="animation-delay:${i * 50}ms"><div class="n">${p?.completed ? ico('check') : i + 1}</div><div><b>${esc(l.title)}${l.published ? '' : ' (черновик)'}</b><span>${l.duration_min ? l.duration_min + ' мин' : ''}</span></div>${nx ? `<em class="here">${ico('play')} Сюда!</em>` : ''}${p ? `<em>${'★'.repeat(p.stars || 1)}${'☆'.repeat(3 - (p.stars || 1))}</em>` : ''}</div>` }).join('') : '<p class="muted">Уроки скоро появятся.</p>') + '</section>';
-  $('[data-back]').onclick = () => go('home'); $$('.lrow').forEach(r => r.onclick = () => go('lesson', r.dataset.l));
+  $('[data-back]').onclick = () => go('home'); $$('.lrow').forEach(r => r.onclick = () => startLesson(r.dataset.l));
 }
 async function openLesson(id) {
   if (limitReached() && !prog[id]) return go('home');
@@ -567,6 +648,8 @@ function settings(a) {
    <div class="pane">Ваш ID: <b>${esc(me.public_id || '—')}</b> <button class="link" id="cpid" type="button">скопировать</button><div class="cnt">Назовите ID в поддержке, чтобы мы быстро нашли ваш аккаунт.</div></div>
    <h2 id="subs" style="margin-top:26px;font-size:17px">Моя подписка</h2>
    ${subsHtml()}
+   <h2 style="margin-top:26px;font-size:17px">Пригласи друга</h2>
+   <div id="refBox"></div>
    <h2 style="margin-top:26px;font-size:17px">Промокод</h2>
    <div class="pane">Есть промокод? Введите его, чтобы получить подписку или курс.
     <div class="row"><input class="in" id="promo" placeholder="Например, SPRING2026" maxlength="32" autocomplete="off" style="max-width:260px;text-transform:uppercase"><button class="btn sm" id="promoGo" type="button">Применить</button></div><div id="promoMsg" class="msg" role="status"></div></div>
@@ -582,6 +665,7 @@ function settings(a) {
     <div class="row"><a class="btn line sm" id="delAcc" href="#">Запросить удаление аккаунта и данных</a></div></div>
    <div class="row"><button class="btn line" id="logout">${ico('out')} Выйти из аккаунта</button></div><div id="pmsg" class="msg" role="status"></div></section>`;
   const m = (t, k) => say($('#pmsg'), t, k);
+  Growth.referralPane($('#refBox'), { sb, toast, plural }).then(ok => { if (!ok) $('#refBox')?.previousElementSibling?.remove(), $('#refBox')?.remove() });
   if (a === 'subs') setTimeout(() => $('#subs')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
   $('#seeSubs')?.addEventListener('click', () => $('#subs').scrollIntoView({ behavior: 'smooth' }));
   $('[data-back]').onclick = () => go('home'); $('#logout').onclick = logout;
