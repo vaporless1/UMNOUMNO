@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="common.css?v=14">
+<link rel="stylesheet" href="common.css?v=12">
 <link rel="stylesheet" href="kid.css">
 <link rel="stylesheet" href="stories.css">
 <style>
@@ -110,7 +110,6 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
     <p class="hintx">Новые рисунки добавляются в код, а здесь вы управляете ценами, названиями и тем, что продаётся. Если скрыть товар, он пропадёт из магазина, но у тех, кто уже купил, останется.</p></form></section></div>
   <div id="tab-journal" class="hide" style="padding:26px 0 70px"><div class="card"><div class="row" style="margin:0 0 14px"><input class="in" id="logq" placeholder="Поиск по журналу: кто, кого, что" autocomplete="off"><button class="btn line sm" id="logre">Обновить</button><button class="btn line sm" id="logcsv">Скачать CSV</button></div><div id="logbox" style="overflow:auto"></div></div></div>
   <div id="tab-stories" class="grid hide"><section class="card" id="stList"></section><section class="card" id="stEdit"><p class="muted">Выберите тему или историю слева, либо создайте новую.</p></section></div>
-  <div id="tab-events" class="grid hide"><section class="card" id="evList"></section><section class="card" id="evEdit"><p class="muted">Выберите событие слева или создайте новое.</p></section></div>
   <div id="tab-roles" class="hide" style="padding:26px 0 70px"><div class="card"><div class="row" style="margin:0 0 6px"><button class="btn sm" id="newRole">+ Новая роль</button></div><p class="hintx" style="margin-bottom:14px">Вы сами выбираете, что может делать каждая роль. Назначить роль можно в карточке аккаунта. Изменения вступают в силу сразу.</p><div id="rlist"></div></div></div>
  </main>
 </div>
@@ -123,7 +122,6 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;p
 <script src="kid.js"></script>
 <script src="stories.js"></script>
 <script src="admin-stories.js"></script>
-<script src="admin-events.js"></script>
 <script>
 injectIcons();
 const show = id => ['loginBox', 'deny', 'panel'].forEach(x => $('#' + x).classList.toggle('hide', x !== id));
@@ -140,14 +138,14 @@ const PERMS = {
   profiles: 'Редактировать профили родителей и детей', rewards: 'Выдавать и забирать награды и звёзды', badges_edit: 'Награды и магазин: создавать и менять',
   promo: 'Промокоды', notes: 'Заметки к аккаунтам', journal: 'Смотреть журнал действий', bulk: 'Массовые действия',
   delete_kids: 'Удалять детей', delete_users: 'Удалять аккаунты целиком', content: 'Курсы, уроки и задания', stats: 'Статистика',
-  test_access: 'Тестовый доступ на сайте: все курсы и черновики', reviews: 'Отзывы на сайте: модерация', stories: 'Истории: темы, публикация, статистика', events: 'События на главной странице кабинета'
+  test_access: 'Тестовый доступ на сайте: все курсы и черновики', reviews: 'Отзывы на сайте: модерация', stories: 'Истории: темы, публикация, статистика'
 };
 let ME = { owner: false, perms: [], role: null }, ROLES = [], ALLB = [];
 const can = p => ME.owner || ME.perms.includes(p);
 const TABS = [
   { id: 'users', t: 'Аккаунты', need: () => can('users') }, { id: 'lessons', t: 'Уроки и задания', need: () => can('content') },
   { id: 'plans', t: 'Подписки', need: () => can('plans') }, { id: 'promo', t: 'Промокоды', need: () => can('promo') }, { id: 'badges', t: 'Награды', need: () => can('badges_edit') }, { id: 'shop', t: 'Магазин', need: () => can('badges_edit') },
-  { id: 'reviews', t: 'Отзывы', need: () => can('reviews') }, { id: 'stories', t: 'Истории', need: () => can('stories') }, { id: 'events', t: 'События', need: () => can('events') }, { id: 'stats', t: 'Статистика', need: () => can('stats') }, { id: 'journal', t: 'Журнал', need: () => can('journal') }, { id: 'roles', t: 'Роли', need: () => ME.owner }
+  { id: 'reviews', t: 'Отзывы', need: () => can('reviews') }, { id: 'stories', t: 'Истории', need: () => can('stories') }, { id: 'stats', t: 'Статистика', need: () => can('stats') }, { id: 'journal', t: 'Журнал', need: () => can('journal') }, { id: 'roles', t: 'Роли', need: () => ME.owner }
 ];
 let curTab = null, usersLoaded = false;
 async function boot(session) {
@@ -170,7 +168,7 @@ $('#out').onclick = $('#dout').onclick = logout;
 function openTab(id) {
   curTab = id; $$('#tabs [data-tab]').forEach(x => x.classList.toggle('on', x.dataset.tab === id));
   TABS.forEach(t => $('#tab-' + t.id).classList.toggle('hide', t.id !== id));
-  ({ users: () => { if (!usersLoaded) { usersLoaded = true; search('') } }, lessons: tree, stats: loadStats, promo: loadPromo, plans: drawPlans, badges: drawBadges, shop: drawShop, journal: loadLog, roles: drawRoles, reviews: loadReviews, stories: loadStories, events: loadEvents })[id]();
+  ({ users: () => { if (!usersLoaded) { usersLoaded = true; search('') } }, lessons: tree, stats: loadStats, promo: loadPromo, plans: drawPlans, badges: drawBadges, shop: drawShop, journal: loadLog, roles: drawRoles, reviews: loadReviews, stories: loadStories })[id]();
 }
 async function loadCat() { courses = (await sb.from('courses').select('*').order('sort')).data || []; lessons = (await sb.from('lessons').select('*').order('sort')).data || [] }
 let PL = [], PP = [];
